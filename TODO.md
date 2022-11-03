@@ -1,6 +1,15 @@
 Zoom Link for Meetings at 14:34: https://epfl.zoom.us/j/63584278895?pwd=TDlaSGRWaC9FMEdOMHFXVk0wQXZoQT09 
 
+The google sheet: https://docs.google.com/spreadsheets/d/1f11GgezBISdyrZ2Uz4A2vm1r7OKpnJ2T5IMDd_tUPTc/edit#gid=0 
+
+The TA: "Aryo Lotfi aryo.lotfi@epfl.ch"
+
 Google doc for Agenda: https://docs.google.com/document/d/1HPhbGpQFJHhI06AbxH-cX_5d89E3HIGTYn5A0xdrZnQ/edit
+
+## Infos about meeting protocol:
+containing a crisp itemized agenda (ordered by priority), which should contextualize and specify what the team wants to discuss (e.g., questions or roadblocks the team faced). Avoid being ambiguous!
+
+
 
 
 # TODO Milestone 2:
