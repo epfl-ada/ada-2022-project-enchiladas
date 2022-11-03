@@ -1,3 +1,8 @@
+Zoom Link for Meetings at 14:34: https://epfl.zoom.us/j/63584278895?pwd=TDlaSGRWaC9FMEdOMHFXVk0wQXZoQT09 
+
+Google doc for Agenda: https://docs.google.com/document/d/1HPhbGpQFJHhI06AbxH-cX_5d89E3HIGTYn5A0xdrZnQ/edit
+
+
 # TODO Milestone 2:
 (copied from here: https://dlab.epfl.ch/teaching/fall2022/cs401/projects/)
 
