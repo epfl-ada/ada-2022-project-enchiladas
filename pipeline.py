@@ -58,7 +58,7 @@ import pathlib
 import matplotlib.pyplot as plt
 import mapclassify as mc
 import os.path
-import numpy as np
+print("import completed")
 
 # %% [markdown]
 # # Helpers
@@ -189,6 +189,60 @@ df_ba_users.head()
 
 # %% [markdown]
 # ### Beers
+
+# - beer_id
+# - beer_name
+# - brewery_name
+# - style
+# - nbr_ratings
+# - overall_score (A score that ranks this beer against all other beers on RateBeer (max=100))
+# - style_score (A score that ranks this beer against all beers within its own style (max=100))
+# - avg (weighted average)
+# - abv (alcohol content)
+# - avg_computed (average rating)
+# - zscore
+# - nbr_matched_valid_ratings
+# - avg_matched_valid_ratings
+
+# %%
+#read in beers.csv
+df_rb_beers = pd.read_csv(path_rb + 'beers.csv')
+df_rb_beers.head()
+
+print("Total # of beers: ", df_rb_beers[df_rb_beers.columns[0]].count())
+
+# %% 
+#check if # of elements missing
+
+for column in df_rb_beers:
+    print(column, " : ", df_rb_beers[column].isnull().sum())
+
+# %%
+# check if any beers appear multiple times
+# we should not sum them up... because avg depends non-linearly on number of ratings
+
+df_rb_beers_same_name = df_rb_beers[df_rb_beers["beer_name"].duplicated(keep=False)]
+df_rb_beers_same_name.sort_values(by=["beer_name"])
+print("# of beers with identical name: ", df_rb_beers_same_name[df_rb_beers_same_name.columns[0]].count())
+
+# but we have beers with same name from different breweries
+# only make list with same name and same brewery
+
+df_rb_beers_same_name_and_brewery = df_rb_beers_same_name[df_rb_beers_same_name["brewery_name"].duplicated(keep=False)]
+df_rb_beers_same_name_and_brewery.sort_values(by="beer_name")
+print("# of beers with identical name & brewery: ", df_rb_beers_same_name_and_brewery[df_rb_beers_same_name_and_brewery.columns[0]].count())
+
+# %% 
+# list all beer styles
+
+rb_styles = list(df_rb_beers["style"].unique())
+print("# of beer styles", len(rb_styles))
+
+# %%
+# check if there is any difference etween avg_computed and avg_matched valid_ratings
+
+
+
 # %% [markdown]
 # ### Breweries
 # %% [markdown]
