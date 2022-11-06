@@ -58,50 +58,8 @@ import pathlib
 import matplotlib.pyplot as plt
 import mapclassify as mc
 import os.path
+from pickling import pickle_load
 print("import completed")
-
-# %% [markdown]
-# # Helpers
-# ## Pickle
-# %%
-def pickle_load(path):
-    """
-    path: path to original txt file
-
-    loads the corresponding pickle file or creates it if it does not exist
-
-    returns: dataframe with the files content
-    """
-    pickle_path = path + ".pickle"
-    if os.path.exists(pickle_path):
-        return pd.read_pickle(pickle_path)
-    else:
-        if "ratings" in path:
-            # TODO: comment this, copied from Matthieu's code.
-            # Does it only work for ratings? Does it work for all ratings?
-
-            with open(path, "r", encoding='utf-8') as file:
-                beer = {}
-                review_list = []
-                for line in file:
-                    if line.isspace():
-                        review_list.append(beer)
-                        beer = {}
-                    else:
-                        beer[line.split()[0][:-1]] =" ".join(line.split()[1:])
-            df = pd.DataFrame(review_list)
-            
-            #making dataframe
-            for col in ["beer_id", "brewery_id", "appearance", "aroma", "palate", "taste", "overall", "rating", "abv"]:
-                df[col] = pd.to_numeric(df[col], errors = 'ignore')
-            df["date"] = pd.to_datetime(df["date"],unit='s')
-            df.set_index(df["date"], inplace = True)
-            df.to_pickle(pickle_path)
-            return df
-        else:
-            df = pd.read_csv(path, sep=",", low_memory=False)
-            df.to_pickle(pickle_path)
-            return df
 
 
 
@@ -158,16 +116,36 @@ path_md = data_folder + 'matched_beer_data/'
 # %%
 #read in beers.csv
 df_ba_beers = pd.read_csv(path_ba + 'beers.csv')
+df_ba_beers.set_index(df_ba_beers['beer_id'], inplace = True)
+df_ba_beers.pop('beer_id')
+df_ba_beers.sort_index(inplace=True)
 df_ba_beers.head()
+# %%
+# Check for null values
+df_ba_beers.isna().sum()
+# We do have a few nan values in avg, ba_score, bros_score, abv, avg_comuted,zsocre and avg_matched_valid_ratings
+# %%
+# Are the avg nan values unrated beers?
+df_ba_beers[df_ba_beers["avg"].isna() & df_ba_beers["nbr_ratings"]!=0 ].head()
+# Yes, they are. O/w this dataframe would not be empty.
 
+# %%
+# Give basic statistics about the ba beer table
+df_ba_beers.describe()
+# TODO plot some interesting values like ratings vs review distribution...
 
 # %% [markdown]
 # ### Breweries
+# - brewery_id -> id
+# - location
+# - name
+# - nbr_beers
 df_ba_breweries = pd.read_csv(path_ba + "breweries.csv")
 df_ba_breweries.set_index(df_ba_breweries['id'], inplace = True)
 df_ba_breweries.pop('id')
 df_ba_breweries.sort_index(inplace=True)
 df_ba_breweries.head()
+
 
 # %% [markdown]
 # ### Users
@@ -175,13 +153,13 @@ df_ba_users = pd.read_csv(path_ba + "users.csv")
 df_ba_users.head()
 # %% [markdown]
 # ### Reviews
-# TODO: pickle...
-# df_ba_reviews = pickle_load(path_ba + "reviews.txt")
-# df_ba_reviews.head()
+# TODO: describe the difference between ratings and reviews
+df_ba_reviews = pickle_load(path_ba + "reviews.txt")
+df_ba_reviews.head()
 # %% [markdown]
 # ### Ratings
-# df_ba_reviews = pickle_load(path_ba + "ratings.txt")
-# df_ba_reviews.head()
+df_ba_reviews = pickle_load(path_ba + "ratings.txt")
+df_ba_reviews.head()
 
 
 # %% [markdown]
@@ -249,9 +227,12 @@ print("# of beer styles", len(rb_styles))
 # ### Users
 # %% [markdown]
 # ### Reviews
+df_rb_reviews = pickle_load(path_ba + "reviews.txt")
+df_rb_reviews.head()
 # %% [markdown]
 # ### Ratings
-
+df_rb_ratings = pickle_load(path_rb + "ratings.txt")
+df_rb_ratings.head()
 
 # %% [markdown]
 # ## Matched Dataset

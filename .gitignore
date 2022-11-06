@@ -3,3 +3,4 @@ Data/matched_beer_data/*
 Data/RateBeer/*
 .DS_Store
 .ipynb_checkpoints/*
+__pycache__/*
