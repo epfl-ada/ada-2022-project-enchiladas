@@ -298,7 +298,7 @@ print(df_rb_beers_per_country.head())
 # %%
 # nb of breweries per country
 
-print(df_rb_brew_per_country.sort_values(ascending=False).head())
+print(type(df_rb_brew_per_country.sort_values(ascending=False).head()))
 # Uncomment me for a world map:
 
 # world = gpd.read_file(data_folder + "maps/world-administrative-boundaries.shp", encoding = 'utf-8')
@@ -329,10 +329,76 @@ plt.show()
 
 # %% [markdown]
 # ### Users
+
+df_rb_users = pd.read_csv(path_rb + 'users.csv')
+df_rb_users.head()
+
+for column in df_rb_users:
+        print(column, " : ", df_rb_users[column].isnull().sum())
+
+# remove lines with no location, there are still states with <joined> NaN
+df_rb_users = df_rb_users[~df_rb_users["location"].isnull()]
+
+# split US states
+df_rb_users['country'] = df_rb_users['location'].apply(lambda x : x.split(',', 1)[0])
+
+def find_iso(x):
+    try:
+        country = pycountry.countries.search_fuzzy(x)
+        return country[0].alpha_3
+    except:
+        return None
+country_list = df_rb_users['country'].unique()
+country_iso = {x: find_iso(x) for x in country_list} #look up table
+df_rb_users['country_code'] = df_rb_users['country'].apply(lambda x: country_iso[x])
+
+df_rb_users.head()
+
+# %%
+# print(df_rb_users["country_code"].unique())
+print("No country code assignment to the following countries: ", df_rb_users[df_rb_users["country_code"].isnull()]["country"].unique())
+
+# %%
+# Users per country
+
+rb_users_per_country = df_rb_users.groupby(["country"])["country"].count().sort_values(ascending=False)
+print(type(rb_users_per_country))
+
+# %% 
+# Number of ratings per country
+
+rb_ratings_per_country = df_rb_users.groupby(["country"])["nbr_ratings"].sum().sort_values(ascending=False)
+print(type(rb_ratings_per_country))
+
+# %%
+# average nb of rating per user
+
+rb_avg_rating_per_user_per_country = rb_ratings_per_country/rb_users_per_country
+
+fig, ax = plt.subplots()
+ax.hist(rb_avg_rating_per_user_per_country.sort_values(ascending=False).head(80), bins=200)
+ax.set_xscale('log')
+ax.set_xlabel("Avg ratings per user per country")
+ax.set_ylabel("Number of countries")
+ax.set_title("Top 80 countries with highest avg ratings per user")
+plt.show()
+
+
+
+
+
+
+
+
+
 # %% [markdown]
 # ### Reviews
 df_rb_reviews = pickle_load(path_rb + "reviews.txt")
 df_rb_reviews.head()
+
+
+
+
 # %% [markdown]
 # ### Ratings
 df_rb_ratings = pickle_load(path_rb + "ratings.txt")

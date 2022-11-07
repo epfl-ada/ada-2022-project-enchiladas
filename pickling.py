@@ -59,11 +59,11 @@ if __name__ == "__main__":
     print("running standalone pickler") 
     # filename = path_ba + "ratings.txt"
     # filename = "test.txt"
-    filename = path_md + "ratings_ba.txt"
-    filename = path_md + "ratings_rb.txt"
-    filename = path_ba + "reviews.txt"
-    filename = path_ba + "ratings.txt"
-    filename = path_rb + "ratings.txt"
+    # filename = path_md + "ratings_ba.txt"
+    # filename = path_md + "ratings_rb.txt"
+    # filename = path_ba + "reviews.txt"
+    # filename = path_ba + "ratings.txt"
+    # filename = path_rb + "ratings.txt"
     filename = path_rb + "reviews.txt"
     df = pickle_load(filename)  
 
