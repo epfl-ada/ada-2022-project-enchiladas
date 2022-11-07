@@ -187,7 +187,7 @@ df_ba_reviews.head()
 df_rb_beers = pd.read_csv(path_rb + 'beers.csv')
 df_rb_beers.head()
 
-print("Total # of beers: ", df_rb_beers[df_rb_beers.columns[0]].count())
+# print("Total # of beers: ", df_rb_beers[df_rb_beers.columns[0]].count())
 
 # %% 
 #check if # of elements missing
@@ -209,25 +209,129 @@ print("# of beers with identical name: ", df_rb_beers_same_name[df_rb_beers_same
 df_rb_beers_same_name_and_brewery = df_rb_beers_same_name[df_rb_beers_same_name["brewery_name"].duplicated(keep=False)]
 df_rb_beers_same_name_and_brewery.sort_values(by="beer_name")
 print("# of beers with identical name & brewery: ", df_rb_beers_same_name_and_brewery[df_rb_beers_same_name_and_brewery.columns[0]].count())
+# how important are those beers
+print("# of ratings for beers with identical name & brewery: ", df_rb_beers_same_name_and_brewery["nbr_ratings"].sum())
+print("gives an average of {} ratings/beer.".format(df_rb_beers_same_name_and_brewery["nbr_ratings"].sum()/df_rb_beers_same_name_and_brewery[df_rb_beers_same_name_and_brewery.columns[0]].count()))
 
 # %% 
 # list all beer styles
 
-rb_styles = list(df_rb_beers["style"].unique())
-print("# of beer styles", len(rb_styles))
+rb_styles = df_rb_beers["style"].value_counts()
+print("There exist {} different beer styles".format(len(rb_styles)))
+
+fig, ax = plt.subplots()
+ax.barh(rb_styles.index, rb_styles, align='center')
+ax.invert_yaxis()  # labels read top-to-bottom
+ax.tick_params(axis='y', which='major', labelsize=4)
+ax.set_xlabel('numbers of beer')
+ax.set_ylabel("Beer style")
+ax.set_title('number of beer per style')
+plt.show()
 
 # %%
 # check if there is any difference etween avg_computed and avg_matched valid_ratings
+
+no_match = ~df_rb_beers["avg_matched_valid_ratings"].isnull() & df_rb_beers["avg_matched_valid_ratings"].ne(df_rb_beers["avg_computed"])
+print("there are {} dataframes where avg_matched_valid_ratings is not NaN or not equal avg_computed".format(df_rb_beers[no_match].shape[0]))
+
+# %%
+# how many ratings did the beers get?
+
+fig, ax = plt.subplots()
+ax.hist(df_rb_beers["nbr_ratings"], bins=1000, log=True)
+ax.set_xlabel("Number of ratings")
+ax.set_ylabel("Number of beers")
+plt.show()
+
+df_rb_beers.sort_values(by=["nbr_ratings"], ascending=False).head()
+
+# %% 
+# how many overall ratings per style
+rb_ratings = df_rb_beers.groupby(["style"])["nbr_ratings"].sum()
+# Average Rating per beer per beer style
+
+rb_avg_rating_per_style = rb_ratings/rb_styles.sort_index()
+
+fig, ax = plt.subplots()
+ax.barh(rb_avg_rating_per_style.index, rb_avg_rating_per_style, align='center')
+# ax.invert_yaxis()  # labels read top-to-bottom
+ax.tick_params(axis='y', which='major', labelsize=4)
+ax.set_xlabel('Average ratings per beer per style')
+ax.set_ylabel("Beer style")
+ax.set_title('Average ratings per beer per style')
+plt.show()
 
 
 
 # %% [markdown]
 # ### Breweries
+
+df_rb_brew = pd.read_csv(path_rb + 'breweries.csv')
+df_rb_brew.head()
+
+for column in df_rb_brew:
+        print(column, " : ", df_rb_brew[column].isnull().sum())
+
+# split US states
+df_rb_brew['country'] = df_rb_brew['location'].apply(lambda x : x.split(',', 1)[0])
+
+
+# %% 
+# add country code
+def find_iso(x):
+    try:
+        country = pycountry.countries.search_fuzzy(x)
+        return country[0].alpha_3
+    except:
+        return None
+country_list = df_rb_brew['country'].unique()
+country_iso = {x: find_iso(x) for x in country_list} #look up table
+df_rb_brew['country_code'] = df_rb_brew['country'].apply(lambda x: country_iso[x])
+
+# %%
+
+df_rb_brew_per_country = df_rb_brew.groupby(["country_code"])["country_code"].count()
+print(df_rb_brew_per_country.head())
+df_rb_beers_per_country = df_rb_brew.groupby(["country_code"])["nbr_beers"].sum()
+print(df_rb_beers_per_country.head())
+
+# %%
+# nb of breweries per country
+
+print(df_rb_brew_per_country.sort_values(ascending=False).head())
+# Uncomment me for a world map:
+
+# world = gpd.read_file(data_folder + "maps/world-administrative-boundaries.shp", encoding = 'utf-8')
+# world = world.merge(df_rb_brew_per_country, how = "left", left_on="iso3", right_index = True, )
+# world = world.sort_values(by = "country_code", ascending = False)
+# world['log_beers'] = world['country_code'].apply(lambda x: np.log10(x) if x >= 1 else 0)
+# #number of breweries per country (log)
+# scheme = mc.FisherJenks(world['log_beers'], k=8)
+# gplt.choropleth(world, hue="log_beers", legend=True, scheme=scheme)
+# plt.title("nb of beer per country (log10)")
+# plt.show()
+
+# %%
+# nb of beers per country
+print(df_rb_beers_per_country.sort_values(ascending=False).head())
+# Uncomment me for a world map:
+
+world = gpd.read_file(data_folder + "maps/world-administrative-boundaries.shp", encoding = 'utf-8')
+world = world.merge(df_rb_beers_per_country, how = "left", left_on="iso3", right_index = True, )
+world = world.sort_values(by = "nbr_beers", ascending = False)
+world['log_beers'] = world['nbr_beers'].apply(lambda x: np.log10(x) if x >= 1 else 0)
+
+#number of beers per country (log)
+scheme = mc.FisherJenks(world['log_beers'], k=8)
+gplt.choropleth(world, hue="log_beers", legend=True, scheme=scheme)
+plt.title("nb of beer per country (log10)")
+plt.show()
+
 # %% [markdown]
 # ### Users
 # %% [markdown]
 # ### Reviews
-df_rb_reviews = pickle_load(path_ba + "reviews.txt")
+df_rb_reviews = pickle_load(path_rb + "reviews.txt")
 df_rb_reviews.head()
 # %% [markdown]
 # ### Ratings
