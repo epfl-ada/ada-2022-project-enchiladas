@@ -16,9 +16,10 @@ import re
 
 def pickle_load(path):
     """
-    path: path to original txt file
-
     loads the corresponding pickle file or creates it if it does not exist
+    
+    
+    path: path to original txt file   
 
     returns: dataframe with the files content
     """
@@ -43,7 +44,7 @@ def pickle_load(path):
             df["date"] = pd.to_datetime(df["date"],unit='s')
             for col in ["abv","appearance","aroma","palate","taste","overall","rating"]:
                 df[col] = pd.to_numeric(df[col], errors = 'ignore')
-            
+            df.set_index(df["date"], inplace = True)
             df.to_pickle(pickle_path)
             return df
         else:
