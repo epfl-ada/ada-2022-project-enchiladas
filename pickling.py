@@ -23,7 +23,7 @@ def pickle_load(path):
 
     returns: dataframe with the files content
     """
-    pickle_path = path + ".pickle"
+    pickle_path = path + ".pickles"
     if os.path.exists(pickle_path):
         return pd.read_pickle(pickle_path)
     else:
@@ -32,7 +32,8 @@ def pickle_load(path):
 
             c = open(filename, "r").read()
             
-            re_data = re.findall(r"^beer_name.+?(?=text)", c,  re.DOTALL | re.MULTILINE)
+            # re_data = re.findall(r"^beer_name.+?(?=text)", c,  re.DOTALL | re.MULTILINE)
+            re_data = re.findall(r"^beer_name.+?(?=\n\n)", c,  re.DOTALL | re.MULTILINE) # includes everything...
             
             def get_attributes(data):
                 return dict(re.findall(r"^([a-zA-Z][^:]+):\s*(.*?)\s*?(?=^[a-zA-Z][^:]+:|\Z)", data,  re.DOTALL | re.MULTILINE))
@@ -61,11 +62,11 @@ if __name__ == "__main__":
     # filename = path_ba + "ratings.txt"
     # filename = "test.txt"
     # filename = path_md + "ratings_ba.txt"
-    # filename = path_md + "ratings_rb.txt"
+    filename = path_md + "ratings_rb.txt"
     # filename = path_ba + "reviews.txt"
     # filename = path_ba + "ratings.txt"
     # filename = path_rb + "ratings.txt"
-    filename = path_rb + "reviews.txt"
+    # filename = path_rb + "reviews.txt"
     df = pickle_load(filename)  
 
     print(df.head())
