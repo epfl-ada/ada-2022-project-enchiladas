@@ -122,7 +122,7 @@ path_md = data_folder + 'matched_beer_data/'
 #       < 60 = awful
 # - bros_score
 # - abv (alcohol by volume)
-# - avg_computed 
+# - avg_computed
 # - zscore
 # - nbr_matched_valid_ratings
 # - avg_matched_valid_ratings
@@ -220,7 +220,9 @@ df_ba_breweries['location'] = df_ba_breweries['location'].apply(lambda x : x.spl
 #separating country from states (for USA)
 df_ba_breweries['country'] = df_ba_breweries['location'].apply(lambda x : x.split(',', 1)[0])
 country_list = df_ba_breweries['country'].unique()
-country_iso = {x: find_iso(x) for x in country_list} #look up table
+#the function find_iso do a matching of common "non-official" country name to their iso code using the pycountry library
+#For example, "united states" is matched to "United states of America" and is assigned the iso code USA
+country_iso = {x: find_iso(x) for x in country_list}
 df_ba_breweries['country_code'] = df_ba_breweries['country'].apply(lambda x: country_iso[x])
 print(df_ba_breweries.head())
 
@@ -285,6 +287,7 @@ df_ba_users = pd.read_csv(path_ba + "users.csv")
 print(df_ba_users.head())
 print(df_ba_users.isna().sum())
 # We do not know 1 username, 2652 join dates and 31279 locations
+# TODO: 1 username are you sure ?
 
 # %%
 # TODO: location processing
@@ -694,4 +697,3 @@ df_rb_ratings.isna().sum()
 df_ratings_with_text_ba = pickle_load(path_md + "ratings_with_text_ba.txt")
 # %% [markdown]
 # #### Ratings with text rb
-
