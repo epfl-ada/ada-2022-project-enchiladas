@@ -83,7 +83,7 @@ print("import completed")
 # - language
 # - country-code (England-uk?)
 # - matching avg
-# - beer style aliases
+# - crawl beer styles from https://www.beeradvocate.com/beer/styles/ and https://www.ratebeer.com/beerstyles/ (for some textual description, we do have style columns in beer tables)
 # Andreaas Idea:
 # - vocabulary: <-> Location
 
@@ -100,6 +100,10 @@ path_md = data_folder + 'matched_beer_data/'
 
 # %% [markdown]
 # ### Beers
+#
+# Source of column description: https://www.beeradvocate.com/community/threads/beeradvocate-ratings-explained.184726/
+#
+#
 # - beer_id
 # - name
 # - brewery_id
@@ -108,10 +112,17 @@ path_md = data_folder + 'matched_beer_data/'
 # - nbr_ratings
 # - nbr_reviews
 # - avg
-# - ba_score
+# - ba_score (The BA Score is the beer's overall score based on its ranking within its style category. It's based on the beer's truncated (trimmed) mean and a custom Bayesian (weighted rank) formula that takes the beer's style into consideration. Its purpose is to provide consumers with a quick reference using a format that's familiar to the wine and liquor worlds.)
+#       95-100 = world-class
+#       90-94 = outstanding
+#       85-89 = very good
+#       80-84 = good
+#       70-79 = okay
+#       60-69 = poor
+#       < 60 = awful
 # - bros_score
-# - abv
-# - avg_computed
+# - abv (alcohol by volume)
+# - avg_computed 
 # - zscore
 # - nbr_matched_valid_ratings
 # - avg_matched_valid_ratings
@@ -127,10 +138,14 @@ df_ba_beers.head()
 # Check for null values
 df_ba_beers.isna().sum()
 # We do have a few nan values in avg, ba_score, bros_score, abv, avg_comuted,zsocre and avg_matched_valid_ratings
+# According to https://www.beeradvocate.com/community/threads/beeradvocate-ratings-explained.184726/ it may be, that averages are not computed for beers with less than 10 reviews/ratings (not sure what the difference is)
 # %%
 # Are the avg nan values unrated beers?
 df_ba_beers[df_ba_beers["avg"].isna() & df_ba_beers["nbr_ratings"]!=0 ].head()
 # Yes, they are. O/w this dataframe would not be empty.
+# Do these beers have reviews?
+df_ba_beers[df_ba_beers["avg"].isna() & df_ba_beers["nbr_reviews"]!=0 ].head()
+# Neither.
 
 # %%
 # Give basic statistics about the ba beer table
@@ -260,17 +275,118 @@ plt.show()
 
 # %% [markdown]
 # ### Users
+# - nbr_ratings
+# - nbr_reviews
+# - user_id
+# - user_name
+# - joined
+# - location
 df_ba_users = pd.read_csv(path_ba + "users.csv")
-df_ba_users.head()
+print(df_ba_users.head())
+print(df_ba_users.isna().sum())
+# We do not know 1 username, 2652 join dates and 31279 locations
 
+# %%
 # TODO: location processing
+#removing html tags
+df_ba_users = df_ba_users[~df_ba_users.isnull().any(axis=1)]
+df_ba_users['location'] = df_ba_users['location'].apply(lambda x : x.split('<', 1)[0])
+#separating country from states (for USA)
+df_ba_users['country'] = df_ba_users['location'].apply(lambda x : x.split(',', 1)[0])
+country_list = df_ba_users['country'].unique()
+country_iso = {x: find_iso(x) for x in country_list} #look up table
+df_ba_users['country_code'] = df_ba_users['country'].apply(lambda x: country_iso[x])
+print(df_ba_users.head())
+
+# %%
+print("number of missing country codes:",df_ba_users['country_code'].isna().sum())
+print(df_ba_users.isna().sum())
+# 54 missing country codes... TODO
+
+# %%
+df_ba_users_usa = df_ba_users[df_ba_users['country'] == 'United States']
+states = df_ba_users_usa['location'].apply(lambda x : str(x.split(',', 1)[1])[1:] if ',' in x else None)
+df_ba_users_usa = df_ba_users_usa.assign(states = states)
+print(df_ba_users_usa.sample(10))
+
+# %%
+users_contiguous_usa = gpd.read_file(gplt.datasets.get_path("contiguous_usa"))
+users_contiguous_usa = users_contiguous_usa.merge(beer_states, how = "left", left_on="state", right_index = True)
+users_contiguous_usa = users_contiguous_usa.sort_values(by = "nbr_ratings", ascending = False)
+#TODO: not done yet...
+users_contiguous_usa["ratings_per_capita"] = users_contiguous_usa.apply(lambda x: 0 if x["nbr_ratings"] == np.nan else x["nbr_ratings"]/x["population"], axis = 1)
+gplt.choropleth(users_contiguous_usa, hue="nbr_ratings", legend=True)
+plt.title("nb of ratings per state")
+plt.show()
+
+# %% [markdown]
+# Number of reviews per user
+# ba_users_review_counts = df_ba_users['nbr_reviews'].value_counts()
+# logbins = np.geomspace(ba_users_review_counts.min(), ba_users_review_counts.max(), 100)
+# print(logbins)
+# plt.hist(ba_users_review_counts,  density=True, log=True,bins=logbins)
+# plt.xscale("log")
+# plt.xlabel("Number of reviews per user")
+# plt.ylabel("Frequency")
+# plt.title("Distribution of number of review per users")
+# plt.show()
+
+nonzero_nbr_reviews = df_ba_users.loc[df_ba_users['nbr_reviews'] > 0 & df_ba_users['nbr_reviews'].notna()]['nbr_reviews']
+logbins = np.geomspace(nonzero_nbr_reviews.min(), nonzero_nbr_reviews.max(), 20)
+nonzero_nbr_reviews.plot(kind='hist', logx=True, logy=True,density=True, bins=logbins)
+plt.xlabel("number of reviews")
+plt.ylabel("number of users")
+plt.title("number of review per users")
+plt.show()
+# TODO: something seems wrong about this plot. Are there no users with less than 100 reviews?
+# TODO: plot the same for ratings
+# TODO: what is the difference between ratings and reviews?
+
+df_ba_users["nbr_ratings"].plot(kind='hist', logx=True, logy=True,density=True, bins=1000)
+plt.xlabel("number of ratings")
+plt.ylabel("number of users")
+plt.title("number of ratings per users")
+plt.show()
+
+# %% [markdown]
+# Sanity Check
+# Number of users with 4 reviews/ratings
+print("number of users with 4 reviews:",df_ba_users[df_ba_users["nbr_reviews"] == 4].shape[0])
+print("number of users with 4 ratings:",df_ba_users[df_ba_users["nbr_ratings"] == 4].shape[0])
+print("number of users with 2 reviews:",df_ba_users[df_ba_users["nbr_reviews"] == 2].shape[0])
+print("number of users with 2 ratings:",df_ba_users[df_ba_users["nbr_ratings"] == 2].shape[0])
+# Are users unique?
+df_ba_users_grouped_by_id = df_ba_users.groupby(df_ba_users["user_id"])
+print(df_ba_users_grouped_by_id.head())
+print(df_ba_users.head())
+# We lose 4 users when grouping by user_id
+
 
 # %% [markdown]
 # ### Reviews
-# TODO: describe the difference between ratings and reviews
+# - beer_name
+# - beer_id
+# - brewery_name
+# - brewery_id
+# - style
+# - abv
+# - date
+# - user_name
+# - user_id
+# - appearance
+# - aroma
+# - palate
+# - taste
+# - overall
+# - rating
+# - text (dropped in pickling)
 df_ba_reviews = pickle_load(path_ba + "reviews.txt")
 df_ba_reviews.set_index(df_ba_reviews["date"], inplace = True)
 df_ba_reviews.head()
+
+# %%
+df_ba_reviews.describe()
+df_ba_reviews.isna().sum()
 
 # %% [markdown]
 # #### Data visualizations
@@ -281,9 +397,30 @@ ba_reviews_month.loc[ba_reviews_month.index.year > 2010].plot()
 
 # %% [markdown]
 # ### Ratings
-df_ba_reviews = pickle_load(path_ba + "ratings.txt")
-df_ba_reviews.set_index(df_ba_reviews["date"], inplace = True)
-df_ba_reviews.head()
+# - beer_name
+# - beer_id
+# - brewery_name
+# - brewery_id
+# - style
+# - abv
+# - date
+# - user_name
+# - user_id
+# - appearance
+# - aroma
+# - palate
+# - taste
+# - overall
+# - rating
+# - text (dropped in pickling)
+# - review (dropped in pickling)
+df_ba_ratings = pickle_load(path_ba + "ratings.txt")
+df_ba_ratings.set_index(df_ba_ratings["date"], inplace = True)
+df_ba_ratings.head()
+
+# %%
+df_ba_ratings.describe()
+df_ba_ratings.isna().sum()
 
 # %% [markdown]
 # #### Data visualizations
@@ -292,15 +429,17 @@ ba_ratings_month = df_ba_reviews.groupby(df_ba_reviews.index.to_period('M')).siz
 ba_ratings_month.plot()
 
 # %% [markdown]
-# Number of reviews per user
-df_ba_users.loc[df_ba_users['nbr_reviews'] >= 1]['nbr_reviews'].plot(kind='hist', logx=True, logy=True,density=True, bins=100)
-plt.xlabel("number of reviews")
-plt.ylabel("number of users")
-plt.title("number of review per users")
-plt.show()
-# TODO: something seems wrong about this plot. Are there no users with less than 100 reviews?
-# TODO: plot the same for ratings
-# TODO: what is the difference between ratings and reviews?
+# #### Ratings vs Reviews
+# Compute intersection
+df_ba_ratings_reviews = df_ba_ratings.merge(df_ba_reviews, how = "inner", on = ["beer_name", "beer_id", "brewery_name", "brewery_id", "style", "abv",  "user_name", "user_id", "appearance", "aroma", "palate", "taste", "overall", "rating"])
+
+# %%
+df_ba_ratings_reviews.describe()
+df_ba_ratings_reviews.isna().sum()
+# %%
+print("size of intersection in review/ratings BA", df_ba_ratings_reviews[~df_ba_ratings_reviews.isnull().any(axis=1)].count())
+print("size of reviews BA", df_ba_reviews[~df_ba_reviews.isnull().any(axis=1)].count())
+# Reviews are a subset of ratings for the BA dataset!
 
 # %% [markdown]
 # ## Rate Beer
