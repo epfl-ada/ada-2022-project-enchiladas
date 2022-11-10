@@ -287,7 +287,7 @@ df_ba_users = pd.read_csv(path_ba + "users.csv")
 print(df_ba_users.head())
 print(df_ba_users.isna().sum())
 # We do not know 1 username, 2652 join dates and 31279 locations
-# TODO: 1 username are you sure ?
+# TODO: 1 username are you sure ? isna().sum() is 1 for user_name...
 
 # %%
 # TODO: location processing
@@ -313,13 +313,15 @@ df_ba_users_usa = df_ba_users_usa.assign(states = states)
 print(df_ba_users_usa.sample(10))
 
 # %%
+users_states = df_ba_users_usa.groupby(df_ba_users_usa["states"]).sum().sort_values(by = 'nbr_ratings', ascending = False)
 users_contiguous_usa = gpd.read_file(gplt.datasets.get_path("contiguous_usa"))
-users_contiguous_usa = users_contiguous_usa.merge(beer_states, how = "left", left_on="state", right_index = True)
+users_contiguous_usa = users_contiguous_usa.merge(users_states, how = "left", left_on="state", right_index = True)
+print(users_contiguous_usa.sample(10))
 users_contiguous_usa = users_contiguous_usa.sort_values(by = "nbr_ratings", ascending = False)
 #TODO: not done yet...
 users_contiguous_usa["ratings_per_capita"] = users_contiguous_usa.apply(lambda x: 0 if x["nbr_ratings"] == np.nan else x["nbr_ratings"]/x["population"], axis = 1)
-gplt.choropleth(users_contiguous_usa, hue="nbr_ratings", legend=True)
-plt.title("nb of ratings per state")
+gplt.choropleth(users_contiguous_usa, hue="ratings_per_capita", legend=True)
+plt.title("nb of ratings per capita per state")
 plt.show()
 
 # %% [markdown]

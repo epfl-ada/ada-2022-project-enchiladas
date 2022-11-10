@@ -6,7 +6,7 @@
 ## Abstract: A 150 word description of the project idea and goals. What’s the motivation behind your project? What story would you like to tell, and why?
 Many countries have (perhaps stereotypical) associations with different beer preferences. For example, one might think the Germans all love <instert german beer> but judge <instert irish beer> with the highest contempt. By utilizing the data from two of the biggest beer ranking website, this project will investigate wether there exist a "home" biais when users rate beers. Morover, we will look at other geographical-based factor that could biais reviews.
 
-Why ?
+Why ? How?
 
 
 Since geographical data is available for both breweries and users, it should be possible to test  whether there is substantive geographical variation in beer preferences and in the type of language used in reviews. It would be very interesting to test rural vs urban differences by incorporating census data e.g. US census data https://data.census.gov/cedsci/. This immediately lends itself to further extensions with other variables of interest e.g. one can investigate the relationship with political leanings, average wealth, alcohol laws etc.
