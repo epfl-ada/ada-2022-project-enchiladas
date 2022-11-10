@@ -102,7 +102,7 @@ path_md = data_folder + 'matched_beer_data/'
 # ### Beers
 #
 # Source of column description: https://www.beeradvocate.com/community/threads/beeradvocate-ratings-explained.184726/
-#
+#<
 #
 # - beer_id
 # - name
@@ -136,8 +136,9 @@ df_ba_beers.sort_index(inplace=True)
 df_ba_beers.head()
 # %%
 # Check for null values
-df_ba_beers.isna().sum()
-# We do have a few nan values in avg, ba_score, bros_score, abv, avg_comuted,zsocre and avg_matched_valid_ratings
+print(df_ba_beers.isna().sum())
+print(f"number of beers in the dataframe: {len(df_ba_beers)}")
+# We do have a few nan values in avg, ba_score, bros_score, abv, avg_comuted,zscore and avg_matched_valid_ratings
 # According to https://www.beeradvocate.com/community/threads/beeradvocate-ratings-explained.184726/ it may be, that averages are not computed for beers with less than 10 reviews/ratings (not sure what the difference is)
 # %%
 # Are the avg nan values unrated beers?
@@ -147,6 +148,12 @@ df_ba_beers[df_ba_beers["avg"].isna() & df_ba_beers["nbr_ratings"]!=0 ].head()
 df_ba_beers[df_ba_beers["avg"].isna() & df_ba_beers["nbr_reviews"]!=0 ].head()
 # Neither.
 
+# %%
+# What is the column "zscore" the zscore of? avg or ba_score ? 
+#avgscore_mean = df_ba_beers["avg_computed"].mean()
+#avgscore_var = df_ba_beers["avg_computed"].var()
+#df_ba_beers["zscore_avg"] = df_ba_beers["avg"].apply(lambda x: (x-avgscore_mean)/avgscore_var)
+#df_ba_beers[~df_ba_beers['zscore'].isnull()]
 # %%
 # Give basic statistics about the ba beer table
 df_ba_beers.describe()
