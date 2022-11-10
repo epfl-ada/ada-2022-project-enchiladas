@@ -14,7 +14,7 @@ import mapclassify as mc
 import os.path
 import re
 
-def pickle_load(path):
+def pickle_load(path, load_with_text=False):
     """
     loads the corresponding pickle file or creates it if it does not exist
     
@@ -24,6 +24,8 @@ def pickle_load(path):
     returns: dataframe with the files content
     """
     pickle_path = path + ".pickle"
+    if load_with_text and ("rating" or "review" in path):
+        pickle_path += "s"
     if os.path.exists(pickle_path):
         return pd.read_pickle(pickle_path)
     else:
