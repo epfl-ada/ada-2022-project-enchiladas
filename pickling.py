@@ -14,7 +14,7 @@ import mapclassify as mc
 import os.path
 import re
 
-def pickle_load(path):
+def pickle_load(path, load_with_text=False):
     """
     loads the corresponding pickle file or creates it if it does not exist
     
@@ -23,14 +23,16 @@ def pickle_load(path):
 
     returns: dataframe with the files content
     """
-    pickle_path = path + ".pickles"
+    pickle_path = path + ".pickle"
+    if load_with_text and ("rating" or "review" in path):
+        pickle_path += "s"
     if os.path.exists(pickle_path):
         return pd.read_pickle(pickle_path)
     else:
         if "ratings" or "review" in path:
             # works for reveiws and ratings, drops the text
 
-            c = open(filename, "r").read()
+            c = open(path, "r").read()
             
             # re_data = re.findall(r"^beer_name.+?(?=text)", c,  re.DOTALL | re.MULTILINE)
             re_data = re.findall(r"^beer_name.+?(?=\n\n)", c,  re.DOTALL | re.MULTILINE) # includes everything...
@@ -64,13 +66,14 @@ if __name__ == "__main__":
     # filename = path_md + "ratings_ba.txt"
     filename = path_md + "ratings_rb.txt"
     # filename = path_ba + "reviews.txt"
-    # filename = path_ba + "ratings.txt"
+    filename = path_ba + "ratings.txt"
     # filename = path_rb + "ratings.txt"
     # filename = path_rb + "reviews.txt"
     df = pickle_load(filename)  
 
     print(df.head())
     print(df.describe())
+    print(list(df.columns))
 
 
 
