@@ -63,7 +63,6 @@ from helpers import *
 print("import completed")
 
 
-
 # %% [markdown]
 # # Pipeline
 # What was written on the sheet of paper:
@@ -691,6 +690,15 @@ df_rb_ratings.isna().sum()
 
 # %% [markdown]
 # ### Beers
+
+#loading and naming columns
+df_beers = pd.read_csv(path_md + "beers.csv", header=1)
+df_beers = df_beers.drop(["ba_score", "bros_score", "nbr_reviews", "overall_score", "style_score"], axis=1) #dropping features that only exist in 1 dataset
+df_beers = df_beers.rename(columns={key: f"{key}_ba" for key in df_beers.columns[0:13]}) #rename columns to highlight dataset of origine
+df_beers = df_beers.rename(columns={key: f"{key[:-2]}_rb" for key in df_beers.columns[13:26]})
+
+#sanity checks:
+df_beers.describe()
 # %% [markdown]
 # ### Breweries
 # %% [markdown]
