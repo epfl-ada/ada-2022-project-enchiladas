@@ -689,18 +689,18 @@ df_rb_ratings.isna().sum()
 # ## Matched Dataset
 
 # column dropping justification:
-# ba_score: only available in ba dataset, not really linear, not available for every review (only for the aggregation of all reviews) and hard to interpret (rather use user avg.)
-# bros_score: wtf ? only available in ba dataset
-# anything related to reviews
-# overall_score: same argument as ba_score
-# avg_matched_...: we don't care about matching the two datasets since we're testing each hypothesis two times
-
+# - ba_score: only available in ba dataset, not really linear, not available for every review (only for the aggregation of all reviews) and hard to interpret (rather use user avg.)
+# - bros_score: wtf ? only available in ba dataset
+# - anything related to reviews
+# - overall_score: same argument as ba_score
+# - avg_matched_...: we don't care about matching the two datasets since we're testing each hypothesis two times
+# 
 #the rest we keep just in case
 
 #issues:
-#       what is the zscore
-#       what is the avg_matched_valid_ratings ?
-#       what is diff and sim ?
+# - what is the zscore
+# - what is the avg_matched_valid_ratings ?
+# - what is diff and sim ?
 # %% [markdown]
 # ### Beers
 
@@ -725,6 +725,17 @@ print(df_beers.isna().sum())
 
 # %% [markdown]
 # ### Breweries
+
+#loading and renaming columns
+df_brew = pd.read_csv(path_md + "breweries.csv", header = 1)
+df_brew = df_brew.rename(columns={key: f"{key}_ba" for key in df_brew.columns[0:4]}) #rename columns to highlight dataset of origine
+df_brew = df_brew.rename(columns={key: f"{key[:-2]}_rb" for key in df_brew.columns[4:8]})
+
+#updating breweries list and beer count according to the beer we removed in the previous section
+#this part Matthieu needs to finish
+nbr_beers_ba = df_beers.groupby(by = "brewery_id_ba")["brewery_id_ba"].count()
+nbr_beers_ba
+
 # %% [markdown]
 # ### Users
 # %% [markdown]
