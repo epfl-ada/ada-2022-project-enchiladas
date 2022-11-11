@@ -688,17 +688,41 @@ df_rb_ratings.isna().sum()
 # %% [markdown]
 # ## Matched Dataset
 
+# column dropping justification:
+# ba_score: only available in ba dataset, not really linear, not available for every review (only for the aggregation of all reviews) and hard to interpret (rather use user avg.)
+# bros_score: wtf ? only available in ba dataset
+# anything related to reviews
+# overall_score: same argument as ba_score
+# avg_matched_...: we don't care about matching the two datasets since we're testing each hypothesis two times
+
+#the rest we keep just in case
+
+#issues:
+#       what is the zscore
+#       what is the avg_matched_valid_ratings ?
+#       what is diff and sim ?
 # %% [markdown]
 # ### Beers
 
 #loading and naming columns
 df_beers = pd.read_csv(path_md + "beers.csv", header=1)
-df_beers = df_beers.drop(["ba_score", "bros_score", "nbr_reviews", "overall_score", "style_score"], axis=1) #dropping features that only exist in 1 dataset
-df_beers = df_beers.rename(columns={key: f"{key}_ba" for key in df_beers.columns[0:13]}) #rename columns to highlight dataset of origine
-df_beers = df_beers.rename(columns={key: f"{key[:-2]}_rb" for key in df_beers.columns[13:26]})
+df_beers = df_beers.drop(["ba_score", "bros_score", "nbr_reviews", "overall_score", "style_score", "avg_matched_valid_ratings", "nbr_matched_valid_ratings", "avg_matched_valid_ratings.1", "nbr_matched_valid_ratings.1"], axis=1) #dropping features that only exist in 1 dataset
+df_beers = df_beers.rename(columns={key: f"{key}_ba" for key in df_beers.columns[0:11]}) #rename columns to highlight dataset of origine
+df_beers = df_beers.rename(columns={key: f"{key[:-2]}_rb" for key in df_beers.columns[11:24]})
+#infos:
+print(f"number of beers in matched dataset {len(df_beers)}")
+print(f"number of beers in BeerAdvocate dataset {len(df_ba_beers)}")
+#so we lost about 84% of the beers, but still 45k is significative.
+#is it interesting to compute the avg nb of reviews for beers we lost ? => don't know how to do (A \ AintersectB)
+#nan checks:
+#print(df_beers.isna().sum())
+#not sure: we remove beers that didn't get at least 1 review in each ds ?
+df_beers = df_beers.loc[df_beers[["avg_ba","avg_computed_ba", "avg_rb", "avg_computed_rb"]].isna().sum(axis=1) == 0]
+print(f"number of beers in matched dataset after cleaning {len(df_beers)}")
+print(df_beers.isna().sum())
+#no NAN lefts !
 
-#sanity checks:
-df_beers.describe()
+
 # %% [markdown]
 # ### Breweries
 # %% [markdown]
