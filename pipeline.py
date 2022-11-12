@@ -711,7 +711,7 @@ df_beers = df_beers.rename(columns={key: f"{key}_ba" for key in df_beers.columns
 df_beers = df_beers.rename(columns={key: f"{key[:-2]}_rb" for key in df_beers.columns[11:24]})
 #infos:
 print(f"number of beers in matched dataset {len(df_beers)}")
-print(f"number of beers in BeerAdvocate dataset {len(df_ba_beers)}")
+#print(f"number of beers in BeerAdvocate dataset {len(df_ba_beers)}")
 #so we lost about 84% of the beers, but still 45k is significative.
 #is it interesting to compute the avg nb of reviews for beers we lost ? => don't know how to do (A \ AintersectB)
 #nan checks:
@@ -733,8 +733,25 @@ df_brew = df_brew.rename(columns={key: f"{key[:-2]}_rb" for key in df_brew.colum
 
 #updating breweries list and beer count according to the beer we removed in the previous section
 #this part Matthieu needs to finish
-nbr_beers_ba = df_beers.groupby(by = "brewery_id_ba")["brewery_id_ba"].count()
-nbr_beers_ba
+nb_beers_ba = df_beers.groupby("brewery_id_ba").size()
+nb_beers_rb = df_beers.groupby("brewery_id_rb").size()
+
+def map_nb_beers(id_beer, df):
+        try:
+                return df.loc[id_beer]
+        except:
+                return 0
+
+df_brew["nbr_beers_ba"] = df_brew.apply(lambda x: map_nb_beers(x["id_ba"], nb_beers_ba), axis=1)
+df_brew["nbr_beers_rb"] = df_brew.apply(lambda x: map_nb_beers(x["id_rb"], nb_beers_rb), axis=1)
+df_brew = df_brew.loc[df_brew["nbr_beers_ba"] > 0]
+df_brew = df_brew.loc[df_brew["nbr_beers_rb"] > 0]
+print(f"number of beers in the beers dataframe {len(df_beers)}")
+nb = df_brew["nbr_beers_ba"].sum()
+print(f"number of beers in the brewery dataframe {nb}")
+#do number of beers per brewery matches between the two dataset ?
+display(df_brew.loc[df_brew["nbr_beers_ba"] != df_brew["nbr_beers_rb"]])
+#no, but we notice that it is ony due to minor difference in the name, so we leave them as it is
 
 # %% [markdown]
 # ### Users
