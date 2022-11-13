@@ -290,27 +290,22 @@ plt.show()
 # - joined
 # - location
 df_ba_users = pd.read_csv(path_ba + "users.csv")
-print(df_ba_users.head())
-print(df_ba_users.isna().sum())
-# We do not know 1 username, 2652 join dates and 31279 locations
-# TODO: 1 username are you sure ? isna().sum() is 1 for user_name...
-
-# %%
-# TODO: location processing
+# We do not know 1 username, 2652 join dates and 31279 locations (i.e. they are nan)
+df_ba_users = df_ba_users.dropna()
+#location processing
 #removing html tags
-df_ba_users = df_ba_users[~df_ba_users.isnull().any(axis=1)]
 df_ba_users['location'] = df_ba_users['location'].apply(lambda x : x.split('<', 1)[0])
 #separating country from states (for USA)
 df_ba_users['country'] = df_ba_users['location'].apply(lambda x : x.split(',', 1)[0])
 country_list = df_ba_users['country'].unique()
 country_iso = {x: find_iso(x) for x in country_list} #look up table
 df_ba_users['country_code'] = df_ba_users['country'].apply(lambda x: country_iso[x])
+print(df_ba_users.isna().sum())
+# 54 missing country codes...
+df_ba_users = df_ba_users.dropna()
+print(df_ba_users.info())
 print(df_ba_users.head())
 
-# %%
-print("number of missing country codes:",df_ba_users['country_code'].isna().sum())
-print(df_ba_users.isna().sum())
-# 54 missing country codes... TODO
 
 # %%
 df_ba_users_usa = df_ba_users[df_ba_users['country'] == 'United States']
@@ -375,6 +370,7 @@ print(df_ba_users.head())
 
 # %% [markdown]
 # ### Reviews
+# The difference in columns between reviews and ratings is only the missing boolean 
 # - beer_name
 # - beer_id
 # - brewery_name
@@ -390,24 +386,25 @@ print(df_ba_users.head())
 # - taste
 # - overall
 # - rating
-# - text (dropped in pickling)
-df_ba_reviews = pickle_load(path_ba + "reviews.txt")
-df_ba_reviews.set_index(df_ba_reviews["date"], inplace = True)
-df_ba_reviews.head()
+# - text 
+# For performance reasons, we will not always load the reviews, they are a subset of ratings.
+# df_ba_reviews = pickle_load(path_ba + "reviews.txt")
+# df_ba_reviews.set_index(df_ba_reviews["date"], inplace = True)
+# df_ba_reviews.head()
 
 # %%
-df_ba_reviews.describe()
-df_ba_reviews.isna().sum()
+# df_ba_reviews.describe()
+# df_ba_reviews.isna().sum()
 
 # %% [markdown]
 # #### Data visualizations
 # BA reviews as time-series
-ba_reviews_month = df_ba_reviews.groupby(df_ba_reviews.index.to_period('M')).size()
-ba_reviews_month.loc[ba_reviews_month.index.year > 2010].plot()
+# ba_reviews_month = df_ba_reviews.groupby(df_ba_reviews.index.to_period('M')).size()
+# ba_reviews_month.loc[ba_reviews_month.index.year > 2010].plot()
 
 
 # %% [markdown]
-# ### Ratings
+# ### Ratings are a superset of reviews, they contain a lot more nan values both in numerical score and in text review
 # - beer_name
 # - beer_id
 # - brewery_name
@@ -423,34 +420,51 @@ ba_reviews_month.loc[ba_reviews_month.index.year > 2010].plot()
 # - taste
 # - overall
 # - rating
-# - text (dropped in pickling)
-# - review (dropped in pickling)
-df_ba_ratings = pickle_load(path_ba + "ratings.txt")
-df_ba_ratings.set_index(df_ba_ratings["date"], inplace = True)
-df_ba_ratings.head()
+# - text 
+# - review 
+# df_ba_ratings = pickle_load(path_ba + "ratings.txt",load_with_text=True)
+# df_ba_ratings.set_index(df_ba_ratings["date"], inplace = True) # Set date as index for ratings
+# df_ba_ratings = df_ba_ratings.convert_dtypes(infer_objects=True) # infer correct string types (does not filter nan values)
+# df_ba_ratings[["overall","taste","palate","aroma","appearance","abv"]] = df_ba_ratings[["overall","taste","palate","aroma","appearance","abv"]].apply(lambda x : pd.to_numeric(x,errors="coerce")) # coerce to numeric
+# df_ba_ratings = df_ba_ratings.astype({"review":bool}) # convert to boolean
+# df_ba_ratings["text"] = df_ba_ratings["text"].apply(lambda x: x if str.lower(x) != "nan" else "") # convert nan to empty string
+# df_ba_ratings = df_ba_ratings.dropna() # drop nan values
+# print(df_ba_ratings.info()) # print info
+# print("Number of nan values",df_ba_ratings.isna().sum())
+# print("Number of non-reviews:",df_ba_ratings[df_ba_ratings["review"] == False].shape[0])
+# print("Number of text that is 'nan':",df_ba_ratings[df_ba_ratings["text"].str.lower() == "nan"].shape[0])
+# for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user_name","user_id"]:
+#         print(f"number of values in {column} that is 'nan'", df_ba_ratings[df_ba_ratings[column].str.lower() == "nan"].shape[0])
+# TODO: convert to style to categorical, it might make sense to also change datatype of beer_id and brewery_id to numeric
 
-# %%
-df_ba_ratings.describe()
-df_ba_ratings.isna().sum()
 
 # %% [markdown]
 # #### Data visualizations
 # BA ratings as time-series
-ba_ratings_month = df_ba_reviews.groupby(df_ba_reviews.index.to_period('M')).size()
-ba_ratings_month.plot()
+# ba_ratings_month = df_ba_ratings.groupby(df_ba_ratings.index.to_period('M')).size()
+# ba_ratings_month.plot()
 
 # %% [markdown]
 # #### Ratings vs Reviews
 # Compute intersection
-df_ba_ratings_reviews = df_ba_ratings.merge(df_ba_reviews, how = "inner", on = ["beer_name", "beer_id", "brewery_name", "brewery_id", "style", "abv",  "user_name", "user_id", "appearance", "aroma", "palate", "taste", "overall", "rating"])
+# df_ba_ratings_reviews = df_ba_ratings.merge(df_ba_ratings, how = "inner", on = ["beer_name", "beer_id", "brewery_name", "brewery_id", "style", "abv",  "user_name", "user_id", "appearance", "aroma", "palate", "taste", "overall", "rating"])
 
 # %%
-df_ba_ratings_reviews.describe()
-df_ba_ratings_reviews.isna().sum()
+# df_ba_ratings_reviews.describe()
+# df_ba_ratings_reviews.isna().sum()
 # %%
-print("size of intersection in review/ratings BA", df_ba_ratings_reviews[~df_ba_ratings_reviews.isnull().any(axis=1)].count())
-print("size of reviews BA", df_ba_reviews[~df_ba_reviews.isnull().any(axis=1)].count())
+# print("size of intersection in review/ratings BA", df_ba_ratings_reviews[~df_ba_ratings_reviews.isnull().any(axis=1)].count())
+# print("size of reviews BA", df_ba_ratings[~df_ba_ratings.isnull().any(axis=1)].count())
 # Reviews are a subset of ratings for the BA dataset!
+
+# %%
+# df_ba_ratings[ df_ba_ratings["text"].isna()].count()
+
+# %%
+# df_ba_ratings_gb_text = df_ba_ratings.groupby("text")
+
+# %%
+# df_ba_ratings_gb_text.describe()
 
 # %% [markdown]
 # ## Rate Beer
@@ -615,13 +629,13 @@ plt.show()
 # ### Users
 
 df_rb_users = pd.read_csv(path_rb + 'users.csv')
+df_rb_users = df_rb_users.convert_dtypes(infer_objects=True) 
 df_rb_users.head()
 
-for column in df_rb_users:
-        print(column, " : ", df_rb_users[column].isnull().sum())
+print(df_rb_users.isna().sum())
 
-# remove lines with no location, there are still states with <joined> NaN
-df_rb_users = df_rb_users[~df_rb_users["location"].isnull()]
+# remove lines with nan
+df_rb_users = df_rb_users.dropna()
 
 # split US states
 df_rb_users['country'] = df_rb_users['location'].apply(lambda x : x.split(',', 1)[0])
@@ -629,12 +643,12 @@ df_rb_users['country'] = df_rb_users['location'].apply(lambda x : x.split(',', 1
 country_list = df_rb_users['country'].unique()
 country_iso = {x: find_iso(x) for x in country_list} #look up table
 df_rb_users['country_code'] = df_rb_users['country'].apply(lambda x: country_iso[x])
-
-df_rb_users.head()
-
-# %%
-# print(df_rb_users["country_code"].unique())
 print("No country code assignment to the following countries: ", df_rb_users[df_rb_users["country_code"].isnull()]["country"].unique())
+
+# remove missing country codes
+df_rb_users = df_rb_users.dropna()
+print(df_rb_users.isna().sum())
+print(df_rb_users.info())
 
 # %%
 # Users per country
@@ -671,19 +685,41 @@ plt.show()
 
 # %% [markdown]
 # ### Reviews
-df_rb_reviews = pickle_load(path_rb + "reviews.txt")
-df_rb_reviews.head()
+# TODO: improve comments... (justification for using reviews instead of ratings for RB)
+# df_rb_reviews = pickle_load(path_rb + "reviews.txt",load_with_text=True)
+# df_rb_reviews.set_index(df_rb_reviews["date"], inplace = True) # Set date as index for ratings
+# df_rb_reviews = df_rb_reviews.convert_dtypes(infer_objects=True) # infer correct string types (does not filter nan values)
+# df_rb_reviews[["overall","taste","palate","aroma","appearance","abv","user_id"]] = df_rb_reviews[["overall","taste","palate","aroma","appearance","abv","user_id"]].apply(lambda x : pd.to_numeric(x,errors="coerce")) # coerce to numeric
+# df_rb_reviews["text"] = df_rb_reviews["text"].apply(lambda x: x if str.lower(x) != "nan" else "") # convert nan to empty string
+# df_rb_reviews = df_rb_reviews.dropna() # drop nan values
+# print(df_rb_reviews.info()) # print info
+# print("Number of nan values",df_rb_reviews.isna().sum())
+# print("Number of text that is 'nan':",df_rb_reviews[df_rb_reviews["text"].str.lower() == "nan"].shape[0])
+# for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user_name","user_id"]:
+#         print(f"number of values in {column} that is 'nan'", df_rb_reviews[df_rb_reviews[column].str.lower() == "nan"].shape[0])
 
-
-
+# %%
+# print(df_rb_reviews.head())
 
 # %% [markdown]
 # ### Ratings
-df_rb_ratings = pickle_load(path_rb + "ratings.txt")
-df_rb_ratings.head()
+# df_rb_ratings = pickle_load(path_rb + "ratings.txt")
+# df_rb_ratings.head()
 
 # %%
-df_rb_ratings.isna().sum()
+# df_rb_ratings.isna().sum()
+
+# %% [markdown]
+# #### Ratings vs Reviews
+# Compute intersection
+# df_ba_ratings_reviews = df_ba_ratings.merge(df_ba_reviews, how = "inner", on = ["beer_name", "beer_id", "brewery_name", "brewery_id", "style", "abv",  "user_name", "user_id", "appearance", "aroma", "palate", "taste", "overall", "rating"])
+
+# %%
+# df_ba_ratings_reviews.describe()
+# df_ba_ratings_reviews.isna().sum()
+# %%
+# print("size of intersection in review/ratings BA", df_ba_ratings_reviews[~df_ba_ratings_reviews.isnull().any(axis=1)].count())
+# print("size of reviews BA", df_ba_reviews[~df_ba_reviews.isnull().any(axis=1)].count())
 
 # %% [markdown]
 # ## Matched Dataset
@@ -720,6 +756,7 @@ print(f"number of beers in matched dataset {len(df_beers)}")
 df_beers = df_beers.loc[df_beers[["avg_ba","avg_computed_ba", "avg_rb", "avg_computed_rb"]].isna().sum(axis=1) == 0]
 print(f"number of beers in matched dataset after cleaning {len(df_beers)}")
 print(df_beers.isna().sum())
+print(df_beers.info())
 #no NAN lefts !
 
 
@@ -755,6 +792,12 @@ display(df_brew.loc[df_brew["nbr_beers_ba"] != df_brew["nbr_beers_rb"]])
 
 # %% [markdown]
 # ### Users
+df_md_users = pd.read_csv(path_ba + "users.csv",header=[0,1])
+print(df_md_users.head())
+print(df_md_users.isna().sum())
+print(df_md_users.columns)
+
+
 # %% [markdown]
 # ### Users Approx
 # %% [markdown]
@@ -763,6 +806,52 @@ display(df_brew.loc[df_brew["nbr_beers_ba"] != df_brew["nbr_beers_rb"]])
 # ### Ratings
 # %% [markdown]
 # #### Ratings with text ba
-df_ratings_with_text_ba = pickle_load(path_md + "ratings_with_text_ba.txt")
+# df_ratings_with_text_ba = pickle_load(path_md + "ratings_with_text_ba.txt")
 # %% [markdown]
 # #### Ratings with text rb
+
+
+
+# %% [markdown]
+# # Create Dataframes for Ratings including userdata filtered on matched beer dataset
+
+
+# %%
+# ## BeerAdvocate
+# Filter BA Ratings to only keep beers in matched beer dataset
+# df_md_beer_ids = df_beers["beer_id_ba"].unique().astype(str)
+# df_ba_beer_ids = df_ba_ratings["beer_id"].unique()
+# df_ba_ratings_filtered_md_beers = df_ba_ratings[df_ba_ratings["beer_id"].isin(df_md_beer_ids)]
+# df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_md_beers.merge(df_ba_users, left_on="user_id", right_on="user_id")
+# print(df_ba_ratings_filtered_beers_merged_users.isnull().sum())
+# print(df_ba_ratings_filtered_beers_merged_users.head())
+# print(df_ba_ratings_filtered_beers_merged_users.info())
+pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
+# df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{pickle_filename}")
+df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{pickle_filename}")
+print(df_ba_ratings_filtered_beers_merged_users.head())
+print(df_ba_ratings_filtered_beers_merged_users.info())
+
+
+
+
+# %%
+# ## RateBeer
+# Filter RB Ratings to only keep beers in matched beer dataset
+
+# df_md_beer_ids = df_beers["beer_id_rb"].unique().astype(str)
+# df_rb_beer_ids = df_rb_reviews["beer_id"].unique()
+# df_rb_reviews_filtered_md_beers = df_rb_reviews[df_rb_reviews["beer_id"].isin(df_md_beer_ids)]
+# df_rb_reviews_filtered_beers_merged_users = df_rb_reviews_filtered_md_beers.merge(df_rb_users, left_on="user_id", right_on="user_id")
+# print(df_rb_reviews_filtered_beers_merged_users.isnull().sum())
+# print(df_rb_reviews_filtered_beers_merged_users.head())
+# print(df_rb_reviews_filtered_beers_merged_users.info())
+pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
+# df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{pickle_filename}")
+df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{pickle_filename}")
+print(df_rb_reviews_filtered_beers_merged_users.head())
+print(df_rb_reviews_filtered_beers_merged_users.info())
+
+
+# %%
+# TODO: warning when comparing ratings between RB and BA: Appearance, Aroma, Paalte, Taste and overall have different ranges in both datasets (rating to be double checked)

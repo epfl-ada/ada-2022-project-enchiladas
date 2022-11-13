@@ -46,7 +46,7 @@ def pickle_load(path, load_with_text=False):
 
             df["date"] = pd.to_datetime(df["date"],unit='s')
             for col in ["abv","appearance","aroma","palate","taste","overall","rating"]:
-                df[col] = pd.to_numeric(df[col], errors = 'ignore')
+                df[col] = pd.to_numeric(df[col], errors = 'coerce')
             df.set_index(df["date"], inplace = True)
             df.to_pickle(pickle_path)
             return df
@@ -65,11 +65,11 @@ if __name__ == "__main__":
     # filename = "test.txt"
     # filename = path_md + "ratings_ba.txt"
     filename = path_md + "ratings_rb.txt"
-    # filename = path_ba + "reviews.txt"
-    filename = path_ba + "ratings.txt"
+    filename = path_ba + "reviews.txt"
+    # filename = path_ba + "ratings.txt"
     # filename = path_rb + "ratings.txt"
     # filename = path_rb + "reviews.txt"
-    df = pickle_load(filename)  
+    df = pickle_load(filename, load_with_text=True)  
 
     print(df.head())
     print(df.describe())
