@@ -62,6 +62,13 @@ from pickling import pickle_load
 from helpers import *
 print("import completed")
 
+#data folder path
+data_folder = './Data/'
+path_ba = data_folder + 'BeerAdvocate/'
+path_rb = data_folder + 'RateBeer/'
+path_md = data_folder + 'matched_beer_data/'
+
+
 
 # %% [markdown]
 # # Pipeline
@@ -85,14 +92,6 @@ print("import completed")
 # - crawl beer styles from https://www.beeradvocate.com/beer/styles/ and https://www.ratebeer.com/beerstyles/ (for some textual description, we do have style columns in beer tables)
 # Andreaas Idea:
 # - vocabulary: <-> Location
-
-# %%
-#data folder path
-data_folder = './Data/'
-path_ba = data_folder + 'BeerAdvocate/'
-path_rb = data_folder + 'RateBeer/'
-path_md = data_folder + 'matched_beer_data/'
-
 
 # %% [markdown]
 # ## Beer Advocate
@@ -759,7 +758,10 @@ print(df_beers.isna().sum())
 print(df_beers.info())
 #no NAN lefts !
 
-
+#do abv contents are the same in both datasets? Yes they are
+print(df_beers.loc[df_beers["abv_ba"] != df_beers["abv_rb"]])
+#do names match ? Most of them don't. BA don't include the brewery name in the beer name but RB often does
+df_beers.loc[df_beers["beer_name_ba"] != df_beers["beer_name_rb"]].head()
 # %% [markdown]
 # ### Breweries
 
@@ -769,7 +771,6 @@ df_brew = df_brew.rename(columns={key: f"{key}_ba" for key in df_brew.columns[0:
 df_brew = df_brew.rename(columns={key: f"{key[:-2]}_rb" for key in df_brew.columns[4:8]})
 
 #updating breweries list and beer count according to the beer we removed in the previous section
-#this part Matthieu needs to finish
 nb_beers_ba = df_beers.groupby("brewery_id_ba").size()
 nb_beers_rb = df_beers.groupby("brewery_id_rb").size()
 
@@ -789,7 +790,7 @@ print(f"number of beers in the brewery dataframe {nb}")
 #do number of beers per brewery matches between the two dataset ?
 display(df_brew.loc[df_brew["nbr_beers_ba"] != df_brew["nbr_beers_rb"]])
 #no, but we notice that it is ony due to minor difference in the name, so we leave them as it is
-
+display(df_brew)
 # %% [markdown]
 # ### Users
 df_md_users = pd.read_csv(path_ba + "users.csv",header=[0,1])
@@ -831,7 +832,7 @@ pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{pickle_filename}")
 print(df_ba_ratings_filtered_beers_merged_users.head())
 print(df_ba_ratings_filtered_beers_merged_users.info())
-
+df_ba = df_ba_ratings_filtered_beers_merged_users
 
 
 
@@ -852,6 +853,19 @@ df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{pickle_filena
 print(df_rb_reviews_filtered_beers_merged_users.head())
 print(df_rb_reviews_filtered_beers_merged_users.info())
 
-
 # %%
 # TODO: warning when comparing ratings between RB and BA: Appearance, Aroma, Paalte, Taste and overall have different ranges in both datasets (rating to be double checked)
+# for the average rating comparison:
+plt.hist(df_beers["avg_computed_ba"], bins=50, alpha=0.5, label='BeerAdvocate rating', density = True)
+plt.hist(df_beers["avg_computed_rb"], bins=50, alpha=0.5, label='RateBeer rating', density = True)
+plt.title("histogram of ratings from both dataset within the merge dataset")
+plt.legend(loc='upper right')
+plt.xlabel("rating")
+plt.ylabel("density")
+plt.show()
+#We notice that rate beer is more critical in avg. that beer advocate. Caution should be taken if two datasets are merged
+# %% [markdown]
+# # without propensity matching:
+df_ba["is_local"] = df_ba.apply(lambda x: x["location"] ==  df_brew.loc[df_brew["id_ba"] == x["brewery_name"]]["location_rb"], axis = 1)
+# %%
+df_ba_american = df_ba.loc[df_ba["location_ba"].split()[0:2] == "United States"]
