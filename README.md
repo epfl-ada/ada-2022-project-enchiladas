@@ -17,11 +17,10 @@ Since geographical data is available for both breweries and users, it should be 
 1. Are beer preferences influenced by geography/culture?
 2. Do different cultures prioritise/prefer different aspects of beers such as feel? Are some cultures more critical of beer?
 3. Do different cultures have stylistically different ways of writing reviews and discussing beer?
-4. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts?
-5. Does "home bias" exist amongst different us-states and countries? Can we say something about how open different cultures are to foreign beers?
-6. Do we also see an effect if we look in the opposite direction i.e. is there a "home advantage" for local beers? Specifically, is a beer likely to have a higher rating from local users than from foreign ones?
-7. Do users talk about foreign beers differently than they talk about their local ones?
-8. What are the other factor that influence consumer ratings based on their location? In particular, in the US we can look at:
+4. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts? Can we say something about how open different cultures are to foreign beers?
+5. Do we also see an effect if we look in the opposite direction i.e. is there a "home advantage" for local beers? Specifically, is a beer likely to have a higher rating from local users than from foreign ones?
+6. Do users talk about foreign beers differently than they talk about their local ones?
+7. What are the other factor that influence consumer ratings based on their location? In particular, in the US we can look at:
     - urban vs. rural
     - wealth
     - politics
@@ -64,6 +63,10 @@ Since geographical data is available for both breweries and users, it should be 
 
         As before, we conduct a paired t-test to investigate if there a "home advantage".
     - [ ] Investigate RQ6 by analysing differences in the stylistic language for local vs foreign beers. Will likely need to do this on a per-country basis since we expect countries to have different stylistic choices in general.
+    - [ ] Investigate RQ7 by looking at ratings with respect to the following variables:
+        - population
+        - wealth
+        - politics
 6. [ ] Create a datastory and visualisations to communicate effectively our results.
         
 
