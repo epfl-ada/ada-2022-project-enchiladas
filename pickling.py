@@ -34,7 +34,6 @@ def pickle_load(path, load_with_text=False):
 
             c = open(path, "r").read()
             
-            # re_data = re.findall(r"^beer_name.+?(?=text)", c,  re.DOTALL | re.MULTILINE)
             re_data = re.findall(r"^beer_name.+?(?=\n\n)", c,  re.DOTALL | re.MULTILINE) # includes everything...
             
             def get_attributes(data):
