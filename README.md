@@ -20,29 +20,36 @@ The following ideas were considered but didn't fit well with the direction of ou
     - wealth (from the [US Census Bureau](https://data.census.gov/cedsci/))
 
 ## Proposed Additional Datasets
-### (if any): List the additional dataset(s) you want to use (if any), and some ideas on how you expect to get, manage, process, and enrich it/them. Show us that you’ve read the docs and some examples, and that you have a clear idea on what to expect. Discuss data size and format if relevant. It is your responsibility to check that what you propose is feasible.
+-
 
-## Methods (Tasks)
-1. [ ] Investigate the existing data and check for any problems with the data. Clean/wrangle the data where necessary e.g. filling missing values.
-2. [ ] Build the following pickled datasets from the _cleaned_ data _(Note: No problem with data size since each filtered are under 200mb and fit into RAM)_:
+## Methods (Pipeline/Tasks)
+1. [ ] Initial data cleaning/wrangling. Missing values are marginal and are mostly dropped. We also address the coherence of the merged dataset (naming, filtering beers without review) and issues regarding country names (matching to ISO-codes).
+2. [ ] Pickled datasets:
     - df_beers: matched beers from RateBeer and BeerAdvocate
     - df_brew: matched breweries from RateBeer and BeerAdvocate
-    - df_ba: BeerAdvocate reviews for all of the matched beers
-    - df_rb: RateBeer reviews for all of the matched beers
-    - one for maps stuff
-3. [ ] Create pipeline to filter relevant datasets, e.g. by minimum number of reviews or countries of interest.
-4. [ ] Investigate the research questions (RQs). We conduct the analysis for RateBeer and BeerAdvocate separately, and then compare the results. This allows us to check if our findings are robust between the two platforms, controlling for an extra source of variation due to differing user bases.
-    - [ ] Investigate RQ1 by viewing ratings for different beer styles for each country
+    - df_ba: BeerAdvocate reviews for all of the matched beers including user data
+    - df_rb: RateBeer reviews for all of the matched beers including user data
+    By working on the pre-filtered merged dataset from 1., the sizes are reduced to 200mb and fit easily into RAM.
+3. [ ] From the pickled datasets, filter again depending on the research question (e.g. by minimum number of reviews or countries of interest), adress similarity/differences between the two rating dataframes (min-max scaling), visualize the basic data (rating distributions, user base map, etc...).
+4. [ ] We conduct the analysis for RateBeer and BeerAdvocate separately, and then compare the results. This allows us to check if our findings are robust between the two platforms, controlling for an extra source of variation due to differing user bases. Further details in addition to the below can be found in the notebook.
+    - [ ] Investigate RQ1 by viewing ratings for different beer styles for each country.
     - [ ] Investigate RQ2 by seeing if general ratings differ per country. Then furthermore seeing if certain countries are more critical on certain rating aspects.
     - [ ] Investigate RQ3 by finding word frequencies and computing distances between the language corpuses i.e. reviews for each country. To achieve this, we will leverage existing methods and research such as [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl) or [word-cloud](https://github.com/amueller/word_cloud). Also investigate if there are differences for foreign and local reviews.
-    - [ ] RQ4
-5. [ ] Create a datastory and visualisations to communicate effectively our results.
+    - [ ] Investigate RQ4 (the home bias/home advantage). Using a t-test, we compare the average user ratings given to local vs. foreign beers to see if they are different. To control the effect of cofounders, we match users based on propensity. Propensity score measures the probability of a user to rate beer from his own country/state vs. from a foreign one given observed covariates. Is is learned using a logistic regression with labels being 1 if the reviewed beer is local, 0 if it is foreign. Some features considered are for example user's avg ratings, number of ratings, user "taste" (ratings per style), country, etc...
+5. [ ] Create a datastory and visualisations to communicate effectively our results (further details in notebook).
         
 ## Proposed timeline
-1. Already for Project Milestone 2, we have completed T1, T2, T3, T4 [FINISH LIST]
-2. 
+1. 18/11/2022: Tasks 1 (data wrangling), 2 (pickling), and T3. We have also already begun T4 RQ1, (looking at variations in ratings, beer styles etc. per country).
+2. 18/11/2022-02/12/2022: Dedicated to homework 2.
+4. 09/12/2022: RQ1 and RQ2 are finished (simpler), start working on RQ3 and RQ4.
+5. 16/12/2022: Begin working on visualisation and finish RQ3 and RQ4.
+6. 23/12/2022: Finalise visualisation.
 
-## Organization within the team: A list of internal milestones up until project Milestone P3.
-- 
+## Organization within the team:
+- Matthieu: Home bias test. Combine RQ1, 2 and 4 results with geopandas maps for visualization.
+- Oisín: Visualisation and textual analysis
+- Kasimir: Visualisation and textual analysis
+- Andrea: Home bias and textual analysis
 
-## Questions for TAs (optional): Add here any questions you have for us related to the proposed project.
+## Questions for TAs (optional):
+-

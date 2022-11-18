@@ -56,6 +56,7 @@ pd.set_option('display.max_rows', 10)
 # └── .gitignore
 # ```
 
+# %%
 #data folder path
 data_folder = './Data/'
 path_ba = data_folder + 'BeerAdvocate/'
@@ -166,6 +167,7 @@ path_md = data_folder + 'matched_beer_data/'
 
 # #### Loading Beer Dataset (merged)
 
+# %%
 #loading and naming columns
 df_beers = pd.read_csv(path_md + "beers.csv", header=1)
 #dropping features that only exist in 1 dataset
@@ -189,6 +191,7 @@ print(df_beers.info())
 # %% [markdown]
 # How many beer did we drop with respect to the Beer Advocate dataset?
 # we should take the union not only ba.
+# %%
 df_ba_beers = pd.read_csv(path_ba + 'beers.csv')
 df_rb_beers = pd.read_csv(path_rb + 'beers.csv')
 
@@ -197,6 +200,8 @@ print(f"number of beers in RateBeer dataset {len(df_rb_beers)}")
 print(f"number of beers in matched dataset {len(df_beers)}")
 
 # %% [markdown]
+# 
+# %% [markdown]
 # With respect to BA, we lost about 87% of the beers.
 # With respect to RB, we lost about 92% of the beers.
 # 38k is still a significant number and this quantity suffices for our analysis
@@ -204,14 +209,16 @@ print(f"number of beers in matched dataset {len(df_beers)}")
 # %% [markdown]
 # Sanity checks
 # Are the abv contents the same in both datasets?
+# %%
 print(df_beers.loc[df_beers["abv_ba"] != df_beers["abv_rb"]])
 # %% [markdown]
 # Do the names match ? Most of them don't. BA don't include the brewery name in the beer name but RB often does. We will keep the RB names since they are more informative.
+# %%
 df_beers.loc[df_beers["beer_name_ba"] != df_beers["beer_name_rb"]].head()
 
 # %% [markdown]
 # ### Breweries
-
+# %%
 #loading and renaming columns
 df_brew = pd.read_csv(path_md + "breweries.csv", header = 1)
 df_brew = df_brew.rename(columns={key: f"{key}_ba" for key in df_brew.columns[0:4]}) #rename columns to highlight dataset of origine
@@ -247,7 +254,7 @@ df_brew = df_brew.loc[df_brew["nbr_beers_ba"] == df_brew["nbr_beers_rb"]]
 df_beers = df_beers.loc[~df_beers["brewery_id_ba"].isin(non_matching_brew["id_ba"])]
 
 # %% [markdown]
-# ### Create dataframes for later use
+# ### Filtering and Transforming - Create dataframes for later use
 # 
 # In this previous section, we created matched beer and breweries. However, we need access to users and ratings in order to conduct our analysis.
 #
@@ -263,24 +270,31 @@ df_beers = df_beers.loc[~df_beers["brewery_id_ba"].isin(non_matching_brew["id_ba
 # %% [markdown]
 # #### Beer Advocate Ratings
 # ##### Load BA User Data
+# %%
 df_ba_users = pd.read_csv(path_ba + "users.csv")
 # We do not know 1 username, 2652 join dates and 31279 locations (i.e. they are nan)
 # Since we are doing some geographical analysis, locations are mandatory and we drop users without location infos
 df_ba_users = df_ba_users.dropna()
 # %% [markdown]
 # ###### Location processing
-# countries sometimes have several names, the official name ("United States of America") and common names ("US, united states, the states, etc..."). In order to plot location on a map, we decide to replace all location names with ISO 3166-1 alpha-3 (3 letter country abbreviation). This is done using the ["search_fuzzy"](https://pypi.org/project/pycountry/) function in the pycountry library.
+# countries sometimes have several names, the official name ("United States of America") and common names ("US, united states, the states, etc..."). In order to plot location on a map, we decide to replace all location names with ISO 3166-1 alpha-3 (3 letter country abbreviation). This is done using the ["search_fuzzy"](https://pypi.org/project/pycountry/) function in the pycountry library. The state column is only valid for user within the united states, for which we have state-wide granularity
 
-# removing html tags
-df_ba_users['location'] = df_ba_users['location'].apply(lambda x : x.split('<', 1)[0])
-# separating country from states (for USA)
-df_ba_users['country'] = df_ba_users['location'].apply(lambda x : x.split(',', 1)[0])
-country_list = df_ba_users['country'].unique()
-country_iso = {x: find_iso(x) for x in country_list}
-df_ba_users['country_code'] = df_ba_users['country'].apply(lambda x: country_iso[x])
-df_ba_users.isna().sum()
-#country that didn't get assigned
-print(df_ba_users.loc[df_ba_users['country_code'].isna()]['location'].value_counts())
+# %%
+def location_processing(location):
+    # removing html tags
+    location = location.apply(lambda x : x.split('<', 1)[0])
+    # separating country from states (for USA)
+    country = location.apply(lambda x : x.split(',', 1)[0])
+    states = location.apply(lambda x : str(x.split(',', 1)[1])[1:] if ',' in x else np.nan)
+
+    country_list = country.unique()
+    country_iso = {x: find_iso(x) for x in country_list}
+    country_code = country.apply(lambda x: country_iso[x])
+    
+    return country, states, country_code
+# %%
+df_ba_users[['country', 'states', 'country_code']] = location_processing(df_ba_users['location'])
+print("No country code assignment to the following countries: ", df_ba_users[df_ba_users["country_code"].isnull()]["country"].value_counts())
 #there are only 5 regions which don't find a matching iso-code, which corresponds to 54 users.
 
 # manually add New Zealand and Australia, and then remove the other outliers (not worth considering)
@@ -290,8 +304,9 @@ df_ba_users = df_ba_users[~df_ba_users['country_code'].isna()]
 
 print(df_ba_users['country_code'].unique())
 
+# %% [markdown]
+# We the UK as one region as opposed to its sub-countries England, Wales, Scotland and Northern Ireland since there are not a lot users in the separate regions
 # %%
-# Verify that it is fine to consider the UK as one region as opposed to its sub-countries England, Wales, Scotland and Northern Ireland
 print(df_ba_users[df_ba_users['country_code']=='GBR']['location'].value_counts())
 
 # %%
@@ -303,6 +318,7 @@ df_ba_users.info()
 # %% [markdown]
 # ##### Load BA Ratings
 # We consider only the ratings for Beer Advocate as the reviews are a subset of the ratings. We then filter out all NaN values in the ratings. 
+# %%
 df_ba_ratings = pickle_load(path_ba + "ratings.txt",load_with_text=True)
 df_ba_ratings.set_index(df_ba_ratings["date"], inplace = True) # Set date as index for ratings
 df_ba_ratings = df_ba_ratings.convert_dtypes(infer_objects=True) # infer correct string types (does not filter nan values)
@@ -323,11 +339,13 @@ for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user
 # %% [markdown]
 # ##### Merge BA Ratings and Users for beers from the matched Dataset
 # Filter BA Ratings to only keep beers in matched beer dataset
+# %%
 df_md_beer_ids = df_beers["beer_id_ba"].unique().astype(str)
 df_ba_beer_ids = df_ba_ratings["beer_id"].unique()
 df_ba_ratings_filtered_md_beers = df_ba_ratings[df_ba_ratings["beer_id"].isin(df_md_beer_ids)]
 df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_md_beers.merge(df_ba_users, left_on="user_id", right_on="user_id")
 df_ba_ratings_filtered_beers_merged_users.isnull().sum()
+# %%
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 # %%
 df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}")
@@ -342,7 +360,7 @@ df_ba = df_ba_ratings_filtered_beers_merged_users
 # %% [markdown]
 # #### RateBeer Ratings
 # ##### Load RB User Data
-
+# %%
 df_rb_users = pd.read_csv(path_rb + 'users.csv')
 df_rb_users = df_rb_users.convert_dtypes(infer_objects=True) 
 df_rb_users.head()
@@ -354,12 +372,7 @@ df_rb_users.isna().sum()
 # remove lines with nan
 df_rb_users = df_rb_users.dropna()
 
-# split US states
-df_rb_users['country'] = df_rb_users['location'].apply(lambda x : x.split(',', 1)[0])
-
-country_list = df_rb_users['country'].unique()
-country_iso = {x: find_iso(x) for x in country_list} #look up table
-df_rb_users['country_code'] = df_rb_users['country'].apply(lambda x: country_iso[x])
+df_rb_users[['country', 'states', 'country_code']] = location_processing(df_rb_users['location'])
 print("No country code assignment to the following countries: ", df_rb_users[df_rb_users["country_code"].isnull()]["country"].value_counts())
 # We keep the most import regions but remove the others. We only consider US states so we drop the US Virgin Islands.
 df_rb_users['country_code'] = np.where(df_rb_users['country']=="Virgin Islands (British)", "GBR", df_rb_users['country_code'])
@@ -375,9 +388,10 @@ df_rb_users.isna().sum()
 df_rb_users.info()
 
 
-# %% [markdown]   ]
+# %% [markdown]
 # ##### Load RB Ratings
 # For RB Ratings and Reviews are equivalent
+# %%
 df_rb_reviews = pickle_load(path_rb + "reviews.txt",load_with_text=True)
 df_rb_reviews.set_index(df_rb_reviews["date"], inplace = True) # Set date as index for ratings
 df_rb_reviews = df_rb_reviews.convert_dtypes(infer_objects=True) # infer correct string types (does not filter nan values)
@@ -397,6 +411,7 @@ for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user
 # %% [markdown]
 # ##### Merge BA Ratings and Users for beers from the matched Dataset
 # Filter RB Ratings to only keep beers in matched beer dataset
+# %%
 df_md_beer_ids = df_beers["beer_id_rb"].unique().astype(str)
 df_rb_beer_ids = df_rb_reviews["beer_id"].unique()
 df_rb_reviews_filtered_md_beers = df_rb_reviews[df_rb_reviews["beer_id"].isin(df_md_beer_ids)]
@@ -405,6 +420,7 @@ df_rb_reviews_filtered_beers_merged_users.isnull().sum()
 
 # %%
 pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
+# %%
 df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{pickle_filename}")
 
 # %%
@@ -414,11 +430,40 @@ df_rb_reviews_filtered_beers_merged_users.head()
 df_rb_reviews_filtered_beers_merged_users.info()
 df_rb = df_rb_reviews_filtered_beers_merged_users
 
+# %% [markdown]
+# #### Print all columns
+# %%
+df_rb.columns
+# %%
+df_ba.columns
+# %%
+df_beers.columns
+# %%
+df_brew.columns
 
 # %% [markdown]
-# #Data exploration
+# # Data exploration
+# Visualisation Ideas
+#
+# GEOGRAPHICAL DISTRIBUTIONS
+# - #beers per country
+# - #breweries per country
+# - #users per country
+# - #ratings per country
+# - Average rating per country
+#
+# TEXT LENGTHS
+# - #review lengths
+#
+# DISTRIBUTIONS
+# - Average rating per beer
+# - Average rating for each of the characteristics per beer
+# - Number of reviews per user (do for top 10 countries) 
+#
+# VISUALISE AND MERGE STYLES (DATA ENRICHMENT)
+
 # %%
-# TODO: warning when comparing ratings between RB and BA: Appearance, Aroma, Paalte, Taste and overall have different ranges in both datasets (rating to be double checked)
+# TODO: warning when comparing ratings between RB and BA: Appearance, Aroma, Palate, Taste and overall have different ranges in both datasets (rating to be double checked)
 # for the average rating comparison:
 plt.hist(df_beers["avg_computed_ba"], bins=50, alpha=0.5, label='BeerAdvocate rating', density = True)
 plt.hist(df_beers["avg_computed_rb"], bins=50, alpha=0.5, label='RateBeer rating', density = True)
@@ -427,4 +472,141 @@ plt.legend(loc='upper right')
 plt.xlabel("rating")
 plt.ylabel("density")
 plt.show()
-#We notice that rate beer is more critical in avg. that beer advocate. Caution should be taken if two datasets 
+
+for trait in ["aroma", "palate", "taste", "appearance", "overall"]:
+    plt.hist(df_ba[trait], bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
+    plt.hist(df_rb[trait], bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
+    plt.title(f"histogram of {trait} from both dataset")
+    plt.legend(loc='upper right')
+    plt.xlabel(f"{trait}")
+    plt.ylabel("density")
+    plt.show()
+
+# %% [markdown]
+# We see from the previous cell that the scales are very different for the BA and RB, since they use very different schemes to quantify beer quality.
+# Apply minmax scaling so the scales are comparable.
+# We see that RB and BA has very different distributions since for RB the data can only take integer values whilst for BA it can be a float.
+# %%
+for trait in ["aroma", "palate", "taste", "appearance", "overall"]:
+    plt.hist((df_ba[trait]-df_ba[trait].min())/(df_ba[trait].max()-df_ba[trait].min()), bins=15, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
+    plt.hist((df_rb[trait]-df_rb[trait].min())/(df_rb[trait].max()-df_rb[trait].min()), bins=15, alpha=0.5, label=f'RateBeer {trait}', density = True)
+    plt.title(f"histogram of {trait} from both datasets")
+    plt.legend(loc='upper right')
+    plt.xlabel(f"{trait}")
+    plt.ylabel("density")
+    plt.show()
+
+
+# %%
+plt.hist(df_ba['text'].str.split(' ').str.len(), bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
+plt.hist(df_rb['text'].str.split(' ').str.len(), bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
+plt.title(f"histogram of number of words per review from both datasets")
+plt.legend(loc='upper right')
+plt.xlabel("Number of words")
+plt.xscale('log')
+plt.ylabel("density")
+plt.show()
+
+plt.hist(df_ba['text'].str.len(), bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
+plt.hist(df_rb['text'].len(), bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
+plt.title(f"histogram of number of characters per review from both datasets")
+plt.legend(loc='upper right')
+plt.xlabel("Number of characters")
+plt.ylabel("density")
+plt.show()
+
+#We notice that rate beer is more critical in avg. that beer advocate. Caution should be taken if two datasets
+# %% [markdown]
+# ### map visualization:
+
+#load world maps (from [open data soft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)) and us maps from [geopandas default library](https://geopandas.org/en/stable/docs/user_guide/io.html).
+# %%
+url_world_map = "https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/download/?format=shp&timezone=Europe/Berlin&lang=fr"
+world = gpd.read_file(url_world_map, encoding = 'utf-8')
+usa = gpd.read_file(gplt.datasets.get_path("contiguous_usa")) #loading usa map from geopandas default library
+
+# need to create per country stats:
+# beer count per country
+beer_country = df_beers.groupby(df_beers["country_code"]).sum().sort_values(by = 'nbr_beers', ascending = False)
+beer_states = brew_usa.groupby(brew_usa["states"]).sum().sort_values(by = 'nbr_beers', ascending = False)
+
+
+world = world.merge(df_rb_brew_per_country, how = "left", left_on="iso3", right_index = True, )
+world = world.sort_values(by = "country_code", ascending = False)
+world['log_beers'] = world['country_code'].apply(lambda x: np.log10(x) if x >= 1 else 0)
+#number of breweries per country (log)
+scheme = mc.FisherJenks(world['log_beers'], k=8)
+gplt.choropleth(world, hue="log_beers", legend=True, scheme=scheme)
+plt.title("nb of beer per country (log10)")
+plt.show()
+
+
+
+# %% [markdown]
+# ## Data enrichment
+# ### style clustering
+# %%
+style_lookup = dict([
+    # taken from: https://www.beeradvocate.com/beer/styles/
+    ('Bocks', ['Bock', 'Doppelbock', 'Eisbock', 'Mailbock', 'Weizenbock', 'Maibock / Helles Bock']),
+    ('Brown Ales', ['Altbier', 'American Brown Ale', 'Belgian Dark Ale', 'English Brown Ale', 'English Dark Mild Ale']),
+    ('Dark Ales', ['Dubbel', 'Roggenbier', 'Scottish Ale', 'Winter Warmer']),
+    ('Dark Lagers', ['American Amber / Red Lager', 'Czech Amber Lawger','Czech Dark Lager', 'Munich Helles Lager', 'European Dark Lager', 'Märzen','Munich Dunkel', 'Munich Dunkel Lager' 'Rauchbier', 'Schwarzbier', 'Vienna Lager', 'Euro Dark Lager', 'Märzen / Oktoberfest', 'Rauchbier']),
+    ('Hybrid Beers', ['Bière de Champagne / Bière Brut', 'Braggot', 'California Common / Steam Beer', 'Cream Ale']),
+    ('India Pale Ales', ['American IPA', 'Belgian IPA', 'Black IPA', 'Brut IPA', 'English IPA', 'Imperial IPA', 'Milkshake IPA', 'New England IPA', 'American Double / Imperial IPA', 'American Black Ale']),
+    ('Pale Ales', ['Belgian', 'American Amber / Red Ale', 'Saison / Farmhouse Ale', 'American Blonde Ale', 'American Pale Ale','American Pale Ale (APA)' 'Belgian Blonde Ale', 'Belgian Pale Ale', 'Bière de Garde', 'English Bitter', 'English Pale Ale', 'English Pale Mild Ale', 'Extra Special / Strong Bitter (ESB)', 'Grisette', 'Irish Red Ale', 'Kölsch', 'Saison', 'American Pale Wheat Ale']),
+    ('Pale Lagers', ['American Pale Lager', 'Euro Pale Lager', 'American Double / Imperial Pilsner', 'American Adjunct Lager', 'American Lager', 'Bohemian / Czech Pilsner', 'Czech Pale Lager', 'European / Dortmunder Export Lager', 'European Pale Lager', 'European Strong Lager', 'Festbier / Wiesnbier', 'German Pilsner', 'German Pilsener', 'Helles', 'Imperial Pilsner', 'India Pale Lager (IPL)', 'Kellerbier / Zwickelbier', 'Light Lager', 'Malt Liquor', 'American Malt Liquor', 'Dortmunder / Export Lager', 'Euro Strong Lager']),
+    ('Porters', ['American Porter', 'Baltic Porter', 'English Porter', 'Imperial Porter', 'Robust Porter', 'Smoked Porter']),
+    ('Speciality Beers', ['Chile Beer', 'Fruit and Field Beer', 'Gruit / Ancient Herbed Ale', 'Happoshu', 'Herb and Spice Beer', 'Japanese Rice Lager', 'Kvass', 'Low-Alcohol Beer', 'Pumpkin Beer', 'Rye Beer', 'Sahti', 'Smoked Beer']),
+    ('Stouts', ['American Imperial Stout', 'American Stout', 'English Stout', 'Foreign / Export Stout', 'Irish Dry Stout', 'Oatmeal Stout', 'Russian Imperial Stout', 'Sweet / Milk Stout', 'Milk / Sweet Stout', 'American Double / Imperial Stout', 'Black & Tan']),
+    ('Strong Ales', ['American Barleywine', 'American Strong Ale', 'Belgian Dark Strong Ale', 'Belgian Pale Strong Ale', 'English Barleywine', 'English Strong Ale', 'Imperial Red Ale', 'Old Ale', 'Quadrupel (Quad)', 'Scotch Ale / Wee Heavy', 'Tripel', 'Wheatwine']),
+    ('Wheat Beers', ['American Dark Wheat Beer', 'American Pale Wheat Beer', 'Dunkelweizen', 'Grodziskie', 'Hefeweizen', 'Kristallweizen', 'Witbier', 'American Dark Wheat Ale', 'Kristalweizen']),
+    ('Wild/Sour Beers', ['Berliner Weisse', 'Berliner Weissbier', 'Brett Beer', 'Faro', 'Flanders Oud Bruin', 'Flanders Red Ale', 'Fruit Lambic', 'Fruited Kettle Sour', 'Gose', 'Gueuze', 'Lambic', 'Wild Ale', 'American Wild Ale', 'Lambic - Unblended']),
+    ('Other', ['Fruit / Vegetable Beer', 'Low Alcohol Beer', 'Scottish Gruit / Ancient Herbed Ale', 'Lambic - Fruit', 'Herbed / Spiced Beer', 'Pumpkin Ale'])
+])
+
+df_ba_beers['style_class'] = 'UNASSIGNED'
+
+for style_keys in style_lookup.keys():
+    df_ba_beers['style_class'] = np.where(df_ba_beers['style'].isin(style_lookup[style_keys]), style_keys, df_ba_beers['style_class'])
+
+
+print(df_ba_beers[df_ba_beers['style_class']=='UNASSIGNED']['style'].value_counts())
+
+
+# %% [markdown]
+# - Average rating for each of the characteristics per beer
+# - Number of reviews per user (do for top 10 countries) 
+
+# %% [markdown]
+# # Plan for Investigation/Methods:
+# ### RQ1: Are beer preferences influenced by geography/culture?
+# We investigate this by looking at ratings per country and preferred beer styles.
+# We can conduct t-tests to see if there is a significant difference in ratings between countries, using the Sidak correction. We could also do this per beer style.
+# ### RQ2: Do different cultures prioritise/prefer different aspects of beers such as feel? Are some cultures more critical of beer?
+# We can conduct the exact same analysis as in RQ1 for each of the beer characteristics.
+# ### RQ3: Do different cultures have stylistically different ways of writing reviews and discussing beer? Do users talk about foreign beers differently than they talk about their local ones?
+# Reviews for each country will just be aggregated into a large piece of text since we strictly interested in comparing per country. We focus on English speaking countries.
+# To do textual analysis, we will first conduct textual preprocessing steps. This will involving removing punctuation, removing stopwords, capitalisation and most importantly choosing indexing terms. Depending on results, we may find that other steps should also be taken.
+# After this preprocessing, we will vectorise the corpus. To do this, we can use a count vectoriser (bag of words model), tf-idf or other methods. Finally, we will compute distances between textual reviews by choosing either existing research methods e.g. [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl), or by using cosine distance metric.
+#
+# Depending on the results of this, we can then investigate if the distances between the corpuses can represent the cultural similarity between countries.
+# If so, it may be interesting to run a dendrogram clustering using [sklearn](https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html) to see if we can recreate geographical regions.
+# It may be that we can recreate a North American group, Oceanic group and European group. This will obviously depend on our results.
+#
+# Furthermore, we will also create a wordmap of the language used in reviews. Either we can use simple frequency analysis, or again we can leverage existing libraries such as [word-cloud](https://github.com/amueller/word_cloud).
+#
+# We can also rerun our distance analysis for each country between reviews for local and foreign beer to see if there is a difference. We can then see what countries exhibit this difference the most.
+#
+# #4: Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts?
+
+# %% [markdown]
+# # Plan for Communication/Visualisation:
+# We plan to tell the following story (_obviously result dependent_):
+# 1. [HeatMap] Show that there are differences in ratings and beer preferences using our initial analyses.
+# 2. [HeatMap, WordCloud] Show that there are differences in how different countries talk about beers.
+# 3. [Dendrogram] Try and relate this to cultural or geographical proximities of the countries.
+# 3. [HeatMap] See if there is a difference for each country in how they talk about local and foreign beers.
+# 4. [HeatMap] Show the results for our detailed analysis into home bias to determine if users have a preference for local produce or not.
+# 5. Give our main takeaways.
+# %%
