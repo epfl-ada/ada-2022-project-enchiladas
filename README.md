@@ -20,7 +20,7 @@ The following ideas were considered but didn't fit well with the direction of ou
     - wealth (from the [US Census Bureau](https://data.census.gov/cedsci/))
 
 ## Proposed Additional Datasets
--
+None
 
 ## Methods (Pipeline/Tasks)
 1. [ ] Initial data cleaning/wrangling. Missing values are marginal and are mostly dropped. We also address the coherence of the merged dataset (naming, filtering beers without review) and issues regarding country names (matching to ISO-codes). 
@@ -41,7 +41,7 @@ The following ideas were considered but didn't fit well with the direction of ou
 ## Proposed timeline
 1. 18/11/2022: Tasks 1 (data wrangling), 2 (pickling), and 3 (data pipeline). We have also already begun T4 RQ1, (looking at variations in ratings, beer styles etc. per country).
 2. 18/11/2022-02/12/2022: Dedicated to homework 2.
-4. 09/12/2022: RQ1 and RQ2 are finished (simpler), start working on RQ3 and RQ4.
+4. 09/12/2022: RQ1 and RQ2 are finished (simpler), start working on RQ3 and RQ4 (in parrallel).
 5. 16/12/2022: Begin working on visualisation and finish RQ3 and RQ4.
 6. 23/12/2022: Finalise visualisation.
 
@@ -52,4 +52,4 @@ The following ideas were considered but didn't fit well with the direction of ou
 - Andrea: Home bias and textual analysis
 
 ## Questions for TAs (optional):
--
+None
