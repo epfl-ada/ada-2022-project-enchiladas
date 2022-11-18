@@ -23,14 +23,14 @@ The following ideas were considered but didn't fit well with the direction of ou
 None
 
 ## Methods (Pipeline/Tasks)
-1. [ ] Initial data cleaning/wrangling. Missing values are marginal and are mostly dropped. We also address the coherence of the merged dataset (naming, filtering beers without review) and issues regarding country names (matching to ISO-codes). 
-2. [ ] Filtered and transformed datasets:
+1. [X] Initial data cleaning/wrangling. Missing values are marginal and are mostly dropped. We also address the coherence of the merged dataset (naming, filtering beers without review) and issues regarding country names (matching to ISO-codes). 
+2. [X] Filtered and transformed datasets:
     - df_beers: matched beers from RateBeer and BeerAdvocate
     - df_brew: matched breweries from RateBeer and BeerAdvocate
     - df_ba: BeerAdvocate reviews for all of the matched beers including user data (pickled)
     - df_rb: RateBeer reviews for all of the matched beers including user data (pickled)
     By working on the pre-filtered merged dataset from 1., the sizes are reduced to 200mb and fit easily into RAM.
-3. [ ] From the pickled datasets, filter again depending on the research question (e.g. by minimum number of reviews or countries of interest), address similarity/differences between the two rating dataframes (min-max scaling), visualize the basic data (rating distributions for the two userbase, geographical distribution), enrich the beer styles by grouping similar beer styles together
+3. [X] From the pickled datasets, filter again depending on the research question (e.g. by minimum number of reviews or countries of interest), address similarity/differences between the two rating dataframes (min-max scaling), visualize the basic data (rating distributions for the two userbase, geographical distribution), enrich the beer styles by grouping similar beer styles together
 4. [ ] We conduct the analysis for RateBeer and BeerAdvocate separately, and then compare the results. This allows us to check if our findings are robust between the two platforms, controlling for an extra source of variation due to differing user bases.
     - [ ] Investigate RQ1 by viewing ratings for different beer styles for each country. Specifically, we want conduct t-tests investigating if there are differences in this between countries, using the Sidak correction.
     - [ ] Investigate RQ2 by seeing if general ratings differ per country. As in the previous point, we can do this using t-tests. Then furthermore we can see if certain countries are more critical on certain rating aspects.
@@ -47,9 +47,7 @@ None
 
 ## Organization within the team:
 - Matthieu: Home bias (RQ4) and map visualisation (RQ 1,2,4)
-- Oisín: Visualisation and textual analysis
-- Kasimir: Visualisation and textual analysis
-- Andrea: Home bias and textual analysis
-
-## Questions for TAs (optional):
-None
+- Oisín: Textual analysis distance and leverage (RQ3)
+- Kasimir: Bag of word for textual analysis
+- Andrea: Style preferences and aspects analysis (RQ1,2)
+- Everyone: wrap
