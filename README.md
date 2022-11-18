@@ -46,7 +46,7 @@ None
 6. 23/12/2022: Finalise visualisation.
 
 ## Organization within the team:
-- Matthieu: Home bias and map visualisation
+- Matthieu: Home bias (RQ4) and map visualisation (RQ 1,2,4)
 - Oisín: Visualisation and textual analysis
 - Kasimir: Visualisation and textual analysis
 - Andrea: Home bias and textual analysis
