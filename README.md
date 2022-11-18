@@ -1,5 +1,3 @@
-# ada_beer
-
 ## Title
 “The Irish all love Guinness, right?”
 
@@ -43,8 +41,8 @@ The following ideas were considered but didn't fit well with the direction of ou
 5. [ ] Investigate the research questions (RQs). We conduct the analysis for RateBeer and BeerAdvocate separately, and then compare the results. This allows us to check if our findings are robust between the two platforms, controlling for an extra source of variation due to differing user bases.
     - [ ] Investigate RQ1 by viewing ratings for different beer styles for each country
     - [ ] Investigate RQ2 by seeing if general ratings differ per country. Then furthermore seeing if certain countries are more critical on certain rating aspects.
-    - [ ] Investigate RQ3 by finding word frequencies and computing distances between the language corpuses i.e. reviews for each country. To achieve this, we will leverage existing methods and research such as [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl) or [word-cloud](https://github.com/amueller/word_cloud).
-    - [ ] Q4
+    - [ ] Investigate RQ3 by finding word frequencies and computing distances between the language corpuses i.e. reviews for each country. To achieve this, we will leverage existing methods and research such as [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl) or [word-cloud](https://github.com/amueller/word_cloud). Also investigate if there are differences for foreign and local reviews.
+    - [ ] RQ4
 
 6. [ ] Create a datastory and visualisations to communicate effectively our results. more idea
         
