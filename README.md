@@ -47,7 +47,7 @@ None
 
 ## Organization within the team:
 - Matthieu: Home bias (RQ4) and map visualisation (RQ 1,2,4)
-- Oisín: Textual analysis distance and leverage (RQ3)
-- Kasimir: Bag of word for textual analysis
+- Oisín: Textual analysis distance and dendogram (RQ3)
+- Kasimir: Bag of word for textual analysis, heat maps (RQ3)
 - Andrea: Style preferences and aspects analysis (RQ1,2)
-- Everyone: wrap
+- Everyone: wrap-up of data story and visualization
