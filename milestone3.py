@@ -484,14 +484,14 @@ df_rb_reviews_filtered_beers_merged_users.isnull().sum()
 
 
 # %%
-pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
+rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 
 # %%
-df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{pickle_filename}")
+df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{rb_pickle_filename}")
 
 
 # %%
-df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{pickle_filename}")
+df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{rb_pickle_filename}")
 df_rb_reviews_filtered_beers_merged_users.head()
 
 # %%
