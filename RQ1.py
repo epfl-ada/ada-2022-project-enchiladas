@@ -143,16 +143,37 @@ df_t_test_results
 # %% [markdown]
 # Compare all US states
 # %%
-# Compare all US states
+# Compare all US states on the BA dataset
 country_list = ["United States"]
 state_list = list(df_ba_ratings_filtered_beers_merged_users["states"].dropna().unique())
 column_name = "rating"
-df_t_test_results_us_states, alpha_1 = perform_independend_t_tests_on_given_country_list(df_ba_ratings_filtered_beers_merged_users, country_list, state_list, column_name)
+df_ba_t_test_results_us_states, alpha_1 = perform_independend_t_tests_on_given_country_list(df_ba_ratings_filtered_beers_merged_users, country_list, state_list, column_name)
 print("alpha_1:", alpha_1)
-df_t_test_results_us_states
+df_ba_t_test_results_us_states
 # %%
-df_t_test_results_us_states["significant"].value_counts()
+df_ba_t_test_results_us_states["significant"].value_counts()
+
+# %%
+# Compare all US states on the RB dataset
+country_list = ["United States"]
+state_list = list(df_rb_reviews_filtered_beers_merged_users["states"].dropna().unique())
+column_name = "rating"
+df_rb_t_test_results_us_states, alpha_1 = perform_independend_t_tests_on_given_country_list(df_rb_reviews_filtered_beers_merged_users, country_list, state_list, column_name)
+print("alpha_1:", alpha_1)
+df_rb_t_test_results_us_states
+# %%
+df_rb_t_test_results_us_states["significant"].value_counts()
 
 # %% [markdown]
-# Compare all US states
+# Make comparisons between beer styles
+# TODO: figure out how to do this meaningfully
+# Problem: What exactly are we trying to achieve here? 
+# 
+# %%
+df_ba_ratings_filtered_beers_merged_users.columns
+beer_styles = df_ba_ratings_filtered_beers_merged_users["style"].unique()
 
+
+
+
+# %%
