@@ -727,20 +727,14 @@ plt.show()
 
 
 # %% [markdown]
-# # RQ4: home bias
+# RQ4: home bias
 # %%
-# create a new column for the treatment variable. Treatment is one if the user and the beer come from the same country, 0 otherwise.
-df_rb = df_rb.head(1000)
+df_rb = df_rb.head(50000) # for testing purposes
 print(df_rb.columns)
-print(df_beers.columns)
-df_rb.shape
+#print(df_beers.columns)
 # %%
-# create a new column on df_rb which contains the country of the brewery
-df_rb = df_rb.merge(df_brew[["name_rb", "location_rb"]], left_on='brewery_name', right_on='name_rb', how='left')
-df_rb.pop("name_rb")
-df_rb.rename(columns={"location_rb": "brewery_country", "country": "user_country"}, inplace=True)
-# %%
-df_rb = df_rb.merge(df_brew[["beer_name_rb", "style_class"]], left_on='beer_name', right_on='beer_name_rb', how='left')
+# create a new column on df_rb which contains the country, country code and the style class of the beer reviewed.
+df_rb = df_rb.merge(df_beers[["beer_name_rb", "country", "country_code", "style_class"]], left_on='beer_name', right_on='beer_name_rb', how='left')
 df_rb.pop("beer_name_rb")
 # %%
 df_rb.rename(columns={"country_y": "brewery_country", "country_x": "user_country", "states": "beer_state", "country_code_x": "country_code_user", "country_code_y": "country_code_beer"}, inplace=True)
@@ -748,7 +742,16 @@ df_rb.rename(columns={"country_y": "brewery_country", "country_x": "user_country
 # %%
 # definition of the treatment variable
 df_rb["treatment"] = df_rb.apply(lambda row: 1 if row["user_country"] == row["brewery_country"] else 0, axis=1)
+
+# %%
+# plot the two distributions of rating for rows where treatment = 1 and treatment = 0
+df_rb[df_rb["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="treatment = 1")
+df_rb[df_rb["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="treatment = 0")
+plt.legend()
+
 # %%
 # feature mean user rating
 df_users = df_rb.groupby(by = "user_id").agg({"rating": "mean"})
 df_rb["mean_user_rating"] = df_rb.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
+# %% [markdown]
+# ## propensity score using logistic regression
