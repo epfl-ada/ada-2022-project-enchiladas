@@ -402,6 +402,18 @@ df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}"
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba = df_ba_ratings_filtered_beers_merged_users
 
+df_ba.pop("user_name_y")
+df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
+
+# create a new column on df_ba which contains the country, state, country code and the style class of the beer reviewed.
+df_ba["beer_id"] = df_ba["beer_id"].astype('int64')
+df_ba = df_ba.merge(df_beers[["beer_id_ba", "country", "states", "country_code", "style_class", "avg_computed_ba"]], left_on='beer_id', right_on='beer_id_ba', how='left')
+df_ba.pop("beer_id_ba")
+
+df_ba.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_ba": "avg_beer_rating"}, inplace=True)
+# check if there are nan values in df_ba["beer_country"]
+df_ba[df_ba["beer_country"].isna()]
+print(df_ba.columns)
 
 # %% [markdown]
 #  #### RateBeer Ratings
@@ -501,7 +513,7 @@ df_rb[df_rb["beer_country"].isna()]
 print(df_rb.columns)
 #TODO: do the same for ba
 # %%
-df_rb.info()
+df_rb["user_country"].value_counts()
 # %% [markdown]
 #  #### Print all columns
 
@@ -731,48 +743,48 @@ plt.show()
 
 # %% [markdown]
 # RQ4: home bias
-# %%
-df_rb.loc[df_rb["beer_name"] == "budweiser"]
-# %%
-df_rb
-df_rb.sample(frac=0.02) # to speed up the process
+df = df_ba
+df = df[df['user_country'] != 'United States']
+df = df[df['beer_country'] != 'United States']
 # %%
 # definition of the treatment variable
-df_rb["treatment"] = df_rb.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
+df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
+# %%
+# feature number of reviews for each beer
+df_groupby_beer = df.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
+df["nb_reviews_per_beer"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["beer_id"], axis=1)
+df["nb_reviews_per_beer_local"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["treatment"], axis=1)
+df["nb_reviews_per_beer_foreign"] = df["nb_reviews_per_beer"] - df["nb_reviews_per_beer_local"]
+df["share_local_reviews"] = df["nb_reviews_per_beer_local"] / df["nb_reviews_per_beer"]
+# %%
+# plot the proportion of local reviews for each beer
+df["share_local_reviews"].hist(bins=50, alpha=0.5, label="local reviews")
+# %%
+# subset to beer with at least 1 review from a foreign user and 1 review from a local user
+df = df[df["nb_reviews_per_beer_local"] > 0]
+df = df[df["nb_reviews_per_beer_foreign"] > 0]
 # %%
 # plot the two distributions of rating for rows where treatment = 1 and treatment = 0
-df_rb[df_rb["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
-df_rb[df_rb["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
+df[df["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
+df[df["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
 plt.legend()
 plt.title("distribution of local vs. foreign reviews")
 # %%
+# run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0
+from scipy.stats import ttest_ind
+res = ttest_ind(df[df["treatment"] == 1]["rating"], df[df["treatment"] == 0]["rating"], equal_var=False)
+print(res)
+# print the average difference of mean ratings between treatment = 1 and treatment = 0
+print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df[df["treatment"] == 1]["rating"].mean() - df[df["treatment"] == 0]["rating"].mean())
+# %%
 # feature mean user rating
-df_users = df_rb.groupby(by = "user_id").agg({"rating": "mean"})
-df_rb["avg_user_rating"] = df_rb.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
-
-# %%
-# feature number of reviews for each beer
-df_groupby_beer = df_rb.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
-df_rb["nb_reviews_per_beer"] = df_rb.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["beer_id"], axis=1)
-df_rb["nb_reviews_per_beer_local"] = df_rb.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["treatment"], axis=1)
-df_rb["nb_reviews_per_beer_foreign"] = df_rb["nb_reviews_per_beer"] - df_rb["nb_reviews_per_beer_local"]
-df_rb["share_local_reviews"] = df_rb["nb_reviews_per_beer_local"] / df_rb["nb_reviews_per_beer"]
-# %%
-# plot the proportion of local reviews for each beer
-df_rb["share_local_reviews"].hist(bins=50, alpha=0.5, label="local reviews")
+df_users = df.groupby(by = "user_id").agg({"rating": "mean"})
+df["avg_user_rating"] = df.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
 # %%
 # feature beer country and user country as categorical integers
-df_rb["beer_country_cat"] = df_rb["beer_country"].astype("category").cat.codes
-df_rb["user_country_cat"] = df_rb["user_country"].astype("category").cat.codes
-df_rb["style_class_cat"] = df_rb["style_class"].astype("category").cat.codes
-# %% [mardkdown]
-# exploration to see if there are some beers with comparable amount of local and foreign reviews
-# %%
-
-# %%
-groupby_beers = df_rb.groupby(by = "beer_id").agg({"treatment": "mean"}).sort_values(by = "treatment", ascending=False)
-# plot histograme of groupby_beers["treatment"]
-groupby_beers["treatment"].hist(bins=200)
+df["beer_country_cat"] = df["beer_country"].astype("category").cat.codes
+df["user_country_cat"] = df["user_country"].astype("category").cat.codes
+df["style_class_cat"] = df["style_class"].astype("category").cat.codes
 # %% [markdown]
 # ## propensity score computation using random forest
 # %%
@@ -784,9 +796,9 @@ groupby_beers["treatment"].hist(bins=200)
 # - beer style class
 # - beer average rating
 
-X = df_rb[["avg_user_rating", "user_nbr_ratings", "user_country_cat", "beer_country_cat", "style_class_cat", "avg_beer_rating"]].values
+X = df[["avg_user_rating", "user_nbr_ratings", "style_class_cat", "avg_beer_rating"]].values
 # create label vector (treatment column)
-y = df_rb["treatment"].values
+y = df["treatment"].values
 
 # %%
 # split into train and test set
@@ -813,11 +825,11 @@ print(confusion_matrix(y_test, y_pred_treated))
 # %%
 # add propensity score to dataframe
 y_pred = clf.predict_proba(X)[:,1]
-df_rb["propensity_score"] = y_pred
+df["propensity_score"] = y_pred
 # %%
 # plot the distribution of propensity score for treatment = 1 and treatment = 0
-df_rb[df_rb["treatment"] == 1]["propensity_score"].hist(bins=20, alpha=0.5, label="local reviews")
-df_rb[df_rb["treatment"] == 0]["propensity_score"].hist(bins=20, alpha=0.5, label="foreign reviews")
+df[df["treatment"] == 1]["propensity_score"].hist(bins=20, alpha=0.5, label="local reviews")
+df[df["treatment"] == 0]["propensity_score"].hist(bins=20, alpha=0.5, label="foreign reviews")
 plt.legend()
 plt.title("distribution of propensity score for local vs. foreign reviews")
 # %%
