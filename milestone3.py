@@ -399,12 +399,7 @@ ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}")
 
 # %%
-
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
-df_ba_ratings_filtered_beers_merged_users.head()
-
-# %%
-df_ba_ratings_filtered_beers_merged_users.info()
 df_ba = df_ba_ratings_filtered_beers_merged_users
 
 
