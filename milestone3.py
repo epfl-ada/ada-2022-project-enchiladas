@@ -492,13 +492,24 @@ df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{rb_pickle_filename}"
 
 # %%
 df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{rb_pickle_filename}")
+df_rb = df_rb_reviews_filtered_beers_merged_users
+# TODO: move this preprocessing up the pipeline
+# some column cleaning
+df_rb.pop("user_name_y")
+df_rb.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
 df_rb_reviews_filtered_beers_merged_users.head()
 
+# create a new column on df_rb which contains the country, country code and the style class of the beer reviewed.
+df_rb = df_rb.merge(df_beers[["beer_name_rb", "country", "states", "country_code", "style_class"]], left_on='beer_name', right_on='beer_name_rb', how='left')
+df_rb.pop("beer_name_rb")
+
+df_rb.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code"}, inplace=True)
+print(df_rb.columns)
+
+df_rb.head()
+#TODO: do the same for ba
 # %%
-df_rb_reviews_filtered_beers_merged_users.info()
-df_rb = df_rb_reviews_filtered_beers_merged_users
-
-
+df_rb.info()
 # %% [markdown]
 #  #### Print all columns
 
@@ -731,14 +742,7 @@ plt.show()
 # %%
 df_rb = df_rb.head(50000) # for testing purposes
 print(df_rb.columns)
-#print(df_beers.columns)
-# %%
-# create a new column on df_rb which contains the country, country code and the style class of the beer reviewed.
-df_rb = df_rb.merge(df_beers[["beer_name_rb", "country", "country_code", "style_class"]], left_on='beer_name', right_on='beer_name_rb', how='left')
-df_rb.pop("beer_name_rb")
-# %%
-df_rb.rename(columns={"country_y": "brewery_country", "country_x": "user_country", "states": "beer_state", "country_code_x": "country_code_user", "country_code_y": "country_code_beer"}, inplace=True)
-
+df_rb.head()
 # %%
 # definition of the treatment variable
 df_rb["treatment"] = df_rb.apply(lambda row: 1 if row["user_country"] == row["brewery_country"] else 0, axis=1)
