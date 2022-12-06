@@ -204,6 +204,116 @@ df_rb_t_test_results_us_states
 # %%
 df_rb_t_test_results_us_states["significant"].value_counts()
 
+
+
+
+# %%
+
+states_codes = {
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    # 'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
+}
+
+def get_key(val):
+    for key, value in states_codes.items():
+        if val == value:
+            return key
+
+
+# %%
+df_t_test_to_plot = df_rb_t_test_results_us_states[["entity1", "entity2", "p-value"]]
+
+df_t_test_to_plot = df_t_test_to_plot[~(df_t_test_to_plot["entity1"]=='United States')]
+
+df_t_test_to_plot["state_code_entity1"] = df_t_test_to_plot["entity1"].apply(lambda x: get_key(x))
+df_t_test_to_plot["state_code_entity2"] = df_t_test_to_plot["entity2"].apply(lambda x: get_key(x))
+
+df_t_test_to_plot.drop("entity1", axis=1, inplace=True)
+df_t_test_to_plot.drop("entity2", axis=1, inplace=True)
+
+
+#%%
+
+df_plot_p_value = pd.DataFrame()
+for key in states_codes.keys():
+    c = df_t_test_to_plot[df_t_test_to_plot["state_code_entity1"].isin([key]) | df_t_test_to_plot["state_code_entity2"].isin([key])]
+    c["state_code_entity1"] = np.where(c["state_code_entity1"] == key, c["state_code_entity2"], c["state_code_entity1"])
+    c["state_code_entity2"] = states_codes.get(key)
+    c.rename(columns={"state_code_entity2": "State"}, inplace=True)
+    c = c.append({'p-value': 0, "state_code_entity1": key, "year": states_codes.get(key)}, ignore_index = True)
+    c = c.sort_values(by=["state_code_entity1"])
+    frames = [df_plot_p_value, c]
+    df_plot_p_value = pd.concat(frames)
+    
+    
+
+# %%
+fig = px.choropleth(df_plot_p_value,
+                    locations='state_code_entity1', 
+                    locationmode="USA-states", 
+                    color='p-value',
+                    color_continuous_scale="Viridis_r", 
+                    scope="usa",
+                    title="Independant T-test between 2 US States",
+                    animation_frame='State') #make sure 'period_begin' is string type and sorted in ascending order
+
+
+
+fig.show()
+print("If the p-value is smaller than our threshold, then we have evidence against the null hypothesis of equal population means.")
+
+
+
+
 # %% [markdown]
 # # Subsetting the data to specific styles...
 # %%
