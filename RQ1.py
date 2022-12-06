@@ -14,6 +14,7 @@ import mapclassify as mc #???
 import os.path
 import scipy.stats as stats
 from helpers import * #custom made functions
+import plotly.express as px
 print("import completed")
 
 # number of pandas rows to display
@@ -152,7 +153,4 @@ print("alpha_1:", alpha_1)
 df_t_test_results_us_states
 # %%
 df_t_test_results_us_states["significant"].value_counts()
-
-# %% [markdown]
-# Compare all US states
 
