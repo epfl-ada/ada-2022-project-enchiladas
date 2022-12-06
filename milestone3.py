@@ -19,7 +19,6 @@ print("import completed")
 pd.set_option('display.max_rows', 10)
 
 
-
 # %% [markdown]
 # 
 #  The data for the `Data` folder can be downloaded from [here](https://drive.google.com/drive/folders/1Wz6D2FM25ydFw_-41I9uTwG9uNsN4TCF)
@@ -221,6 +220,36 @@ df_beers.loc[df_beers["beer_name_ba"] != df_beers["beer_name_rb"]].head()
 
 
 # %% [markdown]
+#  ##### Include Style classes
+# %%
+style_lookup = dict([
+    # taken from: https://www.beeradvocate.com/beer/styles/
+    ('Bocks', ['Bock', 'Doppelbock', 'Eisbock', 'Mailbock', 'Weizenbock', 'Maibock / Helles Bock']),
+    ('Brown Ales', ['Altbier', 'American Brown Ale', 'Belgian Dark Ale', 'English Brown Ale', 'English Dark Mild Ale']),
+    ('Dark Ales', ['Belgian Strong Dark Ale','Dubbel', 'Roggenbier', 'Scottish Ale', 'Winter Warmer']),
+    ('Dark Lagers', ['American Amber / Red Lager', 'Czech Amber Lawger','Czech Dark Lager', 'Munich Helles Lager', 'European Dark Lager', 'Märzen','Munich Dunkel', 'Munich Dunkel Lager', 'Rauchbier', 'Schwarzbier', 'Vienna Lager', 'Euro Dark Lager', 'Märzen / Oktoberfest', 'Rauchbier']),
+    ('Hybrid Beers', ['Bière de Champagne / Bière Brut', 'Braggot', 'California Common / Steam Beer', 'Cream Ale']),
+    ('India Pale Ales', ['English India Pale Ale (IPA)', 'American IPA', 'Belgian IPA', 'Black IPA', 'Brut IPA', 'English IPA', 'Imperial IPA', 'Milkshake IPA', 'New England IPA', 'American Double / Imperial IPA', 'American Black Ale']),
+    ('Pale Ales', ['Belgian Strong Pale Ale', 'American Amber / Red Ale', 'Saison / Farmhouse Ale', 'American Blonde Ale', 'American Pale Ale','American Pale Ale (APA)', 'Belgian Blonde Ale', 'Belgian Pale Ale', 'Bière de Garde', 'English Bitter', 'English Pale Ale', 'English Pale Mild Ale', 'Extra Special / Strong Bitter (ESB)', 'Grisette', 'Irish Red Ale', 'Kölsch', 'Saison', 'American Pale Wheat Ale']),
+    ('Pale Lagers', ['American Pale Lager', 'Euro Pale Lager', 'American Double / Imperial Pilsner', 'American Adjunct Lager', 'American Lager', 'Bohemian / Czech Pilsner', 'Czech Pale Lager', 'European / Dortmunder Export Lager', 'European Pale Lager', 'European Strong Lager', 'Festbier / Wiesnbier', 'German Pilsner', 'German Pilsener', 'Czech Pilsener', 'Helles', 'Imperial Pilsner', 'India Pale Lager (IPL)', 'Kellerbier / Zwickelbier', 'Light Lager', 'Malt Liquor', 'American Malt Liquor', 'Dortmunder / Export Lager', 'Euro Strong Lager']),
+    ('Porters', ['American Porter', 'Baltic Porter', 'English Porter', 'Imperial Porter', 'Robust Porter', 'Smoked Porter']),
+    ('Speciality Beers', ['Chile Beer', 'Fruit and Field Beer', 'Gruit / Ancient Herbed Ale', 'Happoshu', 'Herb and Spice Beer', 'Japanese Rice Lager', 'Kvass', 'Low-Alcohol Beer', 'Pumpkin Beer', 'Rye Beer', 'Sahti', 'Smoked Beer']),
+    ('Stouts', ['American Imperial Stout', 'American Stout', 'English Stout', 'Foreign / Export Stout', 'Irish Dry Stout', 'Oatmeal Stout', 'Russian Imperial Stout', 'Sweet / Milk Stout', 'Milk / Sweet Stout', 'American Double / Imperial Stout', 'Black & Tan']),
+    ('Strong Ales', ['American Barleywine', 'American Strong Ale', 'Belgian Dark Strong Ale', 'Belgian Pale Strong Ale', 'English Barleywine', 'English Strong Ale', 'Imperial Red Ale', 'Old Ale', 'Quadrupel (Quad)', 'Scotch Ale / Wee Heavy', 'Tripel', 'Wheatwine']),
+    ('Wheat Beers', ['American Dark Wheat Beer', 'American Pale Wheat Beer', 'Dunkelweizen', 'Grodziskie', 'Hefeweizen', 'Kristallweizen', 'Witbier', 'American Dark Wheat Ale', 'Kristalweizen']),
+    ('Wild/Sour Beers', ['Berliner Weisse', 'Berliner Weissbier', 'Brett Beer', 'Faro', 'Flanders Oud Bruin', 'Flanders Red Ale', 'Fruit Lambic', 'Fruited Kettle Sour', 'Gose', 'Gueuze', 'Lambic', 'Wild Ale', 'American Wild Ale', 'Lambic - Unblended']),
+    ('Other', ['Fruit / Vegetable Beer', 'Low Alcohol Beer', 'Scottish Gruit / Ancient Herbed Ale', 'Lambic - Fruit', 'Herbed / Spiced Beer', 'Pumpkin Ale'])
+])
+
+df_beers['style_class'] = 'UNASSIGNED'
+
+for style_keys in style_lookup.keys():
+    df_beers['style_class'] = np.where(df_beers['style_ba'].isin(style_lookup[style_keys]), style_keys, df_beers['style_class'])
+
+
+print(df_beers['style_class'].value_counts(sort=True))
+
+# %% [markdown]
 #  ### Breweries
 
 # %%
@@ -393,6 +422,17 @@ df_ba_ratings_filtered_md_beers = df_ba_ratings[df_ba_ratings["beer_id"].isin(df
 df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_md_beers.merge(df_ba_users, left_on="user_id", right_on="user_id")
 df_ba_ratings_filtered_beers_merged_users.isnull().sum()
 
+# %% [markdown]
+#  ###### Add Style_class to BA ratings
+df_ba_ratings_filtered_beers_merged_users['style_class'] = 'UNASSIGNED'
+
+for style_keys in style_lookup.keys():
+    df_ba_ratings_filtered_beers_merged_users['style_class'] = np.where(df_ba_ratings_filtered_beers_merged_users['style'].isin(style_lookup[style_keys]), style_keys, df_ba_ratings_filtered_beers_merged_users['style_class'])
+
+
+print(df_ba_ratings_filtered_beers_merged_users['style_class'].value_counts(sort=True))
+
+
 # %%
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 
@@ -400,14 +440,21 @@ ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}")
 
 # %%
-
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
-df_ba_ratings_filtered_beers_merged_users.head()
-
-# %%
-df_ba_ratings_filtered_beers_merged_users.info()
 df_ba = df_ba_ratings_filtered_beers_merged_users
 
+df_ba.pop("user_name_y")
+df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
+
+# create a new column on df_ba which contains the country, state, country code and the style class of the beer reviewed.
+df_ba["beer_id"] = df_ba["beer_id"].astype('int64')
+df_ba = df_ba.merge(df_beers[["beer_id_ba", "country", "states", "country_code", "style_class", "avg_computed_ba"]], left_on='beer_id', right_on='beer_id_ba', how='left')
+df_ba.pop("beer_id_ba")
+
+df_ba.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_ba": "avg_beer_rating"}, inplace=True)
+# check if there are nan values in df_ba["beer_country"]
+df_ba[df_ba["beer_country"].isna()]
+print(df_ba.columns)
 
 # %% [markdown]
 #  #### RateBeer Ratings
@@ -482,23 +529,45 @@ df_rb_reviews_filtered_md_beers = df_rb_reviews[df_rb_reviews["beer_id"].isin(df
 df_rb_reviews_filtered_beers_merged_users = df_rb_reviews_filtered_md_beers.merge(df_rb_users, left_on="user_id", right_on="user_id")
 df_rb_reviews_filtered_beers_merged_users.isnull().sum()
 
+# %% [markdown]
+#  ###### Add Style_class to RB ratings
+# %%
+df_rb_reviews_filtered_beers_merged_users['style_class'] = 'UNASSIGNED'
+
+for style_keys in style_lookup.keys():
+    df_rb_reviews_filtered_beers_merged_users['style_class'] = np.where(df_rb_reviews_filtered_beers_merged_users['style'].isin(style_lookup[style_keys]), style_keys, df_rb_reviews_filtered_beers_merged_users['style_class'])
+
+
+print(df_rb_reviews_filtered_beers_merged_users['style_class'].value_counts(sort=True))
+# TODO: Problem! 307716 unassigned!!! What if we merge on beer_id?
+
 
 # %%
 rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 
 # %%
 df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{rb_pickle_filename}")
-
-
 # %%
 df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{rb_pickle_filename}")
+df_rb = df_rb_reviews_filtered_beers_merged_users
+# TODO: move this preprocessing up the pipeline
+# some column cleaning
+df_rb.pop("user_name_y")
+df_rb.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
 df_rb_reviews_filtered_beers_merged_users.head()
 
+# create a new column on df_rb which contains the country, state, country code and the style class of the beer reviewed.
+df_rb["beer_id"] = df_rb["beer_id"].astype('int64')
+df_rb = df_rb.merge(df_beers[["beer_id_rb", "country", "states", "country_code", "style_class", "avg_computed_rb"]], left_on='beer_id', right_on='beer_id_rb', how='left')
+df_rb.pop("beer_id_rb")
+
+df_rb.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_rb": "avg_beer_rating"}, inplace=True)
+# check if there are nan values in df_rb["beer_country"]
+df_rb[df_rb["beer_country"].isna()]
+print(df_rb.columns)
+#TODO: do the same for ba
 # %%
-df_rb_reviews_filtered_beers_merged_users.info()
-df_rb = df_rb_reviews_filtered_beers_merged_users
-
-
+df_rb["user_country"].value_counts()
 # %% [markdown]
 #  #### Print all columns
 
@@ -637,33 +706,7 @@ plt.show()
 #  ### style clustering
 #  We want to create better style groupings in order to understand our data better.
 
-# %%
-style_lookup = dict([
-    # taken from: https://www.beeradvocate.com/beer/styles/
-    ('Bocks', ['Bock', 'Doppelbock', 'Eisbock', 'Mailbock', 'Weizenbock', 'Maibock / Helles Bock']),
-    ('Brown Ales', ['Altbier', 'American Brown Ale', 'Belgian Dark Ale', 'English Brown Ale', 'English Dark Mild Ale']),
-    ('Dark Ales', ['Belgian Strong Dark Ale','Dubbel', 'Roggenbier', 'Scottish Ale', 'Winter Warmer']),
-    ('Dark Lagers', ['American Amber / Red Lager', 'Czech Amber Lawger','Czech Dark Lager', 'Munich Helles Lager', 'European Dark Lager', 'Märzen','Munich Dunkel', 'Munich Dunkel Lager', 'Rauchbier', 'Schwarzbier', 'Vienna Lager', 'Euro Dark Lager', 'Märzen / Oktoberfest', 'Rauchbier']),
-    ('Hybrid Beers', ['Bière de Champagne / Bière Brut', 'Braggot', 'California Common / Steam Beer', 'Cream Ale']),
-    ('India Pale Ales', ['English India Pale Ale (IPA)', 'American IPA', 'Belgian IPA', 'Black IPA', 'Brut IPA', 'English IPA', 'Imperial IPA', 'Milkshake IPA', 'New England IPA', 'American Double / Imperial IPA', 'American Black Ale']),
-    ('Pale Ales', ['Belgian Strong Pale Ale', 'American Amber / Red Ale', 'Saison / Farmhouse Ale', 'American Blonde Ale', 'American Pale Ale','American Pale Ale (APA)', 'Belgian Blonde Ale', 'Belgian Pale Ale', 'Bière de Garde', 'English Bitter', 'English Pale Ale', 'English Pale Mild Ale', 'Extra Special / Strong Bitter (ESB)', 'Grisette', 'Irish Red Ale', 'Kölsch', 'Saison', 'American Pale Wheat Ale']),
-    ('Pale Lagers', ['American Pale Lager', 'Euro Pale Lager', 'American Double / Imperial Pilsner', 'American Adjunct Lager', 'American Lager', 'Bohemian / Czech Pilsner', 'Czech Pale Lager', 'European / Dortmunder Export Lager', 'European Pale Lager', 'European Strong Lager', 'Festbier / Wiesnbier', 'German Pilsner', 'German Pilsener', 'Czech Pilsener', 'Helles', 'Imperial Pilsner', 'India Pale Lager (IPL)', 'Kellerbier / Zwickelbier', 'Light Lager', 'Malt Liquor', 'American Malt Liquor', 'Dortmunder / Export Lager', 'Euro Strong Lager']),
-    ('Porters', ['American Porter', 'Baltic Porter', 'English Porter', 'Imperial Porter', 'Robust Porter', 'Smoked Porter']),
-    ('Speciality Beers', ['Chile Beer', 'Fruit and Field Beer', 'Gruit / Ancient Herbed Ale', 'Happoshu', 'Herb and Spice Beer', 'Japanese Rice Lager', 'Kvass', 'Low-Alcohol Beer', 'Pumpkin Beer', 'Rye Beer', 'Sahti', 'Smoked Beer']),
-    ('Stouts', ['American Imperial Stout', 'American Stout', 'English Stout', 'Foreign / Export Stout', 'Irish Dry Stout', 'Oatmeal Stout', 'Russian Imperial Stout', 'Sweet / Milk Stout', 'Milk / Sweet Stout', 'American Double / Imperial Stout', 'Black & Tan']),
-    ('Strong Ales', ['American Barleywine', 'American Strong Ale', 'Belgian Dark Strong Ale', 'Belgian Pale Strong Ale', 'English Barleywine', 'English Strong Ale', 'Imperial Red Ale', 'Old Ale', 'Quadrupel (Quad)', 'Scotch Ale / Wee Heavy', 'Tripel', 'Wheatwine']),
-    ('Wheat Beers', ['American Dark Wheat Beer', 'American Pale Wheat Beer', 'Dunkelweizen', 'Grodziskie', 'Hefeweizen', 'Kristallweizen', 'Witbier', 'American Dark Wheat Ale', 'Kristalweizen']),
-    ('Wild/Sour Beers', ['Berliner Weisse', 'Berliner Weissbier', 'Brett Beer', 'Faro', 'Flanders Oud Bruin', 'Flanders Red Ale', 'Fruit Lambic', 'Fruited Kettle Sour', 'Gose', 'Gueuze', 'Lambic', 'Wild Ale', 'American Wild Ale', 'Lambic - Unblended']),
-    ('Other', ['Fruit / Vegetable Beer', 'Low Alcohol Beer', 'Scottish Gruit / Ancient Herbed Ale', 'Lambic - Fruit', 'Herbed / Spiced Beer', 'Pumpkin Ale'])
-])
 
-df_beers['style_class'] = 'UNASSIGNED'
-
-for style_keys in style_lookup.keys():
-    df_beers['style_class'] = np.where(df_beers['style_ba'].isin(style_lookup[style_keys]), style_keys, df_beers['style_class'])
-
-
-print(df_beers['style_class'].value_counts(sort=True))
 
 
 # %%
@@ -728,30 +771,94 @@ plt.show()
 
 # %% [markdown]
 # RQ4: home bias
-# %%
-df_rb = df_rb.head(50000) # for testing purposes
-print(df_rb.columns)
-#print(df_beers.columns)
-# %%
-# create a new column on df_rb which contains the country, country code and the style class of the beer reviewed.
-df_rb = df_rb.merge(df_beers[["beer_name_rb", "country", "country_code", "style_class"]], left_on='beer_name', right_on='beer_name_rb', how='left')
-df_rb.pop("beer_name_rb")
-# %%
-df_rb.rename(columns={"country_y": "brewery_country", "country_x": "user_country", "states": "beer_state", "country_code_x": "country_code_user", "country_code_y": "country_code_beer"}, inplace=True)
-
+df = df_ba
+df = df[df['user_country'] != 'United States']
+df = df[df['beer_country'] != 'United States']
 # %%
 # definition of the treatment variable
-df_rb["treatment"] = df_rb.apply(lambda row: 1 if row["user_country"] == row["brewery_country"] else 0, axis=1)
-
+df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
+# %%
+# feature number of reviews for each beer
+df_groupby_beer = df.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
+df["nb_reviews_per_beer"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["beer_id"], axis=1)
+df["nb_reviews_per_beer_local"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["treatment"], axis=1)
+df["nb_reviews_per_beer_foreign"] = df["nb_reviews_per_beer"] - df["nb_reviews_per_beer_local"]
+df["share_local_reviews"] = df["nb_reviews_per_beer_local"] / df["nb_reviews_per_beer"]
+# %%
+# plot the proportion of local reviews for each beer
+df["share_local_reviews"].hist(bins=50, alpha=0.5, label="local reviews")
+# %%
+# subset to beer with at least 1 review from a foreign user and 1 review from a local user
+df = df[df["nb_reviews_per_beer_local"] > 0]
+df = df[df["nb_reviews_per_beer_foreign"] > 0]
 # %%
 # plot the two distributions of rating for rows where treatment = 1 and treatment = 0
-df_rb[df_rb["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="treatment = 1")
-df_rb[df_rb["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="treatment = 0")
+df[df["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
+df[df["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
 plt.legend()
-
+plt.title("distribution of local vs. foreign reviews")
+# %%
+# run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0
+from scipy.stats import ttest_ind
+res = ttest_ind(df[df["treatment"] == 1]["rating"], df[df["treatment"] == 0]["rating"], equal_var=False)
+print(res)
+# print the average difference of mean ratings between treatment = 1 and treatment = 0
+print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df[df["treatment"] == 1]["rating"].mean() - df[df["treatment"] == 0]["rating"].mean())
 # %%
 # feature mean user rating
-df_users = df_rb.groupby(by = "user_id").agg({"rating": "mean"})
-df_rb["mean_user_rating"] = df_rb.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
+df_users = df.groupby(by = "user_id").agg({"rating": "mean"})
+df["avg_user_rating"] = df.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
+# %%
+# feature beer country and user country as categorical integers
+df["beer_country_cat"] = df["beer_country"].astype("category").cat.codes
+df["user_country_cat"] = df["user_country"].astype("category").cat.codes
+df["style_class_cat"] = df["style_class"].astype("category").cat.codes
 # %% [markdown]
-# ## propensity score using logistic regression
+# ## propensity score computation using random forest
+# %%
+# create a feature vector using the following features:
+# - avg user rating
+# - number of reviews
+# - user country
+# - beer country
+# - beer style class
+# - beer average rating
+
+X = df[["avg_user_rating", "user_nbr_ratings", "style_class_cat", "avg_beer_rating"]].values
+# create label vector (treatment column)
+y = df["treatment"].values
+
+# %%
+# split into train and test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# train a random forest classifier
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
+clf.fit(X_train, y_train)
+
+# get the probabilities on the test set
+y_pred = clf.predict_proba(X_test)[:,1]
+# predict the treatment with a threshold of 0.5
+y_pred_treated = clf.predict(X_test)
+
+# measure f1 score
+from sklearn.metrics import f1_score
+print("f1 score: ", f1_score(y_test, y_pred_treated))
+# print confusion matrix
+from sklearn.metrics import confusion_matrix
+print(confusion_matrix(y_test, y_pred_treated))
+
+# %%
+# add propensity score to dataframe
+y_pred = clf.predict_proba(X)[:,1]
+df["propensity_score"] = y_pred
+# %%
+# plot the distribution of propensity score for treatment = 1 and treatment = 0
+df[df["treatment"] == 1]["propensity_score"].hist(bins=20, alpha=0.5, label="local reviews")
+df[df["treatment"] == 0]["propensity_score"].hist(bins=20, alpha=0.5, label="foreign reviews")
+plt.legend()
+plt.title("distribution of propensity score for local vs. foreign reviews")
+# %%
+# perform matching between treated and control group using propensity score

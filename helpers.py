@@ -57,6 +57,49 @@ def pickle_load(path, load_with_text=False):
             df.to_pickle(pickle_path)
             return df
 
+
+def isUTF8(data):
+    try:
+        data.decode('UTF-8')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
+from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE, BOM_UTF32_BE, BOM_UTF32_LE
+
+BOMS = (
+    (BOM_UTF8, "UTF-8"),
+    (BOM_UTF32_BE, "UTF-32-BE"),
+    (BOM_UTF32_LE, "UTF-32-LE"),
+    (BOM_UTF16_BE, "UTF-16-BE"),
+    (BOM_UTF16_LE, "UTF-16-LE"),
+)
+
+def isASCII(data):
+    try:
+        data.decode('ASCII')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
+def check_bom(data):
+    return [encoding for bom, encoding in BOMS if data.startswith(bom)]
+
+def determine_encoding(filename):
+    with open(filename, "rb") as f: # Reads in binary format
+        data = f.read()
+        if isUTF8(data):
+            print("UTF-8")
+        elif isASCII(data):
+            print("ASCII")
+        else:
+            print("UTF-16")
+        print(check_bom(data))
+
+
+
 if __name__ == "__main__":
     data_folder = './Data/'
     path_ba = data_folder + 'BeerAdvocate/'
@@ -67,12 +110,14 @@ if __name__ == "__main__":
     # filename = "test.txt"
     # filename = path_md + "ratings_ba.txt"
     filename = path_md + "ratings_rb.txt"
-    filename = path_ba + "reviews.txt"
-    # filename = path_ba + "ratings.txt"
-    # filename = path_rb + "ratings.txt"
-    # filename = path_rb + "reviews.txt"
-    df = pickle_load(filename, load_with_text=True)  
+    # filename = path_ba + "reviews.txt"
+    filename = path_ba + "ratings.txt" # -> is UTF-8 / no BOM
+    # filename = path_rb + "ratings.txt" # -> is UTF-8 / no BOM
+    # filename = path_rb + "reviews.txt" # -> is UTF-8 / no BOM
+    # df = pickle_load(filename, load_with_text=True)  
 
-    print(df.head())
-    print(df.describe())
-    print(list(df.columns))
+    # print(df.head())
+    # print(df.describe())
+    # print(list(df.columns))
+    determine_encoding(filename)
+
