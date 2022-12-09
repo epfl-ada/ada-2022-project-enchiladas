@@ -442,10 +442,7 @@ df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}"
 # %%
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba = df_ba_ratings_filtered_beers_merged_users
-print(df_ba.columns)
-df_ba.pop("user_name_y")
 df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
-
 # create a new column on df_ba which contains the country, state, country code and the style class of the beer reviewed.
 df_ba["beer_id"] = df_ba["beer_id"].astype('int64')
 df_ba = df_ba.merge(df_beers[["beer_id_ba", "country", "states", "country_code", "style_class", "avg_computed_ba"]], left_on='beer_id', right_on='beer_id_ba', how='left')
