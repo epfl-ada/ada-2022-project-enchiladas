@@ -367,7 +367,7 @@ print("No country code assignment to the following countries: ", df_ba_users[df_
 # manually add New Zealand and Australia, and then remove the other outliers (not worth considering)
 df_ba_users['country_code'] = np.where(df_ba_users['location']=="Aotearoa", "NZL", df_ba_users['country_code'])
 df_ba_users['country_code'] = np.where(df_ba_users['location']=="Heard and McDonald Islands", "AUS", df_ba_users['country_code'])
-df_ba_users = df_ba_users[~df_ba_users['country_code'].isna()]
+df_ba_users = df_ba_users[~df_ba_users['§_code'].isna()]
 
 
 
@@ -442,6 +442,7 @@ df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}"
 # %%
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba = df_ba_ratings_filtered_beers_merged_users
+print(df_ba.columns)
 df_ba.pop("user_name_y")
 df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
 
@@ -776,8 +777,7 @@ df = df_ba
 # definition of the treatment variable
 df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
 # %% [markdown]
-# ### data exploration
-# TODO: put this into the data exploration
+# ### data exploration for RQ4
 # %%
 # feature number of reviews for each beer
 df_groupby_beer = df.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
@@ -785,10 +785,33 @@ df["nb_reviews_per_beer"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_i
 df["nb_reviews_per_beer_local"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["treatment"], axis=1)
 df["nb_reviews_per_beer_foreign"] = df["nb_reviews_per_beer"] - df["nb_reviews_per_beer_local"]
 df["share_local_reviews"] = df["nb_reviews_per_beer_local"] / df["nb_reviews_per_beer"]
+
 # %%
 # plot the proportion of local reviews for each beer
-df["share_local_reviews"].hist(bins=50, alpha=0.5, label="local reviews")
+groupby_beer = df.groupby(by="beer_id").agg({"share_local_reviews": "mean"})
+groupby_beer["share_local_reviews"].hist(bins=50, label = "all reviews")
 
+# removing american reviews
+groupby_beer_no_us = df[df["user_country"] != "United States"].groupby(by="beer_id").agg({"share_local_reviews": "mean"})
+groupby_beer_no_us["share_local_reviews"].hist(bins=50, label = "non american reviews")
+plt.title("share of local reviews per beer")
+plt.legend()
+
+# %%
+# same for states
+# %%
+df_us = df[df['user_country'] == 'United States']
+df_us = df[df['beer_country'] == 'United States']
+df_us["treatment"] = df_us.apply(lambda row: 1 if row["user_state"] == row["beer_state"] else 0, axis=1)
+
+# %% [markdown]
+# comment on the figure above: It makes sense. most of the users are concentrated in a few area. Therefore a beer from predominant country is mostly rated by locals and an beer with few user in this country mostly receives foreign reviews foreign.
+# %%
+# how many beers do have a balance distribution ? (10-90%)
+groupby_beer_no_us[(groupby_beer_no_us["share_local_reviews"] > 0.1) & (groupby_beer_no_us["share_local_reviews"] < 0.9)]["share_local_reviews"].hist()
+
+# not that many, should we subset ?
+# propensity matching should take care of that (I hope)
 # %% [markdown]
 # ### analysis prior to matching
 # %%
@@ -797,38 +820,53 @@ df[df["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews
 df[df["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
 plt.legend()
 plt.title("distribution of local vs. foreign reviews")
-# %%
+
 # run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0 (prior to matching)
 from scipy.stats import ttest_ind
 res = ttest_ind(df[df["treatment"] == 1]["rating"], df[df["treatment"] == 0]["rating"], equal_var=False)
 print(res)
 # print the average difference of mean ratings between treatment = 1 and treatment = 0
 print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df[df["treatment"] == 1]["rating"].mean() - df[df["treatment"] == 0]["rating"].mean())
+
+# %%
+# now if we subset to beer with at least 10% of foreign reviews and 10% of local reviews
+df_balanced = df[(df["share_local_reviews"] > 0.1) & (df["share_local_reviews"] < 0.9)]
+df_balanced[df_balanced["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
+df_balanced[df_balanced["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
+
+# run t-test
+res = ttest_ind(df_balanced[df_balanced["treatment"] == 1]["rating"], df_balanced[df_balanced["treatment"] == 0]["rating"], equal_var=False)
+print(res)
+# print the average difference of mean ratings between treatment = 1 and treatment = 0
+print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df_balanced[df_balanced["treatment"] == 1]["rating"].mean() - df_balanced[df_balanced["treatment"] == 0]["rating"].mean())
+
+# still significant results (in the same direction)
+
 # %% [markdown]
 # ## propensity score computation using random forest
 # %%
-# feature mean user rating
+# feature average user rating
 df_users = df.groupby(by = "user_id").agg({"rating": "mean"})
 df["avg_user_rating"] = df.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
 
-# feature beer country and user country as categorical integers
-df["beer_country_cat"] = df["beer_country"].astype("category").cat.codes
-df["user_country_cat"] = df["user_country"].astype("category").cat.codes
+# feature style_class as category
 df["style_class_cat"] = df["style_class"].astype("category").cat.codes
 # %%
 # create a feature vector using the following features:
 # - avg user rating
 # - number of reviews
-# - user country
-# - beer country
 # - beer style class
 # - beer average rating
 
+# we cannont use user country and beer country beause they are already part of the treatment
+
 # TODO: complete this for the notebook
-X = df.values
+
+# why do we now have nans?
+df = df.dropna(subset = "avg_beer_rating")
+X = df[["avg_user_rating", "nbr_reviews", "style_class_cat", "avg_beer_rating"]].values
 # create label vector (treatment column)
 y = df["treatment"].values
-
 # %%
 # split into train and test set
 from sklearn.model_selection import train_test_split
@@ -851,6 +889,9 @@ print("f1 score: ", f1_score(y_test, y_pred_treated))
 from sklearn.metrics import confusion_matrix
 print(confusion_matrix(y_test, y_pred_treated))
 
+# the predictor is very much biased toward predicting treatment = 1 because the dataset is very unbalanced
+# TODO: filter to beers with balance local/foreign review and try again
+
 # %%
 # add propensity score to dataframe
 y_pred = clf.predict_proba(X)[:,1]
@@ -864,10 +905,12 @@ plt.title("distribution of propensity score for local vs. foreign reviews")
 # %%
 # perform matching between treated and control group using propensity score
 
+
+#TODO
 # %% [markdown]
 # ### matrix factorization
 # %%
-# reset beer id and user id to be from 0 to nb_beer and nb_user
+# reset beer id and user id to be from 0 to nb_beer and nb_user (long)
 df_users = df.groupby("user_id").agg({"treatment": "mean"}).reset_index()
 df_groupby_beer = df.groupby("beer_id").agg({"treatment": "mean"}).reset_index()
 # map the user_id in df to the index in df_users
@@ -900,6 +943,8 @@ y = df["treatment"].values
 df["idx"] = df.reset_index().index
 # %%
 # %%
+
+# other option using psmpy library
 from psmpy import PsmPy
 from psmpy.functions import cohenD
 from psmpy.plotting import *
