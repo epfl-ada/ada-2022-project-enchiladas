@@ -15,8 +15,8 @@ import os.path
 from helpers import * #custom made functions
 print("import completed")
 
-# number of pandas rows to display
-pd.set_option('display.max_rows', 10)
+# number of pandas columns to display
+pd.set_option('display.max_columns', 50)
 
 
 # %% [markdown]
@@ -324,7 +324,7 @@ print("No country code assignment to the following countries: ", df_brew[df_brew
 # assign a location by looking up the location of each beers' brewery
 
 df_beers = df_beers.merge(df_brew[["country", "states", "country_code", "id_ba"]], left_on="brewery_id_ba", right_on="id_ba")
-# country = df_beers.apply(lambda beer: df_brew.loc[df_brew['name_ba'] == beer['brewery_name_ba']]['country'], axis = 1)
+# country = df_b eers.apply(lambda beer: df_brew.loc[df_brew['name_ba'] == beer['brewery_name_ba']]['country'], axis = 1)
 # print(country)
 
 
@@ -442,7 +442,6 @@ df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}"
 # %%
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba = df_ba_ratings_filtered_beers_merged_users
-
 df_ba.pop("user_name_y")
 df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
 
@@ -514,9 +513,6 @@ print("Number of nan values",df_rb_reviews.isna().sum())
 print("Number of text that is 'nan':",df_rb_reviews[df_rb_reviews["text"].str.lower() == "nan"].shape[0])
 for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user_name"]:
         print(f"number of values in {column} that is 'nan'", df_rb_reviews[df_rb_reviews[column].str.lower() == "nan"].shape[0])
-
-
-
 
 # %% [markdown]
 #  ##### Merge BA Ratings and Users for beers from the matched Dataset
@@ -771,12 +767,17 @@ plt.show()
 
 # %% [markdown]
 # RQ4: home bias
+# %%
 df = df_ba
-df = df[df['user_country'] != 'United States']
-df = df[df['beer_country'] != 'United States']
+# here we can subset if needed
+#df = df[df['user_country'] != 'United States']
+#df = df[df['beer_country'] != 'United States']
 # %%
 # definition of the treatment variable
 df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
+# %% [markdown]
+# ### data exploration
+# TODO: put this into the data exploration
 # %%
 # feature number of reviews for each beer
 df_groupby_beer = df.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
@@ -787,34 +788,33 @@ df["share_local_reviews"] = df["nb_reviews_per_beer_local"] / df["nb_reviews_per
 # %%
 # plot the proportion of local reviews for each beer
 df["share_local_reviews"].hist(bins=50, alpha=0.5, label="local reviews")
+
+# %% [markdown]
+# ### analysis prior to matching
 # %%
-# subset to beer with at least 1 review from a foreign user and 1 review from a local user
-df = df[df["nb_reviews_per_beer_local"] > 0]
-df = df[df["nb_reviews_per_beer_foreign"] > 0]
-# %%
-# plot the two distributions of rating for rows where treatment = 1 and treatment = 0
+# plot the rating distribution of the treatment and control groups prior to matching
 df[df["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
 df[df["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
 plt.legend()
 plt.title("distribution of local vs. foreign reviews")
 # %%
-# run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0
+# run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0 (prior to matching)
 from scipy.stats import ttest_ind
 res = ttest_ind(df[df["treatment"] == 1]["rating"], df[df["treatment"] == 0]["rating"], equal_var=False)
 print(res)
 # print the average difference of mean ratings between treatment = 1 and treatment = 0
 print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df[df["treatment"] == 1]["rating"].mean() - df[df["treatment"] == 0]["rating"].mean())
+# %% [markdown]
+# ## propensity score computation using random forest
 # %%
 # feature mean user rating
 df_users = df.groupby(by = "user_id").agg({"rating": "mean"})
 df["avg_user_rating"] = df.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
-# %%
+
 # feature beer country and user country as categorical integers
 df["beer_country_cat"] = df["beer_country"].astype("category").cat.codes
 df["user_country_cat"] = df["user_country"].astype("category").cat.codes
 df["style_class_cat"] = df["style_class"].astype("category").cat.codes
-# %% [markdown]
-# ## propensity score computation using random forest
 # %%
 # create a feature vector using the following features:
 # - avg user rating
@@ -824,7 +824,8 @@ df["style_class_cat"] = df["style_class"].astype("category").cat.codes
 # - beer style class
 # - beer average rating
 
-X = df[["avg_user_rating", "user_nbr_ratings", "style_class_cat", "avg_beer_rating"]].values
+# TODO: complete this for the notebook
+X = df.values
 # create label vector (treatment column)
 y = df["treatment"].values
 
@@ -862,3 +863,47 @@ plt.legend()
 plt.title("distribution of propensity score for local vs. foreign reviews")
 # %%
 # perform matching between treated and control group using propensity score
+
+# %% [markdown]
+# ### matrix factorization
+# %%
+# reset beer id and user id to be from 0 to nb_beer and nb_user
+df_users = df.groupby("user_id").agg({"treatment": "mean"}).reset_index()
+df_groupby_beer = df.groupby("beer_id").agg({"treatment": "mean"}).reset_index()
+# map the user_id in df to the index in df_users
+df["user_id"] = df["user_id"].apply(lambda x: df_users[df_users["user_id"] == x].index[0]).astype(int)
+df["beer_id"] = df["beer_id"].apply(lambda x: df_groupby_beer[df_groupby_beer["beer_id"] == x].index[0]).astype(int)
+# %%
+# Matrix factorization with biases
+import surprise.prediction_algorithms.matrix_factorization as mf
+from surprise.model_selection import cross_validate
+from surprise import Reader, Dataset
+
+algo = mf.SVD(n_factors=100, n_epochs=20, biased=True, lr_all=0.005, reg_all=0.02, verbose=True)
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_df(df[["user_id", "beer_id", "rating"]].rename(columns={"user_id": "userID", "beer_id": "itemID", "rating": "rating"}), reader)
+print(df.shape)
+user_bias = algo.fit(data.build_full_trainset()).bu
+beer_bias = algo.fit(data.build_full_trainset()).bi
+plt.hist(user_bias)
+plt.hist(beer_bias)
+# %%
+# add feature user bias and beer bias
+df["user_bias"] = df.apply(lambda row: user_bias[row["user_id"]], axis=1)
+df["beer_bias"] = df.apply(lambda row: beer_bias[row["beer_id"]], axis=1)
+# %%
+X = df[["user_bias", "beer_bias"]].values
+# create label vector (treatment column)
+y = df["treatment"].values
+
+# %%
+df["idx"] = df.reset_index().index
+# %%
+# %%
+from psmpy import PsmPy
+from psmpy.functions import cohenD
+from psmpy.plotting import *
+
+
+psm = PsmPy(df[["user_bias", "beer_bias", "treatment", "idx"]], treatment='treatment', indx='idx', exclude = [])
+psm.logistic_ps(balance = True)
