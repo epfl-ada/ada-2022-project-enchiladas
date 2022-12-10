@@ -7,9 +7,11 @@ from nltk.tokenize import WhitespaceTokenizer, RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+import gensim.downloader
+
 # import scipy.sparse as sp
 
-# import numpy as np
+import numpy as np
 
 def preprocess():
     return
@@ -40,10 +42,12 @@ class Corpus:
             tokenizer = WhitespaceTokenizer().tokenize
         elif tokenize_type == 'words':
             tokenizer = RegexpTokenizer(r'\w+').tokenize
+        else:
+            tokenizer = lambda x: x.split()
         
         if tokenize_type!=None:
             self.tokenized_texts = []
-            for i, text in enumerate(self.texts):
+            for text in self.texts:
                 tokens = tokenizer(text)
                 self.tokenized_texts.append(tokens)
 
@@ -58,33 +62,49 @@ class Corpus:
             }
             if vec_type == "tf":
                 self.params['use_idf']=False # default is True
-            if tokenize_type!=None:
-                self.params['tokenizer'] = lambda x: x
+            self.params['tokenizer'] = lambda x: x
             
             if vec_type in ["tfidf", "tf"]:
                 vectorizer = TfidfVectorizer(**self.params)
             elif vec_type in ["count"]:
                 vectorizer = CountVectorizer(**self.params)
 
-            if tokenize_type!=None:
-                self.X = vectorizer.fit_transform(self.tokenized_texts)
-            else:
-                self.X = vectorizer.fit_transform(self.texts)
+            self.X = vectorizer.fit_transform(self.tokenized_texts)
+        elif vec_type == "word2vec":
+            glove_vectors = gensim.downloader.load('glove-twitter-25') # load the word2vec model (pick one)
+            self.X = []
+            for text in self.tokenized_texts:
+                vec = np.zeros(glove_vectors['hi'].shape)
+                N = len(text)
+                for item in text:
+                    try:
+                        vec += glove_vectors[item]
+                    except:
+                        pass
+                self.X.append(np.array(vec)/N)
+            self.X = np.array(self.X)
+
+        try:
+            self.X = self.X.toarray()
+        except:
+            pass
             
         if scale_type == "std_col":
             scaler = StandardScaler()
-            self.X = scaler.fit_transform(self.X.toarray())
+            self.X = scaler.fit_transform(self.X)
         elif scale_type == "std_row":
             scaler = StandardScaler()
-            self.X = scaler.fit_transform(self.X.T.toarray()).T
+            self.X = scaler.fit_transform(self.X.T).T
         elif scale_type == "minmax_row":
             scaler = MinMaxScaler()
-            self.X = scaler.fit_transform(self.X.T.toarray()).T
+            self.X = scaler.fit_transform(self.X.T).T
         elif scale_type == "minmax_col":
             scaler = MinMaxScaler()
-            self.X = scaler.fit_transform(self.X.toarray())
+            self.X = scaler.fit_transform(self.X)
 
         return self.X
+
+
 
 def distance_matrix(corpus=None, X=None, metric='manhattan'):
     if not metric in ('manhattan', 'cityblock', 'euclidean', 'cosine', 'minmax'):
