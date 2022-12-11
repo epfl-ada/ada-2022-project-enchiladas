@@ -554,6 +554,7 @@ df_rb_reviews_filtered_beers_merged_users.head()
 df_rb["beer_id"] = df_rb["beer_id"].astype('int64')
 df_rb = df_rb.merge(df_beers[["beer_id_rb", "country", "states", "country_code", "style_class", "avg_computed_rb"]], left_on='beer_id', right_on='beer_id_rb', how='left')
 df_rb.pop("beer_id_rb")
+# TODO: Question by Kasimir: Is merging the right thing to do here? df_beers should be used to filter df_rb, ow. we include ratings for beers that are not in the matched beer df and this causes us to have unassigned beer_styles I presume (on the order of 300k in ratings). Afterwards, we can merge the two datasets.
 
 df_rb.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_rb": "avg_beer_rating"}, inplace=True)
 # check if there are nan values in df_rb["beer_country"]

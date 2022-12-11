@@ -20,8 +20,9 @@ print("import completed")
 # number of pandas rows to display
 pd.set_option('display.max_rows', 100)
 
-# %%
-# # Are beer style preferences influenced by geography/culture?
+# %% [markdown]
+#  # RQ1 & RQ 2
+# Are beer style preferences influenced by geography/culture?
 # Investigate RQ1 by viewing ratings for different beer styles for each country. Specifically, we want conduct t-tests investigating if there are differences in this between countries, using the Sidak correction.
 
 # For each country / for each state:
@@ -30,19 +31,219 @@ pd.set_option('display.max_rows', 100)
 # - Perform a t-test comparing means of each country
 
 # %%
-# Load BA data
+#  ## Load BA data
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba.columns
 # %%
-# Load RB data
+#  ## Load RB data
 rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 df_rb = pd.read_pickle(f"Data/{rb_pickle_filename}")
 df_rb.columns
 # TODO: wait on RB data, still unassigned style_classes
+# You sould be able to deduce this. Since we assigned style_classes on matched, after having filtered this df, we should have all style_classes assigned...
+# For now, drop 'UNASSIGNED' style_classes
+df_rb = df_rb[df_rb["style_class"] != "UNASSIGNED"]
+
+# %%
+# print value counts of style_class 
+print(df_ba["style_class"].value_counts())
+print(df_rb["style_class"].value_counts())
 
 # %% [markdown]
-# # Function to perform pairwise t-tests
+#  # Rescale Ratings
+# Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
+# To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
+
+# TODO: Should we show that users actually rate things differently on average somehow? if yes, how? Propensity match users on rated beers accross entire dataset and compare averages... And then? 
+# %%
+def scale(rating, user_average, top=5, bottom=1):
+    """
+    Returns the scale of the rating with respect to the users average rating.
+    """
+    if rating > user_average:
+        return top-user_average
+    elif rating < user_average:
+        return user_average-bottom
+    else:
+        return bottom
+def rescale(rating, user_average, top = 5, bottom = 1):
+    """
+    Rescales the rating to a -1,1 scale where 0 is the users average rating.
+    """
+    return (rating - user_average) / scale(rating, user_average, top, bottom)
+
+# %% [markdown]
+#  ## BA
+# Columns to be rescaled in BA: 
+# - aroma (1-5)
+# - appearance (1-5)
+# - taste (1-5)
+# - palate (1-5)
+# - overall (1-5)
+# - rating (1-5)
+
+# TODO: here might be a good place to explain the different usages of the individual ratings/aspects across the two datasets
+
+# %%
+# Sanity check the ranges of the ratings and aspects
+print("aroma", df_ba["aroma"].min(), df_ba["aroma"].max())
+print("appearance", df_ba["appearance"].min(), df_ba["appearance"].max())
+print("taste", df_ba["taste"].min(), df_ba["taste"].max())
+print("palate", df_ba["palate"].min(), df_ba["palate"].max())
+print("overall", df_ba["overall"].min(), df_ba["overall"].max())
+print("rating", df_ba["rating"].min(), df_ba["rating"].max())
+
+# %%
+# Compute the average rating for each user
+df_ba["user_average_aroma"] = df_ba.groupby("user_id")["aroma"].transform("mean")
+df_ba["user_average_appearance"] = df_ba.groupby("user_id")["appearance"].transform("mean")
+df_ba["user_average_taste"] = df_ba.groupby("user_id")["taste"].transform("mean")
+df_ba["user_average_palate"] = df_ba.groupby("user_id")["palate"].transform("mean")
+df_ba["user_average_overall"] = df_ba.groupby("user_id")["overall"].transform("mean")
+df_ba["user_average_rating"] = df_ba.groupby("user_id")["rating"].transform("mean")
+
+# %%
+# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
+
+df_ba["aroma_rescaled"] = df_ba.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"]), axis=1)
+df_ba["appearance_rescaled"] = df_ba.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
+df_ba["taste_rescaled"] = df_ba.apply(lambda row: rescale(row["taste"], row["user_average_taste"]), axis=1)
+df_ba["palate_rescaled"] = df_ba.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
+df_ba["overall_rescaled"] = df_ba.apply(lambda row: rescale(row["overall"], row["user_average_overall"]), axis=1)
+df_ba["rating_rescaled"] = df_ba.apply(lambda row: rescale(row["rating"], row["user_average_rating"]), axis=1)
+
+# %%
+# Sanity check the ranges of the rescaled ratings and aspects
+print("aroma_rescaled", df_ba["aroma_rescaled"].min(), df_ba["aroma_rescaled"].max())
+print("appearance_rescaled", df_ba["appearance_rescaled"].min(), df_ba["appearance_rescaled"].max())
+print("taste_rescaled", df_ba["taste_rescaled"].min(), df_ba["taste_rescaled"].max())
+print("palate_rescaled", df_ba["palate_rescaled"].min(), df_ba["palate_rescaled"].max())
+print("overall_rescaled", df_ba["overall_rescaled"].min(), df_ba["overall_rescaled"].max())
+print("rating_rescaled", df_ba["rating_rescaled"].min(), df_ba["rating_rescaled"].max())
+
+# %% [markdown]
+#  ## RB
+# Columns to be rescaled in RB:
+# - aroma (1-10)
+# - appearance (1-5)
+# - taste (1-10)
+# - palate (1-5)
+# - overall (1-20)
+# - rating (0-5)
+
+# %%
+# Add 1 to every rating to make it 1-6 instead of 0-5 to prevent divison by zero
+df_rb["translated_rating"] = df_rb["rating"] + 1
+
+# %%
+# Sanity check the ranges of the ratings and aspects
+print("aroma", df_rb["aroma"].min(), df_rb["aroma"].max())
+print("appearance", df_rb["appearance"].min(), df_rb["appearance"].max())
+print("taste", df_rb["taste"].min(), df_rb["taste"].max())
+print("palate", df_rb["palate"].min(), df_rb["palate"].max())
+print("overall", df_rb["overall"].min(), df_rb["overall"].max())
+print("translated_rating", df_rb["translated_rating"].min(), df_rb["translated_rating"].max())
+
+# %%
+# Compute the average rating for each user
+df_rb["user_average_aroma"] = df_rb.groupby("user_id")["aroma"].transform("mean")
+df_rb["user_average_appearance"] = df_rb.groupby("user_id")["appearance"].transform("mean")
+df_rb["user_average_taste"] = df_rb.groupby("user_id")["taste"].transform("mean")
+df_rb["user_average_palate"] = df_rb.groupby("user_id")["palate"].transform("mean")
+df_rb["user_average_overall"] = df_rb.groupby("user_id")["overall"].transform("mean")
+df_rb["user_average_rating"] = df_rb.groupby("user_id")["translated_rating"].transform("mean")
+
+# %%
+# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
+
+df_rb["aroma_rescaled"] = df_rb.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"],top=10), axis=1)
+df_rb["appearance_rescaled"] = df_rb.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
+df_rb["taste_rescaled"] = df_rb.apply(lambda row: rescale(row["taste"], row["user_average_taste"],top=10), axis=1)
+df_rb["palate_rescaled"] = df_rb.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
+df_rb["overall_rescaled"] = df_rb.apply(lambda row: rescale(row["overall"], row["user_average_overall"],20), axis=1)
+df_rb["rating_rescaled"] = df_rb.apply(lambda row: rescale(row["translated_rating"], row["user_average_rating"],top=6), axis=1)
+
+# %%
+# Sanity check the ranges of the rescaled ratings and aspects
+print("aroma_rescaled", df_rb["aroma_rescaled"].min(), df_rb["aroma_rescaled"].max())
+print("appearance_rescaled", df_rb["appearance_rescaled"].min(), df_rb["appearance_rescaled"].max())
+print("taste_rescaled", df_rb["taste_rescaled"].min(), df_rb["taste_rescaled"].max())
+print("palate_rescaled", df_rb["palate_rescaled"].min(), df_rb["palate_rescaled"].max())
+print("overall_rescaled", df_rb["overall_rescaled"].min(), df_rb["overall_rescaled"].max())
+print("rating_rescaled", df_rb["rating_rescaled"].min(), df_rb["rating_rescaled"].max())
+
+# %% [markdown]
+# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5.
+
+# %% [markdown]
+#  # Country and state filtering
+# Find states and countries with enough ratings
+# TODO: arbitrarily pick 1000 as the minimum sample size for now, but this should be changed to something more statistically sound. How?
+# For t-tests, pick a lower sample size, e.g. 100.
+# %%
+MIN_SAMPLE_SIZE = 1000
+MIN_TEST_SAMPLE_SIZE = 100
+
+# %%
+# Show top 10 countries with most ratings in BA
+df_ba["user_country"].value_counts().head(10)
+
+# %%
+# Show top 10 states with most ratings in BA
+df_ba["user_state"].value_counts().head(10)
+
+# %%
+# Show top 10 countries with most ratings in RB
+df_rb["user_country"].value_counts().head(10)
+
+# %%
+# Show top 10 states with most ratings in RB
+df_rb["user_state"].value_counts().head(10)
+
+# %%
+# Get list of countries with less than MIN_SAMPLE_SIZE ratings
+countries_ba = df_ba["user_country"].value_counts()
+countries_ba = countries_ba[countries_ba < MIN_SAMPLE_SIZE].index.tolist()
+countries_rb = df_rb["user_country"].value_counts()
+countries_rb = countries_rb[countries_rb < MIN_SAMPLE_SIZE].index.tolist()
+print("Countries with less than", MIN_SAMPLE_SIZE, "ratings in BA:", len(countries_ba))
+print("Countries with less than", MIN_SAMPLE_SIZE, "ratings in RB:", len(countries_rb))
+print("Total number of countries in BA:", len(df_ba["user_country"].unique()))
+print("Total number of countries in RB:", len(df_rb["user_country"].unique()))
+
+# %%
+# Drop all countries in the countries_ba/rb list
+df_ba = df_ba[~df_ba["user_country"].isin(countries_ba)]
+df_rb = df_rb[~df_rb["user_country"].isin(countries_rb)]
+
+# %%
+# How many countries and states are left?
+print("Number of countries in BA:", len(df_ba["user_country"].unique()))
+print("Number of states in BA:", len(df_ba["user_state"].unique()))
+print("Number of countries in RB:", len(df_rb["user_country"].unique()))
+print("Number of states in RB:", len(df_rb["user_state"].unique()))
+
+# %%
+# Are there states with less than MIN_SAMPLE_SIZE ratings?
+states_ba = df_ba["user_state"].value_counts()
+states_ba = states_ba[states_ba < MIN_SAMPLE_SIZE].index.tolist()
+states_rb = df_rb["user_state"].value_counts()
+states_rb = states_rb[states_rb < MIN_SAMPLE_SIZE].index.tolist()
+print("States with less than", MIN_SAMPLE_SIZE, "ratings in BA:", len(states_ba))
+print("States with less than", MIN_SAMPLE_SIZE, "ratings in RB:", len(states_rb))
+
+# %%
+# Drop all states in the states_ba/rb list
+df_ba = df_ba[~df_ba["user_state"].isin(states_ba)]
+df_rb = df_rb[~df_rb["user_state"].isin(states_rb)]
+
+# %% [markdown]
+#  # Test average ratings accross states and countries
+# TODO describe idea.
+
+
+# Function to perform pairwise t-tests
 # %%
 def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_column_name = "entity"):
     """
@@ -87,6 +288,10 @@ def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_co
             df_t_test_results = pd.concat([df_t_test_results, nr], ignore_index=True)
 
     return df_t_test_results, alpha_1
+
+# %%
+df_ba.info()
+
 
 # %% [markdown]
 # ## Function to perform t-tests of a given column for each pair of countries in a given country list/ or state list
