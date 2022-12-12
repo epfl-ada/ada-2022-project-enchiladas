@@ -240,30 +240,92 @@ df_rb = df_rb[~df_rb["user_state"].isin(states_rb)]
 
 # %% [markdown]
 #  # Test average ratings accross states and countries
-# TODO describe idea.
-
+# Do states and countries have different average ratings?
+# The null hypothesis is that the average ratings are the same for all states and countries.
+#
+# In order to test this, we do pairwise t-tests among all possible pairs of states and countries respectively. We arbitrarily pick a minimum number of ratings per state/country (`MIN_SAMPLE_SIZE`). If a state/country has less than `MIN_SAMPLE_SIZE` ratings, we do not consider it for the t-tests.
+# 
+# We use the Sidak correction to correct for multiple comparisons. Suppose we have a list of states/countries with `n` elements. We perform `n(n-1)/2` t-tests. The Sidak correction is `1 - (1 - alpha)^(1/n)`, where `alpha` is the significance level (default = 0.05).
+#
+# Next, we want to figure out, if the average rating differs among style_classes, styles or even individual beers. Thus, we repeat the same procedure for each style_class, style and beer. Here we allow for a lower sample size (`MIN_TEST_SAMPLE_SIZE`).
+# 
 
 # Function to perform pairwise t-tests
 # %%
-def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_column_name = "entity"):
+def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_column_name = "entity", recompute = False):
     """
     Perform pairwise t-tests on a given column for each pair of entities in a given entity list
     Computes the Sidak correction.
     arguments:
         df: dataframe to perform t-tests on
         entity_list: list of entities to perform t-tests on
+        entity_list: list of entities to perform t-tests on (will most likely be a list of countries or states)
         column_name_to_test: column name to perform t-tests on (should be a rating column)
         alpha: significance level (optional, default = 0.05)
+        entity_column_name: name of the entity column (optional, default = "entity")
+        recompute: boolean to recompute the results (optional, default = False)
     returns:
         df_t_test_results: dataframe containing the results of the t-tests
         alpha_1: the Sidak corrected significance level
     """
+    # Test the arguments for valid input
+    # Check if the df is a dataframe and non-empty
+    if not isinstance(df, pd.DataFrame) or df.empty:
+        raise TypeError("df must be a non-empty pandas dataframe")
+    # Check if the entity_list is a list and non-empty
+    if not isinstance(entity_list, list) or len(entity_list) == 0:
+        raise TypeError("entity_list must be a non-empty list")
+    # Check if the column_name_to_test is a string and non-empty
+    if not isinstance(column_name_to_test, str) or len(column_name_to_test) == 0:
+        raise TypeError("column_name_to_test must be a non-empty string")
+    # Check if the entity_column_name is a string and non-empty
+    if not isinstance(entity_column_name, str) or len(entity_column_name) == 0:
+        raise TypeError("entity_column_name must be a non-empty string")
+    # Check if the alpha is a float and between 0 and 1
+    if not isinstance(alpha, float) or alpha < 0 or alpha > 1:
+        raise TypeError("alpha must be a float between 0 and 1")
+    # Check if the recompute is a boolean
+    if not isinstance(recompute, bool):
+        raise TypeError("recompute must be a boolean")
+    # Check if the column_name_to_test is in the dataframe
+    if column_name_to_test not in df.columns:
+        raise ValueError("column_name_to_test must be in the dataframe")
+    # Check if the entity_column_name is in the dataframe
+    if entity_column_name not in df.columns:
+        raise ValueError("entity_column_name must be in the dataframe")
+    # Check if the entity_list is a subset of the entity_column_name
+    if not set(entity_list).issubset(set(df[entity_column_name].unique())):
+        raise ValueError("entity_list must be a subset of the unique values in the entity_column_name")
+    
+
+
+    # Compute the Sidak correction
     # Compute n: the number of independent t-tests performed
     combined_entity_count = len(entity_list)
     # (n-1) + (n-2) + ... + 1
     n = combined_entity_count * (combined_entity_count - 1) / 2
     # Compute the Sidak correction
     alpha_1 = 1-(1-alpha)**(1/n)
+
+
+    # Create a hash of the arguments to check if the results have already been computed
+    # make a string of all the arguments
+    arguments = str(entity_list) + str(column_name_to_test) + str(alpha) + str(entity_column_name)
+    print("arguments:", arguments)
+    # hash the string
+    hashed_arguments = hash(arguments)
+    print("hashed_arguments:", hashed_arguments)
+    if not recompute:
+        # check if a folder for t-test results exists
+        if not os.path.exists("t_test_results"):
+            os.mkdir("t_test_results")
+        # check if a csv file with the hashed arguments exists
+        if os.path.exists(f"t_test_results/{hashed_arguments}.csv"):
+            # load the csv file
+            print("loading t-test results from csv file")
+            df_t_test_results = pd.read_csv(f"t_test_results/{hashed_arguments}.csv")
+            return df_t_test_results, alpha_1
+
 
     df_t_test_results = pd.DataFrame(columns = [f"{entity_column_name}1", f"{entity_column_name}2", "t-statistic", "p-value", "significant","average_entity1","average_entity2","std_entity1","std_entity2"])
     
@@ -287,62 +349,45 @@ def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_co
             nr = pd.DataFrame({f"{entity_column_name}1":[ entity1], f"{entity_column_name}2":[ entity2], "t-statistic":[ t_statistic], "p-value":[ p_value], "significant":[ significant],"average_entity1":[np.mean(data_entity1)],"std_entity1":[np.std(data_entity1)], "average_entity2":[np.mean(data_entity2)],"std_entity2":[np.std(data_entity2)]})
             df_t_test_results = pd.concat([df_t_test_results, nr], ignore_index=True)
 
-    return df_t_test_results, alpha_1
+    # Save the results
+    if not os.path.exists("t_test_results"):
+        os.mkdir("t_test_results")
+    df_t_test_results.to_csv(f"t_test_results/{hashed_arguments}.csv", index=False)
 
-# %%
-df_ba.info()
+    return df_t_test_results, alpha_1
 
 
 # %% [markdown]
-# ## Function to perform t-tests of a given column for each pair of countries in a given country list/ or state list
+# ### T-Testing for different countries
 # %%
-def perform_independend_t_tests_on_given_country_list(df, country_list, state_list, column_name_to_test, alpha = 0.05):
-    """
-    Perform t-tests on a given column for each pair of countries in a given country list and state list
-    Computes the Sidak correction.
-    arguments:
-        df: dataframe to perform t-tests on
-        country_list: list of countries to perform t-tests on
-        state_list: list of states to perform t-tests on (if both country_list and state_list are given, combine them)
-        column_name_to_test: column name to perform t-tests on (should be a rating column)
-    returns:
-        df_t_test_results: dataframe containing the results of the t-tests 
-        alpha_1: the Sidak corrected significance level
-        TODO: define how exactly the results are stored and if it should print out significant results
-    """
-    # TODO: improve edge-cases like empty country_list, empty state_list, empty df, and empty column_name_to_test for a given country/state
-    
-    # Create filtered dataframe containing only the given countries and states and the given column
-    df_filtered = df[df["country"].isin(country_list) | df["states"].isin(state_list)]
-    df_filtered = df_filtered[[column_name_to_test, "country", "states"]]
-    print("successfully filtered dataframe")
+# Create a list of aspects for ba
+ba_aspects = ["aroma", "appearance", "taste", "palate", "overall", "rating"] 
+# Get a list of all countries
+country_list = list(df_ba["user_country"].unique())
+# Perform t-tests for each pair of countries
+dfs_t_tests_countries = {}
+for aspect in ba_aspects:
+    dfs_t_tests_countries[aspect] = pairwise_ttests(df_ba,country_list,aspect,entity_column_name="user_country")
+    aspect_rescaled = aspect + "_rescaled"
+    dfs_t_tests_countries[aspect_rescaled] = pairwise_ttests(df_ba,country_list,aspect_rescaled,entity_column_name="user_country")
 
-    # Assign entity names to each row
-    def assign_entity_name(row):
-        if row["country"] in country_list and row["country"] != "United States":
-            return row["country"]
-        elif row["states"] in state_list:
-            return row["states"]
-        else:
-            return None
+# TODO: rank countries by average rating for each aspect
+# TODO: plot the results
+# TODO: plot and discuss number of significant results for each aspect
+# TODO: compare to rescaled results and discuss
 
-    df_filtered["entity"] = df_filtered.apply(lambda row: assign_entity_name(row), axis=1)
-    # Create duplicate entries for the US
-    
-    if "United States" in country_list:
-        df_filtered_us = df_filtered[df_filtered["country"] == "United States"]
-        df_filtered_us["entity"] = "United States"
-        df_filtered = pd.concat([df_filtered, df_filtered_us])
-    df_filtered = df_filtered.drop(columns=["country", "states"])
-    df_filtered = df_filtered.dropna()
-    print("NaN-values: ",df_filtered.isna().sum())
-    # df_filtered = df_filtered.reset_index() # TODO: necessary?
+# %%
+# Compare the results for the different aspects
+# How many significant results are there for each aspect?
+for aspect in ba_aspects:
+    print(aspect, ":", len(dfs_t_tests_countries[aspect][dfs_t_tests_countries[aspect]["significant"] == True]))
+    aspect_rescaled = aspect + "_rescaled"
+    print(aspect_rescaled, ":", len(dfs_t_tests_countries[aspect_rescaled][dfs_t_tests_countries[aspect_rescaled]["significant"] == True]))
 
-    print(df_filtered.head())
 
-    df_t_test_results, alpha_1 = pairwise_ttests(df_filtered, country_list + state_list, column_name_to_test, alpha)            
-            
-    return df_t_test_results, alpha_1
+# %% [markdown]
+# ### T-Testing for different US states
+
 
 # %% [markdown]
 # ## Function to perform pairwise t-tests for each pair of styles within a country
@@ -520,35 +565,11 @@ print("If the p-value is smaller than our threshold, then we have evidence again
 
 
 # %% [markdown]
-# # Subsetting the data to specific styles...
+# # Subsetting the data to specific style classes, styles and maybe some beers...
 # %%
 # Load styles
 
 
 
-# %% [markdown]
-# Make comparisons between beer styles
-# TODO: figure out how to do this meaningfully
-# Problem: What exactly are we trying to achieve here? 
-# 
-# %%
-df_ba.columns
-beer_styles = df_ba["style"].unique()
-
-
-
-
-# %% [markdown]
-# # Ideas for further analysis
-# What do we do with the highly significant differences between states/countries in average rating?
-# My Issue is, that I don't know how to tell a story about this... Do we just pick examples of similarities?
-# Furthermore, just stating that average ratings are significantly different between states/countries is naked. 
-# Things we could do:
-# - Order countries based on their average rating. I.e. we figure out who rates best/worst on average? Do they actually rate the same beers?
-# - Would one have to do propensity matching on two countries? I.e. in order to compare the ratings of two countries, one would have to match the beers, or their styles that are rated by both countries. 
-# - cluster countries based on their distribution of rated beers. We need an embedding for rated beer styles. 
-# In order to figure out, if there exists a country that rates a give 
-# This kind of diverges from our research statement...
-# 
 
 
