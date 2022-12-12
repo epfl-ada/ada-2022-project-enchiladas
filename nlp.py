@@ -9,6 +9,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 import gensim.downloader
 
+import spacy
+
 # import scipy.sparse as sp
 
 import numpy as np
@@ -42,6 +44,10 @@ class Corpus:
             tokenizer = WhitespaceTokenizer().tokenize
         elif tokenize_type == 'words':
             tokenizer = RegexpTokenizer(r'\w+').tokenize
+        elif tokenize_type == 'spacy':
+            tokenizer = lambda x: x # don't do anything
+            nlp = spacy.load('en_core_web_sm')
+            nlp.max_length = 10**10 
         else:
             tokenizer = lambda x: x.split()
         
@@ -82,6 +88,11 @@ class Corpus:
                     except:
                         pass
                 self.X.append(np.array(vec)/N)
+            self.X = np.array(self.X)
+        elif vec_type == "spacy":
+            self.X = []
+            for text in self.tokenized_texts:
+                self.X.append(np.array(nlp(text).vector))
             self.X = np.array(self.X)
 
         try:
