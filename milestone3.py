@@ -1069,7 +1069,7 @@ df_topcountries = df[df["user_country"].isin(topten_country)]
 # input: dataset, nb of iterations
 # output: sorted list of means, overal mean, 95% confidence interval
 
-def bootstrapping_function(treatment, control,iterations):
+def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
     differences = []
     for i in range(iterations):
         treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
@@ -1077,10 +1077,12 @@ def bootstrapping_function(treatment, control,iterations):
         differences.append(np.mean(treatment_sample) - np.mean(control_sample))
     
     differences.sort()
-    return np.mean(differences), differences[int(np.floor(0.025*iterations))], differences[int(np.ceil(0.975 * iterations))]
+    return np.mean(differences), differences[int(np.floor(level/2*iterations))], differences[int(np.ceil(1-(level/2) * iterations))]
 
 N_BOOSTRAP = 1000 #number of time we boostrap each dataset (be careful with runtimes)
-
+# sidak correct:
+alpha_1 = 1-(1-0.05)**(1/10)
+print(alpha_1)
 # %%
 list_results = []
 
@@ -1103,8 +1105,7 @@ for country in topten_country:
     print("beer bias: ", stat_beer, p_beer, diff_beer)
 
     # compute confidence interval
-    diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(user_bias_treatment, user_bias_control, N_BOOSTRAP)
-
+    diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(user_bias_treatment, user_bias_control, alpha_1, N_BOOSTRAP)
 
     #print(f"mean: {diff_user_mean:0.04}, 95%CI: [{diff_user_low:0.04}, {diff_user_high:0.04}]")
 
