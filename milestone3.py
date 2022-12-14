@@ -440,6 +440,7 @@ ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}")
 
 # %%
+# TODO: move this up the pipeline
 df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba = df_ba_ratings_filtered_beers_merged_users
 df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
@@ -930,25 +931,19 @@ psm.knn_matched(matcher='propensity_logit', replacement=False, caliper=None)
 psm.plot_match(Title='Side by side matched controls', Ylabel='Number ofpatients', Xlabel= 'Propensity logit',names = ['treatment', 'control'], colors=['#E69F00', '#56B4E9'] ,save=True)
 psm.effect_size_plot(title='Standardized Mean differences accross covariates before and after matching', before_color='#FCB754', after_color='#3EC8FB', save=False)
 
-
-
-
-
 # %%
 # perform matching between treated and control group using propensity score
 
-
 #TODO
 # %% [markdown]
-# ### matrix factorization
+# ### propensity matching using matrix factorization with biases
 # %%
 # reset beer id and user id to be from 0 to nb_beer and nb_user (long, n^2)
-df_sample = df.sample(1000)
-
 def reset_id(df, col):
     df[col] = df[col].astype("category").cat.codes
     return df
-
+# %%    
+df_sample = df.sample(1000)
 df_sample = reset_id(df_sample, "beer_id")
 df_sample = reset_id(df_sample, "user_id")
 # %%
@@ -956,15 +951,16 @@ df_sample = reset_id(df_sample, "user_id")
 import surprise.prediction_algorithms.matrix_factorization as mf
 from surprise import Reader, Dataset
 
-def get_biases(df):
-    algo = mf.SVD(n_factors=100, n_epochs=20, biased=True, lr_all=0.005, reg_all=0.02, verbose=True)
+def get_biases(df, plot=False, verbose=False):
+    algo = mf.SVD(n_factors=100, n_epochs=20, biased=True, lr_all=0.005, reg_all=0.02, verbose=verbose)
     reader = Reader(rating_scale=(1, 5))
     data = Dataset.load_from_df(df[["user_id", "beer_id", "rating"]].rename(columns={"user_id": "userID", "beer_id": "itemID", "rating": "rating"}), reader)
     user_bias = algo.fit(data.build_full_trainset()).bu
     beer_bias = algo.fit(data.build_full_trainset()).bi
-    plt.hist(user_bias)
-    plt.hist(beer_bias)
-    plt.show()
+    if plot:
+        plt.hist(user_bias)
+        plt.hist(beer_bias)
+        plt.show()
     return user_bias, beer_bias
 # %%
 user_bais, beer_bias = get_biases(df_sample)
@@ -1021,15 +1017,15 @@ plt.hist(df_treatment["rating"], alpha=0.5, label="treatment")
 plt.show()
 
 # %% [markdown]
-# ### method 2: comparing the difference in bias vectors from matrix factorization for treatment and control
+# ### Matrix factorization (bis): comparison of bias vectors between control and treatment groups
 # %%
 # reset beer id and user id to be from 0 to nb_beer and nb_user (long, n^2)
 
-df_treatment = df[df["treatment"] == 1]
-df_control = df[df["treatment"] == 0]
+df_treatment_sample = df[df["treatment"] == 1]
+df_control_sample = df[df["treatment"] == 0]
 
-df_treatment_sample = df_treatment.sample(1000)
-df_control_sample = df_control.sample(1000)
+#df_treatment_sample = df_treatment.sample(1000)
+#df_control_sample = df_control.sample(1000)
 
 df_treatment_sample = reset_id(df_treatment_sample, "beer_id")
 df_treatment_sample = reset_id(df_treatment_sample, "user_id")
@@ -1040,13 +1036,13 @@ user_bias_treatment, beer_bias_treatment = get_biases(df_treatment_sample)
 user_bias_control, beer_bias_control = get_biases(df_control_sample)
 # %%
 # plot the difference in bias vectors between control and treatment groups
-plt.hist(user_bias_treatment, label="treatment")
-plt.hist(user_bias_control, label="control")
+plt.hist(user_bias_treatment, label="treatment", alpha = 0.5, bins = 25)
+plt.hist(user_bias_control, label="control", alpha = 0.5, bins = 25)
 plt.title("user bias")
 plt.legend()
 plt.show()
-plt.hist(beer_bias_treatment, label="treatment")
-plt.hist(beer_bias_control, label="control")
+plt.hist(beer_bias_treatment, label="treatment", alpha = 0.5, bins = 25)
+plt.hist(beer_bias_control, label="control", alpha = 0.5, bins = 25)
 plt.title("beer bias")
 plt.legend()
 plt.show()
@@ -1060,3 +1056,69 @@ res = ttest_ind(beer_bias_treatment, beer_bias_control)
 print(res)
 print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
 # interestingly we seem to always find similar values. So the effect is small and significative or not depending on the method (probably also the sample size)
+# %% [markdown]
+# ### Matrix factorization (ter): analysis per country:
+
+groupby_country = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
+topten_country = groupby_country.index[:10]
+df_topcountries = df[df["user_country"].isin(topten_country)]
+
+# %%
+# boostrapping function to get the confidence interval
+# bootstrapping function
+# input: dataset, nb of iterations
+# output: sorted list of means, overal mean, 95% confidence interval
+
+def bootstrapping_function(treatment, control,iterations):
+    differences = []
+    for i in range(iterations):
+        treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
+        control_sample = np.random.choice(control, size = len(treatment), replace = True)
+        differences.append(np.mean(treatment_sample) - np.mean(control_sample))
+    
+    differences.sort()
+    return np.mean(differences), differences[int(np.floor(0.025*iterations))], differences[int(np.ceil(0.975 * iterations))]
+
+N_BOOSTRAP = 1000 #number of time we boostrap each dataset (be careful with runtimes)
+
+# %%
+list_results = []
+
+from scipy.stats import bootstrap
+
+for country in topten_country:
+    df_country = df_topcountries[df_topcountries["user_country"] == country]
+    df_country_treatment = df_country[df_country["treatment"] == 1]
+    df_country_control = df_country[df_country["treatment"] == 0]
+    user_bias_treatment, beer_bias_treatment = get_biases(df_country_treatment)
+    user_bias_control, beer_bias_control = get_biases(df_country_control)
+
+    # run a t-test on the difference in bias vectors
+    print("country: ", country)
+    stat_user, p_user = ttest_ind(user_bias_treatment, user_bias_control)
+    diff_user = np.mean(user_bias_treatment) - np.mean(user_bias_control) #positive if treatment is better
+    stat_beer, p_beer = ttest_ind(beer_bias_treatment, beer_bias_control)
+    diff_beer = np.mean(beer_bias_treatment) - np.mean(beer_bias_control)
+    print("user bias: ", stat_user, p_user, diff_user)
+    print("beer bias: ", stat_beer, p_beer, diff_beer)
+
+    # compute confidence interval
+    diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(user_bias_treatment, user_bias_control, N_BOOSTRAP)
+
+
+    #print(f"mean: {diff_user_mean:0.04}, 95%CI: [{diff_user_low:0.04}, {diff_user_high:0.04}]")
+
+    #append results to list
+    list_results.append({"country" : country,"user_bias_treatment" : user_bias_treatment, "beer_bias_treatment" : beer_bias_treatment, "user_bias_control" : user_bias_control, "beer_bias_control" : beer_bias_control, "diff_user_mean" : diff_user_mean, "diff_user_low" : diff_user_low, "diff_user_high" : diff_user_high})
+# %%
+df_results = pd.DataFrame(list_results)
+df_results["err_low"] = df_results["diff_user_mean"] - df_results["diff_user_low"]
+df_results["err_high"] = df_results["diff_user_high"] - df_results["diff_user_mean"]
+fig, ax = plt.subplots(figsize = (10, 5))
+plt.errorbar([i for i in range(len(df_results))], df_results["diff_user_mean"].to_numpy(), yerr=df_results[["err_low", "err_high"]].transpose().to_numpy(), fmt = 'o', color = 'b', label = "data")
+ax.axhline(0, 0, 1, linestyle = "--", color = "k", label = "reference")
+plt.xticks([i for i in range(len(df_results))], topten_country)
+plt.ylabel("diference in user bias")
+plt.title("diference in user bias confidence interval per country")
+plt.legend()
+plt.show()
