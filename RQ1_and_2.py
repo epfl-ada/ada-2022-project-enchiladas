@@ -906,5 +906,11 @@ df_rb_t_tests_style_states = perform_t_tests_per_class(top_5_styles_rb, df_rb, "
 df_rb_t_tests_style_states
 
 
-
+# TODO: about these results:
+# Dig into some examples of significant results
+# If two countries/states have significant resutls for the same style, why is that?
+# Does it still hold for rescaled ratings?
+# How about the beer distribution?
+# Namely, suppose they rate two styles significantly different, but their beer distribution of that style is different, did one country rate worse beer? I.e. how do the rated beer averages compare?
+# We could maybe do a t-test on the beer averages for each style, and see if they are significantly different
 
