@@ -1,5 +1,5 @@
 markdown: kramdown
 # remote_theme: benbalter/retlab
 # theme: jekyll-theme-architect
-remote_theme: pages-themes/midnight@v0.2.0
-# remote_theme: 
+# remote_theme: pages-themes/midnight@v0.2.0
+remote_theme: raviriley/agency-jekyll-theme
