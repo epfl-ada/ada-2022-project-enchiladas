@@ -76,8 +76,9 @@ class Corpus:
                 vectorizer = CountVectorizer(**self.params)
 
             self.X = vectorizer.fit_transform(self.tokenized_texts)
-        elif vec_type == "word2vec":
-            glove_vectors = gensim.downloader.load('glove-twitter-25') # load the word2vec model (pick one)
+        elif "word2vec" in vec_type:
+            name = vec_type.split("word2vec-")[1]
+            glove_vectors = gensim.downloader.load(name) # load the word2vec model (pick one) 'glove-twitter-25'
             self.X = []
             for text in self.tokenized_texts:
                 vec = np.zeros(glove_vectors['hi'].shape)
@@ -86,6 +87,7 @@ class Corpus:
                     try:
                         vec += glove_vectors[item]
                     except:
+                        print(item+" not in word2vec model")
                         pass
                 self.X.append(np.array(vec)/N)
             self.X = np.array(self.X)
