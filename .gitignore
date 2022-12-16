@@ -1,0 +1,12 @@
+Data/BeerAdvocate/*
+Data/matched_beer_data/*
+Data/RateBeer/*
+Data/*
+.DS_Store
+.ipynb_checkpoints/*
+__pycache__/*
+.vscode/*
+*.pickle
+*.pickles
+Data/df_ba_ratings_filtered_md_beers.txt.pickle
+t_test_results/*
