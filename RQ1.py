@@ -310,7 +310,8 @@ for key in states_codes.keys():
 print(matrix_plot_p_value.head())
 # %% only for Andrea
 # 
-df_plot_p_value.to_csv(r"C:\Users\andre\Documents\EPFL\MA3\Applied Data Analysis\2022\ada-2022-project-enchiladas\Data\df_plot_p_value.csv")    
+matrix_plot_p_value.to_csv(r"C:\Users\andre\Documents\EPFL\MA3\Applied Data Analysis\matrix_plot_p_value.csv")
+df_plot_p_value.to_csv(r"C:\Users\andre\Documents\EPFL\MA3\Applied Data Analysis\df_plot_p_value.csv")    
 # %%
 print(df_plot_p_value.head())
 # %%

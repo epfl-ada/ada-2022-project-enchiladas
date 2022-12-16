@@ -25,6 +25,7 @@
   box-sizing: border-box;
 }
 
+// body text
 body {
   padding: 0;
   margin: 0;
@@ -52,6 +53,7 @@ body {
   }
 }
 
+// Links
 a {
   color: $body-link-color;
   text-decoration: none;
@@ -61,6 +63,7 @@ a {
   }
 }
 
+// button
 .btn {
   display: inline-block;
   margin-bottom: 1rem;
@@ -105,11 +108,30 @@ a {
   }
 }
 
+
+// check it out for headers: https://freefrontend.com/css-headers-footers/#article-headers
+
 .page-header {
-  color: $header-heading-color;
-  text-align: center;
-  background-color: $header-bg-color;
-  background-image: linear-gradient(120deg, $header-bg-color-secondary, $header-bg-color);
+  // color: $header-heading-color;
+  //text-align: center;
+  // background-color: $header-bg-color;
+  // background-image: linear-gradient(120deg, $header-bg-color-secondary, $header-bg-color);
+  
+  //text-align: center
+  //background-image: url('../../beer.jpg');
+  //background-repeat: no-repeat;
+  //background-attachment: fixed;
+  //background-size: 100% 100%;
+  background: url('../../beer.jpg');
+	text-align: center;
+	width: 100%;
+	height: auto;
+	background-size: cover;
+	background-attachment: fixed;
+	position: relative;
+	overflow: hidden;
+	border-radius: 0 0 85% 85% / 30%;
+  
 
   @include large {
     padding: 5rem 6rem;
@@ -166,8 +188,9 @@ a {
     margin-top: 0;
   }
 
+  // how wide the text should be
   @include large {
-    max-width: 64rem;
+    max-width: 64rem; 
     padding: 2rem 6rem;
     margin: 0 auto;
     font-size: 1.1rem;
@@ -183,7 +206,7 @@ a {
     font-size: 1rem;
   }
   
-  kbd {
+  kbd { // keyboard input element
     background-color: #fafbfc;
     border: 1px solid #c6cbd1;
     border-bottom-color: #959da5;
@@ -217,6 +240,7 @@ a {
     margin-bottom: 1em;
   }
 
+
   code {
     padding: 2px 4px;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
@@ -226,7 +250,8 @@ a {
     border-radius: 0.3rem;
   }
 
-  pre {
+  //preformatted text element
+  pre { 
     padding: 0.8rem;
     margin-top: 0;
     margin-bottom: 1rem;
@@ -286,6 +311,7 @@ a {
     }
   }
 
+  // unordered / ordered list
   ul,
   ol {
     margin-top: 0;
@@ -325,6 +351,8 @@ a {
     }
   }
 
+
+  // description element
   dl {
     padding: 0;
 
@@ -341,6 +369,7 @@ a {
     }
   }
 
+  // horizontal ruler
   hr {
     height: 2px;
     padding: 0;
@@ -350,7 +379,9 @@ a {
   }
 }
 
+// I'm not sure if we already have a footer
 .site-footer {
+  // position: sticky;
   padding-top: 2rem;
   margin-top: 2rem;
   border-top: solid 1px $hr-border-color;
