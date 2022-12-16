@@ -1,16 +1,7 @@
 # %%
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-import pycountry # match country names to iso code
-import geoplot as gplt #plotting maps
-import geopandas as gpd
-import geoplot.crs as gcrs
-import imageio #not used ?
-import pathlib #not used ?
-import matplotlib.pyplot as plt
-import mapclassify as mc #???
 import os.path
 import scipy.stats as stats
 from helpers import * #custom made functions
@@ -34,16 +25,18 @@ pd.set_option('display.max_rows', 100)
 #  ## Load BA data
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba = pd.read_pickle(f"Data/{ba_pickle_filename}")
-df_ba.columns
+df_ba.info()
+# %%
+df_ba.isna().sum()
+
 # %%
 #  ## Load RB data
 rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 df_rb = pd.read_pickle(f"Data/{rb_pickle_filename}")
-df_rb.columns
-# TODO: wait on RB data, still unassigned style_classes
-# You sould be able to deduce this. Since we assigned style_classes on matched, after having filtered this df, we should have all style_classes assigned...
-# For now, drop 'UNASSIGNED' style_classes
-df_rb = df_rb[df_rb["style_class"] != "UNASSIGNED"]
+df_rb.info()
+
+# %%
+df_rb.isna().sum()
 
 # %%
 # print value counts of style_class 
@@ -55,7 +48,7 @@ print(df_rb["style_class"].value_counts())
 # Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
 # To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
 
-# TODO: Should we show that users actually rate things differently on average somehow? if yes, how? Propensity match users on rated beers accross entire dataset and compare averages... And then? 
+# TODO: Formalize what we do. Ideally add citations.
 # %%
 def scale(rating, user_average, top=5, bottom=1):
     """
@@ -174,13 +167,33 @@ print("overall_rescaled", df_rb["overall_rescaled"].min(), df_rb["overall_rescal
 print("rating_rescaled", df_rb["rating_rescaled"].min(), df_rb["rating_rescaled"].max())
 
 # %% [markdown]
-# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5.
+# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5. I.e. nobody rated a beer with 0 stars.
 
 # %% [markdown]
 #  # Country and state filtering
 # Find states and countries with enough ratings
 # TODO: arbitrarily pick 1000 as the minimum sample size for now, but this should be changed to something more statistically sound. How?
 # For t-tests, pick a lower sample size, e.g. 100.
+# Improve the justification and especially if and why we should have two thresholds. Does it make sense to have two thresholds? Initially, it was thought to help once we subset the data to the most popular style_classes and styles...
+
+# %%
+# Plot the number of ratings per country in BA top 20
+df_ba["user_country"].value_counts().head(20).plot(kind="bar", title="Number of ratings per country in BA",logy=True)
+plt.xlabel("Country")
+plt.ylabel("Number of ratings")
+
+# %%
+# Plot the number of ratings per user_state in BA last 20
+df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA",logy=True)
+plt.xlabel("State")
+plt.ylabel("Number of ratings")
+
+# %%
+# Plot the number of ratings per user_state in RB last 20
+df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB",logy=True)
+plt.xlabel("State")
+plt.ylabel("Number of ratings")
+
 # %%
 MIN_SAMPLE_SIZE = 1000
 MIN_TEST_SAMPLE_SIZE = 100
@@ -378,6 +391,7 @@ for aspect in ba_aspects:
     aspect_rescaled = aspect + "_rescaled"
     dfs_t_tests_countries[aspect_rescaled] = pairwise_ttests(df_ba,country_list,aspect_rescaled,entity_column_name="user_country")
 
+
 # %%
 print(dfs_t_tests_countries["aroma"][0].head(10))
 
@@ -389,6 +403,8 @@ for aspect in ba_aspects:
     print(aspect, ":", len(dfs_t_tests_countries[aspect][0][dfs_t_tests_countries[aspect][0]["significant"] == True]))
     aspect_rescaled = aspect + "_rescaled"
     print(aspect_rescaled, ":", len(dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]))
+
+
 
 # %%
 # Plot the distribution of ratings of a pair where the t-test is significant
@@ -750,8 +766,6 @@ for key in states_codes.keys():
     frames = [df_plot_p_value, c]
     df_plot_p_value = pd.concat(frames)
     
-    
-
 # %%
 fig = px.choropleth(df_plot_p_value,
                     locations='state_code_user_state1', 

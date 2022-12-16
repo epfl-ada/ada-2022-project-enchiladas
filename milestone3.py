@@ -7,11 +7,8 @@ import pycountry # match country names to iso code
 import geoplot as gplt #plotting maps
 import geopandas as gpd
 import geoplot.crs as gcrs
-import imageio #not used ?
-import pathlib #not used ?
 import matplotlib.pyplot as plt
 import mapclassify as mc #???
-import os.path
 from helpers import * #custom made functions
 print("import completed")
 
@@ -180,7 +177,8 @@ df_beers = df_beers.rename(columns={key: f"{key[:-2]}_rb" for key in df_beers.co
 print("--- Initial number of NaN Values: ---")
 print(df_beers.isna().sum())
 #NaN values in avg means a beer from one website doesn't have any review on the other website. => we only keep beers with at least 1 review on both website (drop NaNs)
-df_beers = df_beers.loc[df_beers[["avg_ba","avg_computed_ba", "avg_rb", "avg_computed_rb"]].isna().sum(axis=1) == 0]
+# %%
+df_beers = df_beers.loc[df_beers[["avg_ba","avg_computed_ba", "avg_rb", "avg_computed_rb"]].isna().sum(axis=1) == 0] 
 print(f"number of beers in matched dataset after cleaning {len(df_beers)}")
 print("--- Number of NaN Values after Processing: ---")
 print(df_beers.isna().sum())
@@ -213,7 +211,7 @@ print(f"number of beers in matched dataset {len(df_beers)}")
 print(df_beers.loc[df_beers["abv_ba"] != df_beers["abv_rb"]])
 
 # %% [markdown]
-#  Do the names match ? Most of them don't. BA don't include the brewery name in the beer name but RB often does. We will keep the RB names since they are more informative.
+#  Do the names match ? Most of them don't. BA doesn't include the brewery name in the beer name but RB often does. We will keep the RB names since they are more informative.
 
 # %%
 df_beers.loc[df_beers["beer_name_ba"] != df_beers["beer_name_rb"]].head()
@@ -324,8 +322,8 @@ print("No country code assignment to the following countries: ", df_brew[df_brew
 # assign a location by looking up the location of each beers' brewery
 
 df_beers = df_beers.merge(df_brew[["country", "states", "country_code", "id_ba"]], left_on="brewery_id_ba", right_on="id_ba")
-# country = df_b eers.apply(lambda beer: df_brew.loc[df_brew['name_ba'] == beer['brewery_name_ba']]['country'], axis = 1)
-# print(country)
+# %%
+df_beers.info()
 
 
 # %% [markdown]
@@ -367,7 +365,7 @@ print("No country code assignment to the following countries: ", df_ba_users[df_
 # manually add New Zealand and Australia, and then remove the other outliers (not worth considering)
 df_ba_users['country_code'] = np.where(df_ba_users['location']=="Aotearoa", "NZL", df_ba_users['country_code'])
 df_ba_users['country_code'] = np.where(df_ba_users['location']=="Heard and McDonald Islands", "AUS", df_ba_users['country_code'])
-df_ba_users = df_ba_users[~df_ba_users['§_code'].isna()]
+df_ba_users = df_ba_users[~df_ba_users['country_code'].isna()]
 
 
 
@@ -418,41 +416,36 @@ for column in ["beer_name","beer_id","brewery_name","brewery_name","style","user
 # %%
 df_md_beer_ids = df_beers["beer_id_ba"].unique().astype(str)
 df_ba_beer_ids = df_ba_ratings["beer_id"].unique()
-df_ba_ratings_filtered_md_beers = df_ba_ratings[df_ba_ratings["beer_id"].isin(df_md_beer_ids)]
-df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_md_beers.merge(df_ba_users, left_on="user_id", right_on="user_id")
+df_ba_ratings_filtered_md_beers = df_ba_ratings[df_ba_ratings["beer_id"].isin(df_md_beer_ids)] # Only keep ratings for beers in the matched dataset
+df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_md_beers.merge(df_ba_users, left_on="user_id", right_on="user_id") # Merge with users
 df_ba_ratings_filtered_beers_merged_users.isnull().sum()
 
-# %% [markdown]
-#  ###### Add Style_class to BA ratings
-df_ba_ratings_filtered_beers_merged_users['style_class'] = 'UNASSIGNED'
 
-for style_keys in style_lookup.keys():
-    df_ba_ratings_filtered_beers_merged_users['style_class'] = np.where(df_ba_ratings_filtered_beers_merged_users['style'].isin(style_lookup[style_keys]), style_keys, df_ba_ratings_filtered_beers_merged_users['style_class'])
+# %%
+df_ba_ratings_filtered_beers_merged_users.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
+# create a new column on df_ba which contains the country, state, country code and the style class of the beer reviewed.
+df_ba_ratings_filtered_beers_merged_users["beer_id"] = df_ba_ratings_filtered_beers_merged_users["beer_id"].astype('int64')
+df_ba_ratings_filtered_beers_merged_users = df_ba_ratings_filtered_beers_merged_users.merge(df_beers[["beer_id_ba", "country", "states", "country_code", "style_class", "avg_computed_ba"]], left_on='beer_id', right_on='beer_id_ba', how='left')
+df_ba_ratings_filtered_beers_merged_users.pop("beer_id_ba")
 
-
-print(df_ba_ratings_filtered_beers_merged_users['style_class'].value_counts(sort=True))
+df_ba_ratings_filtered_beers_merged_users.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_ba": "avg_beer_rating"}, inplace=True)
+# check if there are nan values in df_ba_ratings_filtered_beers_merged_users["beer_country"]
+df_ba_ratings_filtered_beers_merged_users[df_ba_ratings_filtered_beers_merged_users["beer_country"].isna()]
+print(df_ba_ratings_filtered_beers_merged_users.columns)
 
 
 # %%
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 
+
 # %%
 df_ba_ratings_filtered_beers_merged_users.to_pickle(f"Data/{ba_pickle_filename}")
 
 # %%
-# TODO: move this up the pipeline
-df_ba_ratings_filtered_beers_merged_users = pd.read_pickle(f"Data/{ba_pickle_filename}")
-df_ba = df_ba_ratings_filtered_beers_merged_users
-df_ba.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
-# create a new column on df_ba which contains the country, state, country code and the style class of the beer reviewed.
-df_ba["beer_id"] = df_ba["beer_id"].astype('int64')
-df_ba = df_ba.merge(df_beers[["beer_id_ba", "country", "states", "country_code", "style_class", "avg_computed_ba"]], left_on='beer_id', right_on='beer_id_ba', how='left')
-df_ba.pop("beer_id_ba")
+df_ba = pd.read_pickle(f"Data/{ba_pickle_filename}")
 
-df_ba.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_ba": "avg_beer_rating"}, inplace=True)
-# check if there are nan values in df_ba["beer_country"]
-df_ba[df_ba["beer_country"].isna()]
-print(df_ba.columns)
+# %%
+df_ba.info()
 
 # %% [markdown]
 #  #### RateBeer Ratings
@@ -524,17 +517,23 @@ df_rb_reviews_filtered_md_beers = df_rb_reviews[df_rb_reviews["beer_id"].isin(df
 df_rb_reviews_filtered_beers_merged_users = df_rb_reviews_filtered_md_beers.merge(df_rb_users, left_on="user_id", right_on="user_id")
 df_rb_reviews_filtered_beers_merged_users.isnull().sum()
 
-# %% [markdown]
-#  ###### Add Style_class to RB ratings
-# %%
-df_rb_reviews_filtered_beers_merged_users['style_class'] = 'UNASSIGNED'
 
-for style_keys in style_lookup.keys():
-    df_rb_reviews_filtered_beers_merged_users['style_class'] = np.where(df_rb_reviews_filtered_beers_merged_users['style'].isin(style_lookup[style_keys]), style_keys, df_rb_reviews_filtered_beers_merged_users['style_class'])
+# %% 
+# some column cleaning
+df_rb_reviews_filtered_beers_merged_users.pop("user_name_y")
+df_rb_reviews_filtered_beers_merged_users.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
+df_rb_reviews_filtered_beers_merged_users.head()
 
+# create a new column on df_rb which contains the country, state, country code and the style class of the beer reviewed.
+df_rb_reviews_filtered_beers_merged_users["beer_id"] = df_rb_reviews_filtered_beers_merged_users["beer_id"].astype('int64')
+df_rb_reviews_filtered_beers_merged_users = df_rb_reviews_filtered_beers_merged_users.merge(df_beers[["beer_id_rb", "country", "states", "country_code", "style_class", "avg_computed_rb"]], left_on='beer_id', right_on='beer_id_rb', how='left')
+df_rb_reviews_filtered_beers_merged_users.pop("beer_id_rb")
 
-print(df_rb_reviews_filtered_beers_merged_users['style_class'].value_counts(sort=True))
-# TODO: Problem! 307716 unassigned!!! What if we merge on beer_id?
+df_rb_reviews_filtered_beers_merged_users.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_rb": "avg_beer_rating"}, inplace=True)
+# check if there are nan values in df_rb_reviews_filtered_beers_merged_users["beer_country"]
+df_rb_reviews_filtered_beers_merged_users[df_rb_reviews_filtered_beers_merged_users["beer_country"].isna()]
+print(df_rb_reviews_filtered_beers_merged_users.columns)
+
 
 
 # %%
@@ -543,25 +542,11 @@ rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 # %%
 df_rb_reviews_filtered_beers_merged_users.to_pickle(f"Data/{rb_pickle_filename}")
 # %%
-df_rb_reviews_filtered_beers_merged_users = pd.read_pickle(f"Data/{rb_pickle_filename}")
-df_rb = df_rb_reviews_filtered_beers_merged_users
-# TODO: move this preprocessing up the pipeline
-# some column cleaning
-df_rb.pop("user_name_y")
-df_rb.rename(columns={"user_name_x": "user_name", "nbr_ratings": "user_nbr_ratings", "location": "user_location", "country": "user_country", "states": "user_state", "country_code": "user_country_code"}, inplace=True)
-df_rb_reviews_filtered_beers_merged_users.head()
+df_rb = pd.read_pickle(f"Data/{rb_pickle_filename}")
 
-# create a new column on df_rb which contains the country, state, country code and the style class of the beer reviewed.
-df_rb["beer_id"] = df_rb["beer_id"].astype('int64')
-df_rb = df_rb.merge(df_beers[["beer_id_rb", "country", "states", "country_code", "style_class", "avg_computed_rb"]], left_on='beer_id', right_on='beer_id_rb', how='left')
-df_rb.pop("beer_id_rb")
-# TODO: Question by Kasimir: Is merging the right thing to do here? df_beers should be used to filter df_rb, ow. we include ratings for beers that are not in the matched beer df and this causes us to have unassigned beer_styles I presume (on the order of 300k in ratings). Afterwards, we can merge the two datasets.
+# %%
+df_rb.info()
 
-df_rb.rename(columns={"country": "beer_country", "states": "beer_state", "country_code": "beer_country_code", "avg_computed_rb": "avg_beer_rating"}, inplace=True)
-# check if there are nan values in df_rb["beer_country"]
-df_rb[df_rb["beer_country"].isna()]
-print(df_rb.columns)
-#TODO: do the same for ba
 # %%
 df_rb["user_country"].value_counts()
 # %% [markdown]
@@ -578,548 +563,3 @@ df_beers.columns
 
 # %%
 df_brew.columns
-
-
-# %% [markdown]
-#  # Data exploration
-# 
-#  GEOGRAPHICAL DISTRIBUTION
-#  - #beers per country
-# 
-#  TEXT LENGTHS
-#  - #review lengths
-# 
-#  DISTRIBUTIONS
-#  - Average rating per beer
-#  - Average rating for each of the characteristics per beer
-# 
-#  VISUALISE MERGED STYLES (DATA ENRICHMENT)
-
-# %%
-# TODO: warning when comparing ratings between RB and BA: Appearance, Aroma, Palate, Taste and overall have different ranges in both datasets (rating to be double checked)
-# for the average rating comparison:
-plt.hist(df_beers["avg_computed_ba"], bins=50, alpha=0.5, label='BeerAdvocate rating', density = True)
-plt.hist(df_beers["avg_computed_rb"], bins=50, alpha=0.5, label='RateBeer rating', density = True)
-plt.title("histogram of ratings from both dataset within the merge dataset")
-plt.legend(loc='upper right')
-plt.xlabel("rating")
-plt.ylabel("density")
-plt.show()
-#We notice that rate beer is more critical on average that beer advocate. Caution should be taken if two datasets
-
-
-# %%
-for trait in ["aroma", "palate", "taste", "appearance", "overall"]:
-    plt.hist(df_ba[trait], bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
-    plt.hist(df_rb[trait], bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
-    plt.title(f"histogram of {trait} from both dataset")
-    plt.legend(loc='upper right')
-    plt.xlabel(f"{trait}")
-    plt.ylabel("density")
-    plt.show()
-
-
-# %% [markdown]
-#  We see from the previous cell that the scales are very different for the BA and RB, since they use very different schemes to quantify beer quality.
-#  Apply minmax scaling so the scales are comparable.
-#  We see that RB and BA has very different distributions since for RB the data can only take integer values whilst for BA it can be a float.
-
-# %%
-for trait in ["aroma", "palate", "taste", "appearance", "overall"]:
-    plt.hist((df_ba[trait]-df_ba[trait].min())/(df_ba[trait].max()-df_ba[trait].min()), bins=15, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
-    plt.hist((df_rb[trait]-df_rb[trait].min())/(df_rb[trait].max()-df_rb[trait].min()), bins=15, alpha=0.5, label=f'RateBeer {trait}', density = True)
-    plt.title(f"histogram of {trait} from both datasets")
-    plt.legend(loc='upper right')
-    plt.xlabel(f"{trait}")
-    plt.ylabel("density")
-    plt.show()
-
-
-# %% [markdown]
-#  We see that the review distibution is heavy tailed, showing that there exist some reviews that are extremely long in comparison to the average reviews.
-#  This occurs both for the number of words and the number of characters.
-
-# %%
-plt.hist(df_ba['text'].str.split(' ').str.len(), bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
-plt.hist(df_rb['text'].str.split(' ').str.len(), bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
-plt.title(f"histogram of number of words per review from both datasets")
-plt.legend(loc='upper right')
-plt.xlabel("Number of words")
-plt.ylabel("density")
-plt.show()
-
-plt.hist(df_ba['text'].str.len(), bins=10, alpha=0.5, label=f'BeerAdvocate {trait}', density = True)
-plt.hist(df_rb['text'].str.len(), bins=10, alpha=0.5, label=f'RateBeer {trait}', density = True)
-plt.title(f"histogram of number of characters per review from both datasets")
-plt.legend(loc='upper right')
-plt.xlabel("Number of characters")
-plt.ylabel("density")
-plt.show()
-
-
-# %% [markdown]
-#  ### map visualization:
-# load world maps (from [open data soft](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)) and us maps from [geopandas default library](https://geopandas.org/en/stable/docs/user_guide/io.html).
-
-# %%
-url_world_map = "https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/download/?format=shp&timezone=Europe/Berlin&lang=fr"
-world = gpd.read_file(url_world_map)
-usa = gpd.read_file(gplt.datasets.get_path("contiguous_usa")) #loading usa map from geopandas default library
-
-# need to create per country stats:
-
-# %%
-# beer count per country
-beer_country = df_beers["country_code"].groupby(df_beers["country_code"]).count()
-display(beer_country)
-# beer count per state
-beer_usa = df_beers.dropna() #countries outside of us have NaN values for the state
-beer_states = beer_usa["states"].groupby(beer_usa["states"]).count()
-
-# plotting log number of beers per country
-beer_country = world.merge(beer_country, how = "left", left_on="iso3", right_index = True, )
-beer_country['log_beers'] = beer_country['country_code'].apply(lambda x: np.log10(x) if x >= 1 else 0)
-#number of breweries per country (log)
-#scheme = mc.FisherJenks(beer_country['log_beers'], k=8)
-gplt.choropleth(beer_country, hue="log_beers", legend=True)
-plt.title("nb of beer per country (log10)")
-plt.show()
-
-# plotting log number of beers per states
-beer_states = usa.merge(beer_states, how = "left", left_on="state", right_index = True)
-beer_states['log_beers'] = beer_states['states'].apply(lambda x: np.log10(x) if x >= 1 else 0)
-
-gplt.choropleth(beer_states, hue="log_beers", legend=True)
-plt.title("nb of beer per states (log10)")
-plt.show()
-
-
-# %% [markdown]
-# We can see that most of our data is concentrated in the USA and the North Americas in general. Thus, we make an extra effort to also include US states.
-
-# %% [markdown]
-#  ## Data enrichment
-#  ### style clustering
-#  We want to create better style groupings in order to understand our data better.
-
-
-
-
-# %%
-counts = df_beers["style_class"].value_counts().sort_values(ascending=False)
-names = counts.index
-plt.bar(names, counts, alpha=0.5)
-# plt.hist(df_ba_beers["style_class"], )
-plt.title(f"Amount of beers per style for BA dataset")
-plt.legend(loc='upper right')
-plt.xlabel("Beer Style")
-plt.ylabel("Number of beers")
-plt.xticks(rotation=90)
-plt.show()
-
-
-# %% [markdown]
-# The predominant beer styles are Pale Ales and Indian Pale Ales. In total we have 15 classes of beer styles.
-
-# %% [markdown]
-#  # Plan for Investigation/Methods:
-#  ### RQ1: Are beer preferences influenced by geography/culture?
-#  We investigate this by figuring out preferred beer styles.
-#  We can conduct t-tests to see if there is a significant difference in ratings per beer style between countries, using the Sidak correction.
-#  ### RQ2: Do different cultures prioritise/prefer different aspects of beers such as feel? Are some cultures more critical of beer?
-#  We can conduct the exact same analysis as in RQ1 for each of the beer characteristics (palate, etc.) and also for beer ratings in general.
-#  ### RQ3: Do different cultures have stylistically different ways of writing reviews and discussing beer? Do users talk about foreign beers differently than they talk about their local ones?
-#  Reviews for each country will just be aggregated into a large piece of text since we strictly interested in comparing per country. We focus on English speaking countries.
-#  To do textual analysis, we will first conduct textual preprocessing steps. This will involving removing punctuation, removing stopwords, capitalisation and most importantly choosing indexing terms. Depending on results, we may find that other steps should also be taken.
-#  After this preprocessing, we will vectorise the corpus. To do this, we can use a count vectoriser (bag of words model), tf-idf or other methods. Finally, we will compute distances between textual reviews by choosing either existing research methods e.g. [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl), or by using cosine distance metric.
-# 
-#  Depending on the results of this, we can then investigate if the distances between the corpuses can represent the cultural similarity between countries.
-#  If so, it may be interesting to run a dendrogram clustering using [sklearn](https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html) to see if we can recreate geographical regions.
-#  It may be that we can recreate a North American group, Oceanic group and European group. This will obviously depend on our results.
-# 
-#  Furthermore, we will also create a wordmap of the language used in reviews. Either we can use simple frequency analysis, or again we can leverage existing libraries such as [word-cloud](https://github.com/amueller/word_cloud).
-# 
-#  We can also rerun our distance analysis for each country between reviews for local and foreign beer to see if there is a difference. We can then see what countries exhibit this difference the most.
-# 
-# ### RQ4: Is there a "home bias" for reviewers?
-# I.e. do users rate local beers higher than their foreign counterparts?
-# The hypothesis is the following:
-# $H_0$: $\mu_l = \mu_f$
-# $H_a$: $\mu_l \neq \mu_f$
-# 
-# where $\mu_l$ ($\mu_f$) is the average user ratings given to local (foreign) beers.
-# 
-# We have to control the effect of confounders. Here the "treatment" might be identified as "do the users and the beers come from the same country". 
-# We call an experiment treated (treatment=1), if the user and the beer come from the same country. On the otherhand, if the user and the beer do not come from the same country, we set treatment = 0.
-# However, there are some covariates (such as users' taste, whether they are overall more critical or not, etc...). These might influence both the outcome (the users' rating of that beer) and the likelihood to be from the same place as the beer. To mitigate this effect, we match users based on propensity. A propensity score measures the probability of a user to rate beer from his own country/state (treatment = 1) vs. a foreign beer (treatment = 0) given observed covariates. Is is learned using logistic regression with labels being 1 if the reviewed beer is local, 0 if it is foreign. Some features considered are for example users' average ratings, number of ratings, users' "taste" (ratings per style), country, etc...
-# 
-
-# %% [markdown]
-#  # Plan for Communication/Visualisation:
-#  We plan to tell the following story (_obviously result dependent_):
-#  1. [HeatMap] Show that there are differences in ratings and beer preferences using our initial analyses.
-#  2. [HeatMap, WordCloud] Show that there are differences in how different countries talk about beers.
-#  3. [Dendrogram] Try and relate this to cultural or geographical proximities of the countries.
-#  3. [HeatMap] See if there is a difference for each country in how they talk about local and foreign beers.
-#  4. [HeatMap] Show the results for our detailed analysis into home bias to determine if users have a preference for local produce or not.
-#  5. Give our main takeaways.
-
-
-# %% [markdown]
-# RQ4: home bias
-# %%
-df = df_ba
-# here we can subset if needed
-#df = df[df['user_country'] != 'United States']
-#df = df[df['beer_country'] != 'United States']
-# %%
-# definition of the treatment variable
-df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
-# %% [markdown]
-# ### data exploration for RQ4
-# %%
-# feature number of reviews for each beer
-df_groupby_beer = df.groupby(by = "beer_id").agg({"beer_id": "count", "treatment": "sum"})
-df["nb_reviews_per_beer"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["beer_id"], axis=1)
-df["nb_reviews_per_beer_local"] = df.apply(lambda row: df_groupby_beer.loc[row["beer_id"]]["treatment"], axis=1)
-df["nb_reviews_per_beer_foreign"] = df["nb_reviews_per_beer"] - df["nb_reviews_per_beer_local"]
-df["share_local_reviews"] = df["nb_reviews_per_beer_local"] / df["nb_reviews_per_beer"]
-
-# %%
-# plot the proportion of local reviews for each beer
-groupby_beer = df.groupby(by="beer_id").agg({"share_local_reviews": "mean"})
-groupby_beer["share_local_reviews"].hist(bins=50, label = "all reviews")
-
-# removing american reviews
-groupby_beer_no_us = df[df["user_country"] != "United States"].groupby(by="beer_id").agg({"share_local_reviews": "mean"})
-groupby_beer_no_us["share_local_reviews"].hist(bins=50, label = "non american reviews")
-plt.title("share of local reviews per beer")
-plt.legend()
-# %% [markdown]
-# comment on the figure above: It makes sense. most of the users are concentrated in a few area. Therefore a beer from predominant country is mostly rated by locals and an beer with few user in this country mostly receives foreign reviews foreign.
-# %%
-# how many beers do have a balance distribution ? (10-90%)
-groupby_beer_no_us[(groupby_beer_no_us["share_local_reviews"] > 0.1) & (groupby_beer_no_us["share_local_reviews"] < 0.9)]["share_local_reviews"].hist()
-
-# not that many, should we subset ?
-# propensity matching should take care of that (I hope)
-# %% [markdown]
-# ### analysis prior to matching
-# %%
-# plot the rating distribution of the treatment and control groups prior to matching
-df[df["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
-df[df["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
-plt.legend()
-plt.title("distribution of local vs. foreign reviews")
-
-# run a t-test to see if there is a significant difference in ratings between reviews with treatment = 1 and reviews with treatment = 0 (prior to matching)
-from scipy.stats import ttest_ind
-res = ttest_ind(df[df["treatment"] == 1]["rating"], df[df["treatment"] == 0]["rating"], equal_var=False)
-print(res)
-# print the average difference of mean ratings between treatment = 1 and treatment = 0
-print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df[df["treatment"] == 1]["rating"].mean() - df[df["treatment"] == 0]["rating"].mean())
-
-# %%
-# now if we subset to beer with at least 10% of foreign reviews and 10% of local reviews
-df_balanced = df[(df["share_local_reviews"] > 0.1) & (df["share_local_reviews"] < 0.9)]
-df_balanced[df_balanced["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
-df_balanced[df_balanced["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
-
-# run t-test
-res = ttest_ind(df_balanced[df_balanced["treatment"] == 1]["rating"], df_balanced[df_balanced["treatment"] == 0]["rating"], equal_var=False)
-print(res)
-# print the average difference of mean ratings between treatment = 1 and treatment = 0
-print("average difference of mean ratings between treatment = 1 and treatment = 0: ", df_balanced[df_balanced["treatment"] == 1]["rating"].mean() - df_balanced[df_balanced["treatment"] == 0]["rating"].mean())
-
-# still significant results (in the same direction)
-
-# %% [markdown]
-# ## propensity score computation using random forest
-# %%
-# feature average user rating
-df_users = df.groupby(by = "user_id").agg({"rating": "mean"})
-df["avg_user_rating"] = df.apply(lambda row: df_users.loc[row["user_id"]]["rating"], axis=1)
-
-# feature style_class as category
-df["style_class_cat"] = df["style_class"].astype("category").cat.codes
-# %%
-# create a feature vector using the following features:
-# - avg user rating
-# - number of reviews
-# - beer style class
-# - beer average rating
-
-# we cannot use user country and beer country beause they are already part of the treatment
-
-# feature list
-feature_list = ["avg_user_rating", "nbr_reviews", "style_class_cat", "avg_beer_rating"]
-
-# why do we now have nans?
-df = df.dropna(subset = "avg_beer_rating")
-
-X = df[feature_list].values
-# create label vector (treatment column)
-y = df["treatment"].values
-# %%
-# split into train and test set
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import f1_score, confusion_matrix
-
-def random_forest_propensity(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # train a random forest classifier
-
-    clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
-    clf.fit(X_train, y_train)
-
-    # get the probabilities on the test set
-    y_pred = clf.predict_proba(X_test)[:,1]
-    # predict the treatment with a threshold of 0.5
-    y_pred_treated = clf.predict(X_test)
-
-    # measure f1 score
-    print("f1 score: ", f1_score(y_test, y_pred_treated))
-    # print confusion matrix
-    print(confusion_matrix(y_test, y_pred_treated))
-
-    return y_pred
-
-y_pred = random_forest_propensity(X, y)
-# the predictor is very much biased toward predicting treatment = 1 because the dataset is very unbalanced
-# %% [markdown]
-# in the following, we filter the review dataset to only keep countries with at least 1000 reviews (top 8 countries). We then balance our dataset by randomly sampling 1000 reviews per country.
-# %%
-g = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
-# filter to countries in g with at least 100 reviews
-countries = g[g["beer_id"] >= 1000].index
-df_topcountries = df[df["user_country"].isin(countries)] # 8 countries
-g = df_topcountries.groupby("user_country")
-def sampling_k_elements(group, k=1000):
-    if len(group) < k:
-        return group
-    return group.sample(k)
-
-df_topcountries_balanced = df_topcountries.groupby('user_country').apply(sampling_k_elements).reset_index(drop=True)
-# check if we have 1000 reviews per country
-df_topcountries_balanced.groupby("user_country").count()
-
-# %%
-# check if random forest performs better
-X = df_topcountries_balanced[["avg_user_rating", "nbr_reviews", "style_class_cat", "avg_beer_rating"]].values
-# create label vector (treatment column)
-y = df_topcountries_balanced["treatment"].values
-random_forest_propensity(X, y)
-# random forest is still pretty shit
-
-# %% [markdown]
-# ### propensity matching using psmpy library
-from psmpy import PsmPy
-from psmpy.functions import cohenD
-from psmpy.plotting import *
-
-# psmpy need a index column
-df_topcountries["idx"] = df_topcountries.reset_index().index
-
-psm = PsmPy(df_topcountries[feature_list + ["treatment", "idx"]], treatment='treatment', indx='idx', exclude = [])
-psm.logistic_ps(balance = True)
-
-# %%
-# matching with knn
-psm.knn_matched(matcher='propensity_logit', replacement=False, caliper=None)
-psm.plot_match(Title='Side by side matched controls', Ylabel='Number ofpatients', Xlabel= 'Propensity logit',names = ['treatment', 'control'], colors=['#E69F00', '#56B4E9'] ,save=True)
-psm.effect_size_plot(title='Standardized Mean differences accross covariates before and after matching', before_color='#FCB754', after_color='#3EC8FB', save=False)
-
-# %%
-# perform matching between treated and control group using propensity score
-
-#TODO
-# %% [markdown]
-# ### propensity matching using matrix factorization with biases
-# %%
-# reset beer id and user id to be from 0 to nb_beer and nb_user (long, n^2)
-def reset_id(df, col):
-    df[col] = df[col].astype("category").cat.codes
-    return df
-# %%    
-df_sample = df.sample(1000)
-df_sample = reset_id(df_sample, "beer_id")
-df_sample = reset_id(df_sample, "user_id")
-# %%
-# Matrix factorization with biases
-import surprise.prediction_algorithms.matrix_factorization as mf
-from surprise import Reader, Dataset
-
-def get_biases(df, plot=False, verbose=False):
-    algo = mf.SVD(n_factors=100, n_epochs=20, biased=True, lr_all=0.005, reg_all=0.02, verbose=verbose)
-    reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(df[["user_id", "beer_id", "rating"]].rename(columns={"user_id": "userID", "beer_id": "itemID", "rating": "rating"}), reader)
-    user_bias = algo.fit(data.build_full_trainset()).bu
-    beer_bias = algo.fit(data.build_full_trainset()).bi
-    if plot:
-        plt.hist(user_bias)
-        plt.hist(beer_bias)
-        plt.show()
-    return user_bias, beer_bias
-# %%
-user_bais, beer_bias = get_biases(df_sample)
-# %%
-# add feature user bias and beer bias
-df_sample["user_bias"] = df_sample.apply(lambda row: user_bias[row["user_id"]], axis=1)
-df_sample["beer_bias"] = df_sample.apply(lambda row: beer_bias[row["beer_id"]], axis=1)
-
-# %%
-# reset index reviews
-df_sample = df_sample.reset_index()
-df_sample["idx"] = df_sample.index
-
-# %%
-import networkx as nx
-B = nx.Graph()
-# Add nodes with the node attribute "bipartite"
-B.add_nodes_from(df_sample[df_sample["treatment"] == 0]["idx"], bipartite=0)
-B.add_nodes_from(df_sample[df_sample["treatment"] == 1]["idx"], bipartite=1)
-print(B)
-# Add edge between nodes of opposite node sets. The weights are the difference in user_bias squared plus the difference in beer_bias squared
-control_nodes = {n for n, d in B.nodes(data=True) if d["bipartite"] == 0}
-treatment_nodes = set(B) - control_nodes
-for control in control_nodes:
-    for treatment in treatment_nodes:
-        B.add_edge(control, treatment, weight=(df_sample.loc[control]["user_bias"] - df_sample.loc[treatment]["user_bias"])**2 + (df_sample.loc[control]["beer_bias"] - df_sample.loc[treatment]["beer_bias"])**2)
-
-# TODO: find an algorithm which is not O(n^2)
-
-# %%
-# find maximum matching of the graph
-matching = nx.algorithms.bipartite.matching.hopcroft_karp_matching(B, top_nodes=control_nodes)
-# the key-value pair in matching appear twice, so we can just take the first half of the matching
-control_ids = list(matching.keys())[:len(matching)//2]
-treatment_ids = list(matching.values())[:len(matching)//2]
-# print intersection of matching keys and values
-print(set(matching.keys()) & set(matching.values()))
-# %%
-# create a new df with the matching
-df_control = df_sample.loc[control_ids]
-df_treatment = df_sample.loc[treatment_ids]
-
-# run a t-test on rating with the matching dataframe
-res = ttest_ind(df_control["rating"], df_treatment["rating"])
-print(res)
-# after matching the result is not significative anymore
-# TODO: verify with bigger sample size
-# comput the difference of mean rating between control and treatment
-print(df_control["rating"].mean() - df_treatment["rating"].mean())
-
-#plot the distribution of rating for the matching
-plt.hist(df_control["rating"], alpha=0.5, label="control")
-plt.hist(df_treatment["rating"], alpha=0.5, label="treatment")
-plt.show()
-
-# %% [markdown]
-# ### Matrix factorization (bis): comparison of bias vectors between control and treatment groups
-# %%
-# reset beer id and user id to be from 0 to nb_beer and nb_user (long, n^2)
-
-df_treatment_sample = df[df["treatment"] == 1]
-df_control_sample = df[df["treatment"] == 0]
-
-#df_treatment_sample = df_treatment.sample(1000)
-#df_control_sample = df_control.sample(1000)
-
-df_treatment_sample = reset_id(df_treatment_sample, "beer_id")
-df_treatment_sample = reset_id(df_treatment_sample, "user_id")
-df_control_sample = reset_id(df_control_sample, "beer_id")
-df_control_sample = reset_id(df_control_sample, "user_id")
-
-user_bias_treatment, beer_bias_treatment = get_biases(df_treatment_sample)
-user_bias_control, beer_bias_control = get_biases(df_control_sample)
-# %%
-# plot the difference in bias vectors between control and treatment groups
-plt.hist(user_bias_treatment, label="treatment", alpha = 0.5, bins = 25)
-plt.hist(user_bias_control, label="control", alpha = 0.5, bins = 25)
-plt.title("user bias")
-plt.legend()
-plt.show()
-plt.hist(beer_bias_treatment, label="treatment", alpha = 0.5, bins = 25)
-plt.hist(beer_bias_control, label="control", alpha = 0.5, bins = 25)
-plt.title("beer bias")
-plt.legend()
-plt.show()
-# %%
-# run a t-test on the difference in bias vectors
-res = ttest_ind(user_bias_treatment, user_bias_control)
-print(res)
-# print difference in mean
-print(np.mean(user_bias_treatment) - np.mean(user_bias_control))
-res = ttest_ind(beer_bias_treatment, beer_bias_control)
-print(res)
-print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
-# interestingly we seem to always find similar values. So the effect is small and significative or not depending on the method (probably also the sample size)
-# %% [markdown]
-# ### Matrix factorization (ter): analysis per country:
-
-groupby_country = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
-topten_country = groupby_country.index[:10]
-df_topcountries = df[df["user_country"].isin(topten_country)]
-
-# %%
-# boostrapping function to get the confidence interval
-# bootstrapping function
-# input: dataset, nb of iterations
-# output: sorted list of means, overal mean, 95% confidence interval
-
-def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
-    differences = []
-    for i in range(iterations):
-        treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
-        control_sample = np.random.choice(control, size = len(treatment), replace = True)
-        differences.append(np.mean(treatment_sample) - np.mean(control_sample))
-    
-    differences.sort()
-    return np.mean(differences), differences[int(np.floor(level/2*iterations))], differences[int(np.ceil(1-(level/2) * iterations))]
-
-N_BOOSTRAP = 1000 #number of time we boostrap each dataset (be careful with runtimes)
-# sidak correct:
-alpha_1 = 1-(1-0.05)**(1/10)
-print(alpha_1)
-# %%
-list_results = []
-
-from scipy.stats import bootstrap
-
-for country in topten_country:
-    df_country = df_topcountries[df_topcountries["user_country"] == country]
-    df_country_treatment = df_country[df_country["treatment"] == 1]
-    df_country_control = df_country[df_country["treatment"] == 0]
-    user_bias_treatment, beer_bias_treatment = get_biases(df_country_treatment)
-    user_bias_control, beer_bias_control = get_biases(df_country_control)
-
-    # run a t-test on the difference in bias vectors
-    print("country: ", country)
-    stat_user, p_user = ttest_ind(user_bias_treatment, user_bias_control)
-    diff_user = np.mean(user_bias_treatment) - np.mean(user_bias_control) #positive if treatment is better
-    stat_beer, p_beer = ttest_ind(beer_bias_treatment, beer_bias_control)
-    diff_beer = np.mean(beer_bias_treatment) - np.mean(beer_bias_control)
-    print("user bias: ", stat_user, p_user, diff_user)
-    print("beer bias: ", stat_beer, p_beer, diff_beer)
-
-    # compute confidence interval
-    diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(user_bias_treatment, user_bias_control, alpha_1, N_BOOSTRAP)
-
-    #print(f"mean: {diff_user_mean:0.04}, 95%CI: [{diff_user_low:0.04}, {diff_user_high:0.04}]")
-
-    #append results to list
-    list_results.append({"country" : country,"user_bias_treatment" : user_bias_treatment, "beer_bias_treatment" : beer_bias_treatment, "user_bias_control" : user_bias_control, "beer_bias_control" : beer_bias_control, "diff_user_mean" : diff_user_mean, "diff_user_low" : diff_user_low, "diff_user_high" : diff_user_high})
-# %%
-df_results = pd.DataFrame(list_results)
-df_results["err_low"] = df_results["diff_user_mean"] - df_results["diff_user_low"]
-df_results["err_high"] = df_results["diff_user_high"] - df_results["diff_user_mean"]
-fig, ax = plt.subplots(figsize = (10, 5))
-plt.errorbar([i for i in range(len(df_results))], df_results["diff_user_mean"].to_numpy(), yerr=df_results[["err_low", "err_high"]].transpose().to_numpy(), fmt = 'o', color = 'b', label = "data")
-ax.axhline(0, 0, 1, linestyle = "--", color = "k", label = "reference")
-plt.xticks([i for i in range(len(df_results))], topten_country)
-plt.ylabel("diference in user bias")
-plt.title("diference in user bias confidence interval per country")
-plt.legend()
-plt.show()
