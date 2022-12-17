@@ -492,60 +492,32 @@ plt.show()
 # TODO: compare to rescaled results and discuss
 
 # %%
-# function for setting the colors of the box plots pairs
-def setBoxColors(bp, colors):
+def plot_boxplot(df, aspect, countries, attribute="user_country"):
     """
-    Fills the boxes of a boxplot with the specified colors
+    Plots a boxplot for the specified aspect
     """
-    for i in range(len(bp['boxes'])):
-        bp['boxes'][i].set_facecolor(colors[i])
-    plt.setp(bp['medians'], color="blue")
+    _ = plt.figure(figsize=(12,6))
+    ax = plt.axes()
+    for i,country in enumerate(countries):
+        data = df[df[attribute] == country][aspect].to_numpy(dtype=float)
+        ax.boxplot(data,positions=[i+1], notch=0, sym='+', vert=1, whis=1.5)
+    ax.set_title(f"Distribution of {aspect}")
+    # set axes limits and labels
+    ax.set_xlim(0.5, len(countries)+0.5)
+    ticks = np.arange(1, len(countries)+1)
+    ax.set_xticks(ticks)
+    ax.set_xticklabels(countries,rotation=90)
+    ax.set_xlabel("Country")
+    ax.set_ylabel(aspect)
+    plt.show()
 
+# %%
+# Get a list of countries we want to plot the aspects for
+country_list = list(df_ba["user_country"].unique())
+# Plot the distribution of the aspects for the countries in the list
+for aspect in ba_aspects:
+    plot_boxplot(df_ba, aspect, country_list)
 
-# Some fake data to plot
-df_ba_US = df_ba[df_ba["user_country"] == "United States"]
-A = [df_ba_US["aroma"], df_ba_US["appearance"], df_ba_US["taste"], df_ba_US["palate"], df_ba_US["overall"], df_ba_US["rating"]]
-# A= [[1, 2, 5,],  [7, 2,6,3,4],[3,2,8,6]]
-B = [[5, 7, 2, 2, 5], [7, 2, 5]]
-C = [[3,2,5,7], [6, 7, 3]]
-
-fig = plt.figure(figsize=(12,6))
-ax = plt.axes()
-# plt.hold(True)
-
-colors = ['pink', 'lightblue', 'lightgreen','pink', 'lightblue', 'lightgreen']
-
-# first boxplot pair
-bp = ax.boxplot(A, positions = [1, 2,3,4,5,6], widths = 0.6, patch_artist=True)
-setBoxColors(bp,colors)
-
-# # second boxplot pair
-# bp = ax.boxplot(B, positions = [4, 5], widths = 0.6, patch_artist=True)
-# setBoxColors(bp,colors)
-
-# thrid boxplot pair
-bp = ax.boxplot(C, positions = [7, 8], widths = 0.6, patch_artist=True)
-setBoxColors(bp,colors)
-
-bp = ax.boxplot(C, positions = [10, 11], widths = 0.6, patch_artist=True)
-setBoxColors(bp,colors)
-
-# set axes limits and labels
-plt.xlim(0,20)
-plt.ylim(0,9)
-ticks = [1.5, 4.5, 7.5, 10.5]
-plt.xticks(range(0, len(ticks)), ticks)
-ax.set_xticks(ticks)
-ax.set_xticklabels(['A', 'B', 'C',"D"])
-
-
-# draw temporary red and blue lines and use them to create a legend
-hB, = plt.plot([1,1],'-', color='pink')
-hR, = plt.plot([1,1],'-', color = 'lightblue')
-plt.legend((hB, hR),('Apples', 'Oranges'))
-hB.set_visible(False)
-hR.set_visible(False)
-# TODO: how about such a visualization?
 
 # %% [markdown]
 #  ### T-Testing for different US states in BA
@@ -673,8 +645,18 @@ for aspect in ba_aspects:
     results["total_rescaled"].append(len(dfs_ba_t_tests_style_germany[aspect + "_rescaled"][0]))
 df_results_t_tests_style_germany = pd.DataFrame(results)
 
+
 # %%
 df_results_t_tests_style_germany
+
+# %%
+# box plot the most popular style classes in germany
+# Get the most popular style classes
+style_counts = df_ba_germany["style"].value_counts().head(10)
+style_counts = style_counts.index.tolist()
+
+# %%
+plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style")
 
 
 # %%
@@ -928,3 +910,50 @@ df_rb_t_tests_style_states
 # Namely, suppose they rate two styles significantly different, but their beer distribution of that style is different, did one country rate worse beer? I.e. how do the rated beer averages compare?
 # We could maybe do a t-test on the beer averages for each style, and see if they are significantly different
 
+# %%
+# Get a list of countries/states that have significant results for a given style
+aspect_rescaled = "rating_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+# %%
+aspect_rescaled = "aroma_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+# %%
+aspect_rescaled = "palate_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+# %%
+aspect_rescaled = "appearance_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+# %%
+aspect_rescaled = "taste_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+# %%
+aspect_rescaled = "overall_rescaled"
+dfs_t_tests_countries[aspect_rescaled][0]
+# Keep only the significant results
+dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+
+
+# %%
+print(ba_aspects)
+
+# %%
+# For Each of the significant results. Are the beer averages significantly different?
+# Get a list of all beers rated by the 
+
+
+# %%
