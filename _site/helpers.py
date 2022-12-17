@@ -99,6 +99,7 @@ def determine_encoding(filename):
         print(check_bom(data))
 
 
+
 if __name__ == "__main__":
     data_folder = './Data/'
     path_ba = data_folder + 'BeerAdvocate/'

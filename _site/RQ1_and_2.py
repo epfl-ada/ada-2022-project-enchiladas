@@ -1,7 +1,16 @@
 # %%
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
+import pycountry # match country names to iso code
+import geoplot as gplt #plotting maps
+import geopandas as gpd
+import geoplot.crs as gcrs
+import imageio #not used ?
+import pathlib #not used ?
+import matplotlib.pyplot as plt
+import mapclassify as mc #???
 import os.path
 import scipy.stats as stats
 from helpers import * #custom made functions
@@ -25,18 +34,16 @@ pd.set_option('display.max_rows', 100)
 #  ## Load BA data
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba = pd.read_pickle(f"Data/{ba_pickle_filename}")
-df_ba.info()
-# %%
-df_ba.isna().sum()
-
+df_ba.columns
 # %%
 #  ## Load RB data
 rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 df_rb = pd.read_pickle(f"Data/{rb_pickle_filename}")
-df_rb.info()
-
-# %%
-df_rb.isna().sum()
+df_rb.columns
+# TODO: wait on RB data, still unassigned style_classes
+# You sould be able to deduce this. Since we assigned style_classes on matched, after having filtered this df, we should have all style_classes assigned...
+# For now, drop 'UNASSIGNED' style_classes
+df_rb = df_rb[df_rb["style_class"] != "UNASSIGNED"]
 
 # %%
 # print value counts of style_class 
@@ -48,7 +55,7 @@ print(df_rb["style_class"].value_counts())
 # Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
 # To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
 
-# TODO: Formalize what we do. Ideally add citations.
+# TODO: Should we show that users actually rate things differently on average somehow? if yes, how? Propensity match users on rated beers accross entire dataset and compare averages... And then? 
 # %%
 def scale(rating, user_average, top=5, bottom=1):
     """
@@ -167,33 +174,13 @@ print("overall_rescaled", df_rb["overall_rescaled"].min(), df_rb["overall_rescal
 print("rating_rescaled", df_rb["rating_rescaled"].min(), df_rb["rating_rescaled"].max())
 
 # %% [markdown]
-# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5. I.e. nobody rated a beer with 0 stars.
+# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5.
 
 # %% [markdown]
 #  # Country and state filtering
 # Find states and countries with enough ratings
 # TODO: arbitrarily pick 1000 as the minimum sample size for now, but this should be changed to something more statistically sound. How?
 # For t-tests, pick a lower sample size, e.g. 100.
-# Improve the justification and especially if and why we should have two thresholds. Does it make sense to have two thresholds? Initially, it was thought to help once we subset the data to the most popular style_classes and styles...
-
-# %%
-# Plot the number of ratings per country in BA top 20
-df_ba["user_country"].value_counts().head(20).plot(kind="bar", title="Number of ratings per country in BA",logy=True)
-plt.xlabel("Country")
-plt.ylabel("Number of ratings")
-
-# %%
-# Plot the number of ratings per user_state in BA last 20
-df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA",logy=True)
-plt.xlabel("State")
-plt.ylabel("Number of ratings")
-
-# %%
-# Plot the number of ratings per user_state in RB last 20
-df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB",logy=True)
-plt.xlabel("State")
-plt.ylabel("Number of ratings")
-
 # %%
 MIN_SAMPLE_SIZE = 1000
 MIN_TEST_SAMPLE_SIZE = 100
@@ -391,7 +378,6 @@ for aspect in ba_aspects:
     aspect_rescaled = aspect + "_rescaled"
     dfs_t_tests_countries[aspect_rescaled] = pairwise_ttests(df_ba,country_list,aspect_rescaled,entity_column_name="user_country")
 
-
 # %%
 print(dfs_t_tests_countries["aroma"][0].head(10))
 
@@ -403,8 +389,6 @@ for aspect in ba_aspects:
     print(aspect, ":", len(dfs_t_tests_countries[aspect][0][dfs_t_tests_countries[aspect][0]["significant"] == True]))
     aspect_rescaled = aspect + "_rescaled"
     print(aspect_rescaled, ":", len(dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]))
-
-
 
 # %%
 # Plot the distribution of ratings of a pair where the t-test is significant
@@ -492,32 +476,60 @@ plt.show()
 # TODO: compare to rescaled results and discuss
 
 # %%
-def plot_boxplot(df, aspect, countries, attribute="user_country"):
+# function for setting the colors of the box plots pairs
+def setBoxColors(bp, colors):
     """
-    Plots a boxplot for the specified aspect
+    Fills the boxes of a boxplot with the specified colors
     """
-    _ = plt.figure(figsize=(12,6))
-    ax = plt.axes()
-    for i,country in enumerate(countries):
-        data = df[df[attribute] == country][aspect].to_numpy(dtype=float)
-        ax.boxplot(data,positions=[i+1], notch=0, sym='+', vert=1, whis=1.5)
-    ax.set_title(f"Distribution of {aspect}")
-    # set axes limits and labels
-    ax.set_xlim(0.5, len(countries)+0.5)
-    ticks = np.arange(1, len(countries)+1)
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(countries,rotation=90)
-    ax.set_xlabel("Country")
-    ax.set_ylabel(aspect)
-    plt.show()
+    for i in range(len(bp['boxes'])):
+        bp['boxes'][i].set_facecolor(colors[i])
+    plt.setp(bp['medians'], color="blue")
 
-# %%
-# Get a list of countries we want to plot the aspects for
-country_list = list(df_ba["user_country"].unique())
-# Plot the distribution of the aspects for the countries in the list
-for aspect in ba_aspects:
-    plot_boxplot(df_ba, aspect, country_list)
 
+# Some fake data to plot
+df_ba_US = df_ba[df_ba["user_country"] == "United States"]
+A = [df_ba_US["aroma"], df_ba_US["appearance"], df_ba_US["taste"], df_ba_US["palate"], df_ba_US["overall"], df_ba_US["rating"]]
+# A= [[1, 2, 5,],  [7, 2,6,3,4],[3,2,8,6]]
+B = [[5, 7, 2, 2, 5], [7, 2, 5]]
+C = [[3,2,5,7], [6, 7, 3]]
+
+fig = plt.figure(figsize=(12,6))
+ax = plt.axes()
+# plt.hold(True)
+
+colors = ['pink', 'lightblue', 'lightgreen','pink', 'lightblue', 'lightgreen']
+
+# first boxplot pair
+bp = ax.boxplot(A, positions = [1, 2,3,4,5,6], widths = 0.6, patch_artist=True)
+setBoxColors(bp,colors)
+
+# # second boxplot pair
+# bp = ax.boxplot(B, positions = [4, 5], widths = 0.6, patch_artist=True)
+# setBoxColors(bp,colors)
+
+# thrid boxplot pair
+bp = ax.boxplot(C, positions = [7, 8], widths = 0.6, patch_artist=True)
+setBoxColors(bp,colors)
+
+bp = ax.boxplot(C, positions = [10, 11], widths = 0.6, patch_artist=True)
+setBoxColors(bp,colors)
+
+# set axes limits and labels
+plt.xlim(0,20)
+plt.ylim(0,9)
+ticks = [1.5, 4.5, 7.5, 10.5]
+plt.xticks(range(0, len(ticks)), ticks)
+ax.set_xticks(ticks)
+ax.set_xticklabels(['A', 'B', 'C',"D"])
+
+
+# draw temporary red and blue lines and use them to create a legend
+hB, = plt.plot([1,1],'-', color='pink')
+hR, = plt.plot([1,1],'-', color = 'lightblue')
+plt.legend((hB, hR),('Apples', 'Oranges'))
+hB.set_visible(False)
+hR.set_visible(False)
+# TODO: how about such a visualization?
 
 # %% [markdown]
 #  ### T-Testing for different US states in BA
@@ -645,18 +657,8 @@ for aspect in ba_aspects:
     results["total_rescaled"].append(len(dfs_ba_t_tests_style_germany[aspect + "_rescaled"][0]))
 df_results_t_tests_style_germany = pd.DataFrame(results)
 
-
 # %%
 df_results_t_tests_style_germany
-
-# %%
-# box plot the most popular style classes in germany
-# Get the most popular style classes
-style_counts = df_ba_germany["style"].value_counts().head(10)
-style_counts = style_counts.index.tolist()
-
-# %%
-plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style")
 
 
 # %%
@@ -748,6 +750,8 @@ for key in states_codes.keys():
     frames = [df_plot_p_value, c]
     df_plot_p_value = pd.concat(frames)
     
+    
+
 # %%
 fig = px.choropleth(df_plot_p_value,
                     locations='state_code_user_state1', 
@@ -910,50 +914,3 @@ df_rb_t_tests_style_states
 # Namely, suppose they rate two styles significantly different, but their beer distribution of that style is different, did one country rate worse beer? I.e. how do the rated beer averages compare?
 # We could maybe do a t-test on the beer averages for each style, and see if they are significantly different
 
-# %%
-# Get a list of countries/states that have significant results for a given style
-aspect_rescaled = "rating_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-# %%
-aspect_rescaled = "aroma_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-# %%
-aspect_rescaled = "palate_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-# %%
-aspect_rescaled = "appearance_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-# %%
-aspect_rescaled = "taste_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-# %%
-aspect_rescaled = "overall_rescaled"
-dfs_t_tests_countries[aspect_rescaled][0]
-# Keep only the significant results
-dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
-
-
-# %%
-print(ba_aspects)
-
-# %%
-# For Each of the significant results. Are the beer averages significantly different?
-# Get a list of all beers rated by the 
-
-
-# %%
