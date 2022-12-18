@@ -3,6 +3,43 @@ layout: default
 title: Applied Beer Analysis
 ---
 
+
+
+
+# RQ 1
+
+# RQ 2
+
+# RQ 3
+
+# RQ 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Text can be **bold**, _italic_, or ~~strikethrough~~.
 
 [Link to another page](./another-page.html).
