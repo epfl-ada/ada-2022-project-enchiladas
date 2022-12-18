@@ -433,6 +433,79 @@ df_ba_ratings_filtered_beers_merged_users.rename(columns={"country": "beer_count
 df_ba_ratings_filtered_beers_merged_users[df_ba_ratings_filtered_beers_merged_users["beer_country"].isna()]
 print(df_ba_ratings_filtered_beers_merged_users.columns)
 
+# %% [markdown]
+#  # Rescale Ratings
+# Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
+# To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
+
+# TODO: Formalize what we do. Ideally add citations.
+# %%
+def scale(rating, user_average, top=5, bottom=1):
+    """
+    Returns the scale of the rating with respect to the users average rating.
+    """
+    if rating > user_average:
+        return top-user_average
+    elif rating < user_average:
+        return user_average-bottom
+    else:
+        return bottom
+def rescale(rating, user_average, top = 5, bottom = 1):
+    """
+    Rescales the rating to a -1,1 scale where 0 is the users average rating.
+    """
+    return (rating - user_average) / scale(rating, user_average, top, bottom)
+
+# %% [markdown]
+#  ## BA
+# Columns to be rescaled in BA: 
+# - aroma (1-5)
+# - appearance (1-5)
+# - taste (1-5)
+# - palate (1-5)
+# - overall (1-5)
+# - rating (1-5)
+
+# TODO: here might be a good place to explain the different usages of the individual ratings/aspects across the two datasets
+
+# %%
+# Sanity check the ranges of the ratings and aspects
+print("aroma", df_ba_ratings_filtered_beers_merged_users["aroma"].min(), df_ba_ratings_filtered_beers_merged_users["aroma"].max())
+print("appearance", df_ba_ratings_filtered_beers_merged_users["appearance"].min(), df_ba_ratings_filtered_beers_merged_users["appearance"].max())
+print("taste", df_ba_ratings_filtered_beers_merged_users["taste"].min(), df_ba_ratings_filtered_beers_merged_users["taste"].max())
+print("palate", df_ba_ratings_filtered_beers_merged_users["palate"].min(), df_ba_ratings_filtered_beers_merged_users["palate"].max())
+print("overall", df_ba_ratings_filtered_beers_merged_users["overall"].min(), df_ba_ratings_filtered_beers_merged_users["overall"].max())
+print("rating", df_ba_ratings_filtered_beers_merged_users["rating"].min(), df_ba_ratings_filtered_beers_merged_users["rating"].max())
+
+# %%
+# Compute the average rating for each user
+df_ba_ratings_filtered_beers_merged_users["user_average_aroma"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["aroma"].transform("mean")
+df_ba_ratings_filtered_beers_merged_users["user_average_appearance"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["appearance"].transform("mean")
+df_ba_ratings_filtered_beers_merged_users["user_average_taste"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["taste"].transform("mean")
+df_ba_ratings_filtered_beers_merged_users["user_average_palate"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["palate"].transform("mean")
+df_ba_ratings_filtered_beers_merged_users["user_average_overall"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["overall"].transform("mean")
+df_ba_ratings_filtered_beers_merged_users["user_average_rating"] = df_ba_ratings_filtered_beers_merged_users.groupby("user_id")["rating"].transform("mean")
+
+# %%
+# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
+
+df_ba_ratings_filtered_beers_merged_users["aroma_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"]), axis=1)
+df_ba_ratings_filtered_beers_merged_users["appearance_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
+df_ba_ratings_filtered_beers_merged_users["taste_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["taste"], row["user_average_taste"]), axis=1)
+df_ba_ratings_filtered_beers_merged_users["palate_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
+df_ba_ratings_filtered_beers_merged_users["overall_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["overall"], row["user_average_overall"]), axis=1)
+df_ba_ratings_filtered_beers_merged_users["rating_rescaled"] = df_ba_ratings_filtered_beers_merged_users.apply(lambda row: rescale(row["rating"], row["user_average_rating"]), axis=1)
+
+# %%
+# Sanity check the ranges of the rescaled ratings and aspects
+print("aroma_rescaled", df_ba_ratings_filtered_beers_merged_users["aroma_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["aroma_rescaled"].max())
+print("appearance_rescaled", df_ba_ratings_filtered_beers_merged_users["appearance_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["appearance_rescaled"].max())
+print("taste_rescaled", df_ba_ratings_filtered_beers_merged_users["taste_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["taste_rescaled"].max())
+print("palate_rescaled", df_ba_ratings_filtered_beers_merged_users["palate_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["palate_rescaled"].max())
+print("overall_rescaled", df_ba_ratings_filtered_beers_merged_users["overall_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["overall_rescaled"].max())
+print("rating_rescaled", df_ba_ratings_filtered_beers_merged_users["rating_rescaled"].min(), df_ba_ratings_filtered_beers_merged_users["rating_rescaled"].max())
+
+
 
 # %%
 ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
@@ -536,6 +609,62 @@ print(df_rb_reviews_filtered_beers_merged_users.columns)
 
 
 
+# %% [markdown]
+#  ## RB Aspects
+# Columns to be rescaled in RB:
+# - aroma (1-10)
+# - appearance (1-5)
+# - taste (1-10)
+# - palate (1-5)
+# - overall (1-20)
+# - rating (0-5)
+
+# %%
+# Add 1 to every rating to make it 1-6 instead of 0-5 to prevent divison by zero
+df_rb_reviews_filtered_beers_merged_users["translated_rating"] = df_rb_reviews_filtered_beers_merged_users["rating"] + 1
+
+# %%
+# Sanity check the ranges of the ratings and aspects
+print("aroma", df_rb_reviews_filtered_beers_merged_users["aroma"].min(), df_rb_reviews_filtered_beers_merged_users["aroma"].max())
+print("appearance", df_rb_reviews_filtered_beers_merged_users["appearance"].min(), df_rb_reviews_filtered_beers_merged_users["appearance"].max())
+print("taste", df_rb_reviews_filtered_beers_merged_users["taste"].min(), df_rb_reviews_filtered_beers_merged_users["taste"].max())
+print("palate", df_rb_reviews_filtered_beers_merged_users["palate"].min(), df_rb_reviews_filtered_beers_merged_users["palate"].max())
+print("overall", df_rb_reviews_filtered_beers_merged_users["overall"].min(), df_rb_reviews_filtered_beers_merged_users["overall"].max())
+print("translated_rating", df_rb_reviews_filtered_beers_merged_users["translated_rating"].min(), df_rb_reviews_filtered_beers_merged_users["translated_rating"].max())
+
+# %%
+# Compute the average rating for each user
+df_rb_reviews_filtered_beers_merged_users["user_average_aroma"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["aroma"].transform("mean")
+df_rb_reviews_filtered_beers_merged_users["user_average_appearance"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["appearance"].transform("mean")
+df_rb_reviews_filtered_beers_merged_users["user_average_taste"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["taste"].transform("mean")
+df_rb_reviews_filtered_beers_merged_users["user_average_palate"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["palate"].transform("mean")
+df_rb_reviews_filtered_beers_merged_users["user_average_overall"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["overall"].transform("mean")
+df_rb_reviews_filtered_beers_merged_users["user_average_rating"] = df_rb_reviews_filtered_beers_merged_users.groupby("user_id")["translated_rating"].transform("mean")
+
+# %%
+# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
+
+df_rb_reviews_filtered_beers_merged_users["aroma_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"],top=10), axis=1)
+df_rb_reviews_filtered_beers_merged_users["appearance_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
+df_rb_reviews_filtered_beers_merged_users["taste_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["taste"], row["user_average_taste"],top=10), axis=1)
+df_rb_reviews_filtered_beers_merged_users["palate_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
+df_rb_reviews_filtered_beers_merged_users["overall_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["overall"], row["user_average_overall"],20), axis=1)
+df_rb_reviews_filtered_beers_merged_users["rating_rescaled"] = df_rb_reviews_filtered_beers_merged_users.apply(lambda row: rescale(row["translated_rating"], row["user_average_rating"],top=6), axis=1)
+
+# %%
+# Sanity check the ranges of the rescaled ratings and aspects
+print("aroma_rescaled", df_rb_reviews_filtered_beers_merged_users["aroma_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["aroma_rescaled"].max())
+print("appearance_rescaled", df_rb_reviews_filtered_beers_merged_users["appearance_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["appearance_rescaled"].max())
+print("taste_rescaled", df_rb_reviews_filtered_beers_merged_users["taste_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["taste_rescaled"].max())
+print("palate_rescaled", df_rb_reviews_filtered_beers_merged_users["palate_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["palate_rescaled"].max())
+print("overall_rescaled", df_rb_reviews_filtered_beers_merged_users["overall_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["overall_rescaled"].max())
+print("rating_rescaled", df_rb_reviews_filtered_beers_merged_users["rating_rescaled"].min(), df_rb_reviews_filtered_beers_merged_users["rating_rescaled"].max())
+
+# %% [markdown]
+# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5. I.e. nobody rated a beer with 0 stars.
+
+
+
 # %%
 rb_pickle_filename = "df_rb_reviews_filtered_beers_merged_users.pickle"
 
@@ -563,3 +692,8 @@ df_beers.columns
 
 # %%
 df_brew.columns
+
+
+
+
+# %%

@@ -6,6 +6,7 @@ import os.path
 import scipy.stats as stats
 from helpers import * #custom made functions
 import plotly.express as px
+from prettify import * #custom made functions
 print("import completed")
 
 # number of pandas rows to display
@@ -20,6 +21,7 @@ pd.set_option('display.max_rows', 100)
 # compute the CI Sidak correction
 # For Each Beerstyle: 
 # - Perform a t-test comparing means of each country
+# TODO: deepen this explanation
 
 # %%
 #  ## Load BA data
@@ -42,132 +44,6 @@ df_rb.isna().sum()
 # print value counts of style_class 
 print(df_ba["style_class"].value_counts())
 print(df_rb["style_class"].value_counts())
-
-# %% [markdown]
-#  # Rescale Ratings
-# Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
-# To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
-
-# TODO: Formalize what we do. Ideally add citations.
-# %%
-def scale(rating, user_average, top=5, bottom=1):
-    """
-    Returns the scale of the rating with respect to the users average rating.
-    """
-    if rating > user_average:
-        return top-user_average
-    elif rating < user_average:
-        return user_average-bottom
-    else:
-        return bottom
-def rescale(rating, user_average, top = 5, bottom = 1):
-    """
-    Rescales the rating to a -1,1 scale where 0 is the users average rating.
-    """
-    return (rating - user_average) / scale(rating, user_average, top, bottom)
-
-# %% [markdown]
-#  ## BA
-# Columns to be rescaled in BA: 
-# - aroma (1-5)
-# - appearance (1-5)
-# - taste (1-5)
-# - palate (1-5)
-# - overall (1-5)
-# - rating (1-5)
-
-# TODO: here might be a good place to explain the different usages of the individual ratings/aspects across the two datasets
-
-# %%
-# Sanity check the ranges of the ratings and aspects
-print("aroma", df_ba["aroma"].min(), df_ba["aroma"].max())
-print("appearance", df_ba["appearance"].min(), df_ba["appearance"].max())
-print("taste", df_ba["taste"].min(), df_ba["taste"].max())
-print("palate", df_ba["palate"].min(), df_ba["palate"].max())
-print("overall", df_ba["overall"].min(), df_ba["overall"].max())
-print("rating", df_ba["rating"].min(), df_ba["rating"].max())
-
-# %%
-# Compute the average rating for each user
-df_ba["user_average_aroma"] = df_ba.groupby("user_id")["aroma"].transform("mean")
-df_ba["user_average_appearance"] = df_ba.groupby("user_id")["appearance"].transform("mean")
-df_ba["user_average_taste"] = df_ba.groupby("user_id")["taste"].transform("mean")
-df_ba["user_average_palate"] = df_ba.groupby("user_id")["palate"].transform("mean")
-df_ba["user_average_overall"] = df_ba.groupby("user_id")["overall"].transform("mean")
-df_ba["user_average_rating"] = df_ba.groupby("user_id")["rating"].transform("mean")
-
-# %%
-# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
-
-df_ba["aroma_rescaled"] = df_ba.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"]), axis=1)
-df_ba["appearance_rescaled"] = df_ba.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
-df_ba["taste_rescaled"] = df_ba.apply(lambda row: rescale(row["taste"], row["user_average_taste"]), axis=1)
-df_ba["palate_rescaled"] = df_ba.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
-df_ba["overall_rescaled"] = df_ba.apply(lambda row: rescale(row["overall"], row["user_average_overall"]), axis=1)
-df_ba["rating_rescaled"] = df_ba.apply(lambda row: rescale(row["rating"], row["user_average_rating"]), axis=1)
-
-# %%
-# Sanity check the ranges of the rescaled ratings and aspects
-print("aroma_rescaled", df_ba["aroma_rescaled"].min(), df_ba["aroma_rescaled"].max())
-print("appearance_rescaled", df_ba["appearance_rescaled"].min(), df_ba["appearance_rescaled"].max())
-print("taste_rescaled", df_ba["taste_rescaled"].min(), df_ba["taste_rescaled"].max())
-print("palate_rescaled", df_ba["palate_rescaled"].min(), df_ba["palate_rescaled"].max())
-print("overall_rescaled", df_ba["overall_rescaled"].min(), df_ba["overall_rescaled"].max())
-print("rating_rescaled", df_ba["rating_rescaled"].min(), df_ba["rating_rescaled"].max())
-
-# %% [markdown]
-#  ## RB
-# Columns to be rescaled in RB:
-# - aroma (1-10)
-# - appearance (1-5)
-# - taste (1-10)
-# - palate (1-5)
-# - overall (1-20)
-# - rating (0-5)
-
-# %%
-# Add 1 to every rating to make it 1-6 instead of 0-5 to prevent divison by zero
-df_rb["translated_rating"] = df_rb["rating"] + 1
-
-# %%
-# Sanity check the ranges of the ratings and aspects
-print("aroma", df_rb["aroma"].min(), df_rb["aroma"].max())
-print("appearance", df_rb["appearance"].min(), df_rb["appearance"].max())
-print("taste", df_rb["taste"].min(), df_rb["taste"].max())
-print("palate", df_rb["palate"].min(), df_rb["palate"].max())
-print("overall", df_rb["overall"].min(), df_rb["overall"].max())
-print("translated_rating", df_rb["translated_rating"].min(), df_rb["translated_rating"].max())
-
-# %%
-# Compute the average rating for each user
-df_rb["user_average_aroma"] = df_rb.groupby("user_id")["aroma"].transform("mean")
-df_rb["user_average_appearance"] = df_rb.groupby("user_id")["appearance"].transform("mean")
-df_rb["user_average_taste"] = df_rb.groupby("user_id")["taste"].transform("mean")
-df_rb["user_average_palate"] = df_rb.groupby("user_id")["palate"].transform("mean")
-df_rb["user_average_overall"] = df_rb.groupby("user_id")["overall"].transform("mean")
-df_rb["user_average_rating"] = df_rb.groupby("user_id")["translated_rating"].transform("mean")
-
-# %%
-# Rescale the ratings and aspects to a -1,1 scale where 0 is the users average rating
-
-df_rb["aroma_rescaled"] = df_rb.apply(lambda row: rescale(row["aroma"], row["user_average_aroma"],top=10), axis=1)
-df_rb["appearance_rescaled"] = df_rb.apply(lambda row: rescale(row["appearance"], row["user_average_appearance"]), axis=1)
-df_rb["taste_rescaled"] = df_rb.apply(lambda row: rescale(row["taste"], row["user_average_taste"],top=10), axis=1)
-df_rb["palate_rescaled"] = df_rb.apply(lambda row: rescale(row["palate"], row["user_average_palate"]), axis=1)
-df_rb["overall_rescaled"] = df_rb.apply(lambda row: rescale(row["overall"], row["user_average_overall"],20), axis=1)
-df_rb["rating_rescaled"] = df_rb.apply(lambda row: rescale(row["translated_rating"], row["user_average_rating"],top=6), axis=1)
-
-# %%
-# Sanity check the ranges of the rescaled ratings and aspects
-print("aroma_rescaled", df_rb["aroma_rescaled"].min(), df_rb["aroma_rescaled"].max())
-print("appearance_rescaled", df_rb["appearance_rescaled"].min(), df_rb["appearance_rescaled"].max())
-print("taste_rescaled", df_rb["taste_rescaled"].min(), df_rb["taste_rescaled"].max())
-print("palate_rescaled", df_rb["palate_rescaled"].min(), df_rb["palate_rescaled"].max())
-print("overall_rescaled", df_rb["overall_rescaled"].min(), df_rb["overall_rescaled"].max())
-print("rating_rescaled", df_rb["rating_rescaled"].min(), df_rb["rating_rescaled"].max())
-
-# %% [markdown]
-# It is normal that the min of the rescaled ratings is -0.82, the worst score in the rb df is not 0, but 0.5. I.e. nobody rated a beer with 0 stars.
 
 # %% [markdown]
 #  # Country and state filtering
@@ -197,6 +73,7 @@ plt.ylabel("Number of ratings")
 # %%
 MIN_SAMPLE_SIZE = 1000
 MIN_TEST_SAMPLE_SIZE = 100
+# TODO: move the MIN_TEST_SAMPLE_SIZE to the bottom of the notebook (where we start using it, and motivate it there...)
 
 # %%
 # Show top 10 countries with most ratings in BA
@@ -323,7 +200,8 @@ def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_co
 
     # Create a hash of the arguments to check if the results have already been computed
     # make a string of all the arguments
-    arguments = str(entity_list) + str(column_name_to_test) + str(alpha) + str(entity_column_name) + str(datasource) + str(min_sample_size)
+    entity_list.sort()
+    arguments = "-".join(entity_list) + str(column_name_to_test) + f"{alpha:.5f}"+ str(entity_column_name) + str(datasource) + str(min_sample_size)
     print("arguments:", arguments)
     # hash the string
     hashed_arguments = hash(arguments)
@@ -856,7 +734,7 @@ top_5_style_classes_rb = df_rb["style_class"].value_counts().head(5).index.tolis
 top_5_style_classes_rb
 
 # %%
-df_rb_t_tests_style_classes_states = perform_t_tests_per_class(top_5_style_classes_rb, df_rb, "style_class", "RB", "user_state",recompute=True)
+df_rb_t_tests_style_classes_states = perform_t_tests_per_class(top_5_style_classes_rb, df_rb, "style_class", "RB", "user_state")
 df_rb_t_tests_style_classes_states
 
 # %%
@@ -879,7 +757,7 @@ df_ba_t_tests_style_countries = perform_t_tests_per_class(top_5_styles_ba, df_ba
 df_ba_t_tests_style_countries
 
 # %%
-df_ba_t_tests_style_states = perform_t_tests_per_class(top_5_styles_ba, df_ba, "style", "BA", "user_state",recompute=True)
+df_ba_t_tests_style_states = perform_t_tests_per_class(top_5_styles_ba, df_ba, "style", "BA", "user_state")
 df_ba_t_tests_style_states
 
 
@@ -917,6 +795,7 @@ dfs_t_tests_countries[aspect_rescaled][0]
 # Keep only the significant results
 dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
 
+
 # %%
 aspect_rescaled = "aroma_rescaled"
 dfs_t_tests_countries[aspect_rescaled][0]
@@ -951,9 +830,196 @@ dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled]
 # %%
 print(ba_aspects)
 
+# %% [markdown]
+#  ### Evaluate the significant results
+
 # %%
 # For Each of the significant results. Are the beer averages significantly different?
 # Get a list of all beers rated by the 
 
 
 # %%
+significant_country_pairs = {"countryA":[],"countryB":[],"aspect":[]}
+for aspect in ba_aspects:
+    aspect_rescaled = aspect + "_rescaled"
+    significant = dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
+    for index, row in significant.iterrows():
+        significant_country_pairs["countryA"].append(row["user_country1"])
+        significant_country_pairs["countryB"].append(row["user_country2"])
+        significant_country_pairs["aspect"].append(aspect)
+
+
+# %%
+# Create a dataframe with the significant country pairs
+df_significant_country_pairs = pd.DataFrame(significant_country_pairs)
+df_significant_country_pairs
+
+# %%
+# Get unique country names
+unique_countries = df_significant_country_pairs["countryA"].unique().tolist()
+unique_countries.extend(df_significant_country_pairs["countryB"].unique().tolist())
+unique_countries = list(set(unique_countries))
+unique_countries
+
+# %%
+# For each of the unique countries, get the plot the number of ratings of the top n beers
+top_n = 20
+for country in unique_countries:
+    df_ba[df_ba["user_country"] == country]["beer_name"].value_counts().head(top_n).plot(kind="bar")
+    plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + country)
+    plt.xlabel("Beer")
+    plt.ylabel("Number of ratings")
+    plt.show()
+# %%
+# For each of the unique countries, get all ratings on the top n beers and store them in a dictionary
+top_n = 100
+dict_top_n_beers = {}
+for country in unique_countries:
+    # Get the top n beers
+    top_n_beers = df_ba[df_ba["user_country"] == country]["beer_name"].value_counts().head(top_n).index.tolist()
+    # Get all ratings for the top n beers
+    top_n_beers_ratings = df_ba[df_ba["beer_name"].isin(top_n_beers)]
+    # Store the ratings in a dictionary
+    dict_top_n_beers[country] = top_n_beers_ratings
+dict_top_n_beers
+
+# %%
+# Get unique beer rating in the dict_top_n_beers
+unique_beers = []
+for country in unique_countries:
+    unique_beers.extend(dict_top_n_beers[country]["beer_name"].unique().tolist())
+unique_beers = list(set(unique_beers))
+len(unique_beers)
+
+# %%
+# Get the number of unique beers in df_ba
+len(df_ba["beer_name"].unique().tolist())
+
+# %%
+# For each significant country pair, t_test the average ratings of the top n beers
+# Create a dictionary to store the results
+dict_t_tests_top_n_beers = {}
+# compute the sidak correction
+sidak_correction = 1 - (1 - 0.05)**(1/len(df_significant_country_pairs))
+print("sidak_correction: " + str(sidak_correction))
+for index, row in df_significant_country_pairs.iterrows():
+    # Get the ratings for the two countries
+    ratings_countryA = dict_top_n_beers[row["countryA"]]
+    ratings_countryB = dict_top_n_beers[row["countryB"]]
+    # Perform a t-test
+    t_test = stats.ttest_ind(ratings_countryA[row["aspect"]+"_rescaled"], ratings_countryB[row["aspect"]+"_rescaled"])
+    # Check if the t-test is significant
+    significant = False
+    if t_test[1] < sidak_correction:
+        significant = True
+    p_value = t_test[1]
+    t_statistic = t_test[0]
+    # Store the results in a dictionary
+    dict_t_tests_top_n_beers[index] = {"countryA":row["countryA"], "countryB":row["countryB"], "aspect":row["aspect"], "t_test_statistic":t_statistic, "p_value":p_value, "significant":significant}
+dict_t_tests_top_n_beers
+# %%
+# Create a dataframe with the results
+df_t_tests_top_n_beers = pd.DataFrame(dict_t_tests_top_n_beers).T
+df_t_tests_top_n_beers
+
+# %%
+# Get the ratio of significant results
+df_t_tests_top_n_beers["significant"].value_counts()
+
+
+# %% [markdown]
+#  ### States BA
+
+# %%
+# TODO: repeat the same analysis per state...
+dfs_ba_t_tests_states
+
+# %%
+significant_state_pairs_BA = {"stateA":[],"stateB":[],"aspect":[]}
+for aspect in ba_aspects:
+    aspect_rescaled = aspect + "_rescaled"
+    significant = dfs_ba_t_tests_states[aspect_rescaled][0][dfs_ba_t_tests_states[aspect_rescaled][0]["significant"] == True]
+    for index, row in significant.iterrows():
+        significant_state_pairs_BA["stateA"].append(row["user_state1"])
+        significant_state_pairs_BA["stateB"].append(row["user_state2"])
+        significant_state_pairs_BA["aspect"].append(aspect)
+
+
+# %%
+# Create a dataframe with the significant country pairs
+df_significant_state_pairs = pd.DataFrame(significant_state_pairs_BA)
+df_significant_state_pairs
+
+# %%
+# Get unique country names
+unique_states = df_significant_state_pairs["stateA"].unique().tolist()
+unique_states.extend(df_significant_state_pairs["stateB"].unique().tolist())
+unique_states = list(set(unique_states))
+unique_states
+
+# %%
+# For each of the unique countries, get the plot the number of ratings of the top n beers
+top_n = 20
+for state in unique_states:
+    df_ba[df_ba["user_state"] == state]["beer_name"].value_counts().head(top_n).plot(kind="bar")
+    plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + state)
+    plt.xlabel("Beer")
+    plt.ylabel("Number of ratings")
+    plt.show()
+# %%
+# For each of the unique countries, get all ratings on the top n beers and store them in a dictionary
+top_n = 100
+dict_top_n_beers = {}
+for country in unique_countries:
+    # Get the top n beers
+    top_n_beers = df_ba[df_ba["user_country"] == country]["beer_name"].value_counts().head(top_n).index.tolist()
+    # Get all ratings for the top n beers
+    top_n_beers_ratings = df_ba[df_ba["beer_name"].isin(top_n_beers)]
+    # Store the ratings in a dictionary
+    dict_top_n_beers[country] = top_n_beers_ratings
+dict_top_n_beers
+
+# %%
+# Get unique beer rating in the dict_top_n_beers
+unique_beers = []
+for country in unique_countries:
+    unique_beers.extend(dict_top_n_beers[country]["beer_name"].unique().tolist())
+unique_beers = list(set(unique_beers))
+len(unique_beers)
+
+# %%
+# Get the number of unique beers in df_ba
+len(df_ba["beer_name"].unique().tolist())
+
+# %%
+# For each significant country pair, t_test the average ratings of the top n beers
+# Create a dictionary to store the results
+dict_t_tests_top_n_beers = {}
+# compute the sidak correction
+sidak_correction = 1 - (1 - 0.05)**(1/len(df_significant_country_pairs))
+print("sidak_correction: " + str(sidak_correction))
+for index, row in df_significant_country_pairs.iterrows():
+    # Get the ratings for the two countries
+    ratings_countryA = dict_top_n_beers[row["countryA"]]
+    ratings_countryB = dict_top_n_beers[row["countryB"]]
+    # Perform a t-test
+    t_test = stats.ttest_ind(ratings_countryA[row["aspect"]+"_rescaled"], ratings_countryB[row["aspect"]+"_rescaled"])
+    # Check if the t-test is significant
+    significant = False
+    if t_test[1] < sidak_correction:
+        significant = True
+    p_value = t_test[1]
+    t_statistic = t_test[0]
+    # Store the results in a dictionary
+    dict_t_tests_top_n_beers[index] = {"countryA":row["countryA"], "countryB":row["countryB"], "aspect":row["aspect"], "t_test_statistic":t_statistic, "p_value":p_value, "significant":significant}
+dict_t_tests_top_n_beers
+# %%
+# Create a dataframe with the results
+df_t_tests_top_n_beers = pd.DataFrame(dict_t_tests_top_n_beers).T
+df_t_tests_top_n_beers
+
+# %%
+# Get the ratio of significant results
+df_t_tests_top_n_beers["significant"].value_counts()
+
+

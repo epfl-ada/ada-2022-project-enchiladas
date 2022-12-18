@@ -11,3 +11,4 @@ __pycache__/*
 Data/df_ba_ratings_filtered_md_beers.txt.pickle
 t_test_results/*
 _site/Data/*
+Plots/*
