@@ -256,13 +256,13 @@ td, th { padding: 0; }
 .container { width: 100%; margin: 0 auto; }
 
 /* Progress bar */
-#progress-bar { --scrollAmount: 0%; background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); width: var(--scrollAmount); /*  background: linear-gradient(to right, #F24E1E var(--scrollAmount), transparent 0); width: 100%; */ height: 12px; position: fixed; top: 0; left: 0; }
+#progress-bar { --scrollAmount: 0%; background-image: linear-gradient(45deg, #421919 0%, #ffffff 100%); width: var(--scrollAmount); /*  background: linear-gradient(to right, #F24E1E var(--scrollAmount), transparent 0); width: 100%; */ height: 12px; position: fixed; top: 0; left: 0; }
 
-#myBtn { position: fixed; /* Fixed/sticky position */ bottom: 20px; /* Place the button at the bottom of the page */ right: 30px; /* Place the button 30px from the right */ z-index: 99; /* Make sure it does not overlap */ cursor: pointer; /* Add a mouse pointer on hover */ padding: 15px; /* Some padding */ display: inline-block; color: white; background-color: rgba(0, 0, 0, 0.807); border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+#myBtn { position: fixed; /* Fixed/sticky position */ bottom: 20px; /* Place the button at the bottom of the page */ right: 30px; /* Place the button 30px from the right */ z-index: 99; /* Make sure it does not overlap */ cursor: pointer; /* Add a mouse pointer on hover */ padding: 15px; /* Some padding */ display: inline-block; color: white; background-color: #421919; border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
 
-#myBtn:hover { color: rgba(0, 0, 0, 0.8); text-decoration: none; background-color: rgba(30, 7, 7, 0.2); border-color: rgba(255, 255, 255, 0.3); }
+#myBtn:hover { color: rgba(0, 0, 0, 0.8); text-decoration: none; background-color: #510a0a; border-color: rgba(255, 255, 255, 0.3); }
 
-body { padding: 0; margin: 0; font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #606c71; }
+body { padding: 0; margin: 0; font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #686564; }
 
 #skip-to-content { height: 1px; width: 1px; position: absolute; overflow: hidden; top: -10px; }
 
@@ -272,7 +272,7 @@ a { color: #1e6bb8; text-decoration: none; }
 
 a:hover { text-decoration: underline; }
 
-.btn { display: inline-block; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.7); background-color: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+.btn { display: inline-block; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.7); background-color: #421919; border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
 
 .btn:hover { color: rgba(255, 255, 255, 0.8); text-decoration: none; background-color: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); }
 
@@ -284,7 +284,7 @@ a:hover { text-decoration: underline; }
 
 @media screen and (max-width: 42em) { .btn { display: block; width: 100%; padding: 0.75rem; font-size: 0.9rem; } .btn + .btn { margin-top: 1rem; margin-left: 0; } }
 
-.page-header { background: url("../../images/beer.jpg"); text-align: center; width: 100%; height: auto; background-size: cover; background-attachment: fixed; position: relative; overflow: hidden; border-radius: 0 0 85% 85% / 30%; }
+.page-header { background: url("../../images/beer.jpg"); opacity: 90%; text-align: center; width: 100%; height: auto; background-size: cover; background-attachment: fixed; position: relative; overflow: hidden; border-radius: 0 0 85% 85% / 30%; }
 
 @media screen and (min-width: 64em) { .page-header { padding: 5rem 6rem; } }
 
@@ -322,7 +322,7 @@ a:hover { text-decoration: underline; }
 
 .main-content img { max-width: 100%; }
 
-.main-content h1, .main-content h2, .main-content h3, .main-content h4, .main-content h5, .main-content h6 { margin-top: 2rem; margin-bottom: 1rem; font-weight: normal; color: #159957; }
+.main-content h1, .main-content h2, .main-content h3, .main-content h4, .main-content h5, .main-content h6 { margin-top: 2rem; margin-bottom: 1rem; font-weight: normal; color: #421919; }
 
 .main-content p { margin-bottom: 1em; }
 
@@ -344,7 +344,7 @@ a:hover { text-decoration: underline; }
 
 .main-content ul, .main-content ol { margin-top: 0; }
 
-.main-content blockquote { padding: 0 1rem; margin-left: 0; color: #819198; border-left: 0.3rem solid #dce6f0; }
+.main-content blockquote { padding: 0 1rem; margin-left: 0; color: #686564; border-left: 0.3rem solid #dce6f0; }
 
 .main-content blockquote > :first-child { margin-top: 0; }
 
@@ -372,8 +372,8 @@ a:hover { text-decoration: underline; }
 
 @media screen and (max-width: 42em) { .site-footer { font-size: 0.9rem; } }
 
-.site-footer-owner { display: block; font-weight: bold; }
+.site-footer-owner { display: block; font-weight: bold; color: #421919; }
 
-.site-footer-credits { color: #819198; }
+.site-footer-credits { color: #421919; }
 
 /*# sourceMappingURL=style.css.map */

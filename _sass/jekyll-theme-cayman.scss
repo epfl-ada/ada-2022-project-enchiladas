@@ -40,7 +40,7 @@
 #progress-bar {
   --scrollAmount: 0%;
   
-  background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+  background-image: linear-gradient(45deg, #421919 0%, #ffffff 100%);
   width: var(--scrollAmount);
 
   /*  background: linear-gradient(to right, #F24E1E var(--scrollAmount), transparent 0);
@@ -61,7 +61,7 @@
   padding: 15px; /* Some padding */
   display: inline-block;
   color: rgb(255, 255, 255);
-  background-color: rgba(0, 0, 0, 0.807);
+  background-color: #421919; // #686564;
   border-color: rgba(255, 255, 255, 0.2);
   border-style: solid;
   border-width: 1px;
@@ -73,7 +73,7 @@
 #myBtn:hover {
   color: rgba(0, 0, 0, 0.8);
   text-decoration: none;
-  background-color: rgba(30, 7, 7, 0.2);
+  background-color: rgba(81, 10, 10, 1);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -120,7 +120,7 @@ a {
   display: inline-block;
   margin-bottom: 1rem;
   color: rgba(255, 255, 255, 0.7);
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: #421919;
   border-color: rgba(255, 255, 255, 0.2);
   border-style: solid;
   border-width: 1px;
@@ -178,6 +178,7 @@ a {
   //background-attachment: fixed;
   //background-size: 100% 100%;
   background: url('../../images/beer.jpg');
+  opacity: 90%; 
 	text-align: center;
 	width: 100%;
 	height: auto;
@@ -457,8 +458,10 @@ a {
 .site-footer-owner {
   display: block;
   font-weight: bold;
+  color: #421919;
+  
 }
 
 .site-footer-credits {
-  color: $blockquote-text-color;
+  color: #421919;// $blockquote-text-color;
 }
