@@ -8,6 +8,7 @@ from helpers import * #custom made functions
 import plotly.express as px
 from prettify import * #custom made functions
 import hashlib
+import datapane as dp
 print("import completed")
 
 # number of pandas rows to display
@@ -62,7 +63,7 @@ plt.savefig("Plots/BA_ratings_per_country.png",bbox_inches='tight')
 
 # %%
 # Plot the number of ratings per user_state in BA last 20
-df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA (top 20)",logy=True)
+df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA (bottom 20)")
 plt.xlabel("State")
 plt.ylabel("Number of ratings")
 plt.tight_layout()
@@ -70,7 +71,7 @@ plt.savefig("Plots/BA_ratings_per_state.png",bbox_inches='tight')
 
 # %%
 # Plot the number of ratings per user_state in RB last 20
-df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB (top 20)",logy=True)
+df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB (bottom 20)")
 plt.xlabel("State")
 plt.ylabel("Number of ratings")
 plt.tight_layout()
@@ -400,7 +401,7 @@ def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None):
     """
     Plots a boxplot for the specified aspect
     """
-    _ = plt.figure(figsize=(12,6))
+    fig = plt.figure(figsize=(12,6))
     ax = plt.axes()
     for i,country in enumerate(countries):
         data = df[df[attribute] == country][aspect].to_numpy(dtype=float)
@@ -416,17 +417,40 @@ def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None):
     ax.set_ylabel(aspect)
     plt.tight_layout()
     plt.savefig(f"Plots/{filename}.png",bbox_inches='tight')
-    plt.show()
+    return fig
 
 # %%
 # Get a list of countries we want to plot the aspects for
 country_list = list(df_ba["user_country"].unique())
 # Plot the distribution of the aspects for the countries in the list
+ba_blocks = []
+ba_blocks_rescaled = []
 for aspect in ba_aspects:
-    plot_boxplot(df_ba, aspect, country_list,filename=f"boxplot_of_{aspect}_for_all_countries")
+    ba_blocks.append(dp.Plot(plot_boxplot(df_ba, aspect, country_list,filename=f"boxplot_of_{aspect}_for_all_countries_ba"), label=aspect))
     # plot rescaled aspect
     aspect_rescaled = aspect + "_rescaled"
-    plot_boxplot(df_ba, aspect_rescaled, country_list, filename=f"boxplot_of_{aspect_rescaled}_for_all_countries")
+    ba_blocks_rescaled.append(dp.Plot(plot_boxplot(df_ba, aspect_rescaled, country_list, filename=f"boxplot_of_{aspect_rescaled}_for_all_countries"),label=aspect))
+
+# %%
+countries_app = dp.App(
+    dp.Page(
+        title="Distribution of Ratings",
+        blocks=[
+            dp.Select(
+                blocks=ba_blocks
+            ), 
+        ]
+    ),
+    dp.Page(
+        title="Distribution of Ratings (rescaled)",
+        blocks=[
+            dp.Select(
+                blocks=ba_blocks_rescaled
+            ),
+        ]
+    ),
+)
+countries_app.save("Pages/boxplots_of_aspects_for_all_countries.html")
 
 
 # %% [markdown]
@@ -439,9 +463,9 @@ state_list = list(df_ba[df_ba["user_country"] == "United States"]["user_state"].
 # Perform t-tests for each pair of countries
 dfs_ba_t_tests_states = {}
 for aspect in ba_aspects:
-    dfs_ba_t_tests_states[aspect] = pairwise_ttests(df_ba,state_list,aspect,entity_column_name="user_state")
+    dfs_ba_t_tests_states[aspect] = pairwise_ttests(df_ba,state_list,aspect,entity_column_name="user_state",min_sample_size=MIN_TEST_SAMPLE_SIZE)
     aspect_rescaled = aspect + "_rescaled"
-    dfs_ba_t_tests_states[aspect_rescaled] = pairwise_ttests(df_ba,state_list,aspect_rescaled,entity_column_name="user_state")
+    dfs_ba_t_tests_states[aspect_rescaled] = pairwise_ttests(df_ba,state_list,aspect_rescaled,entity_column_name="user_state",min_sample_size=MIN_TEST_SAMPLE_SIZE)
 
 # %%
 dfs_ba_t_tests_states["aroma"][0].head()
@@ -480,12 +504,12 @@ state_list = list(df_rb[df_rb["user_country"] == "United States"]["user_state"].
 # Perform t-tests for each pair of countries
 dfs_rb_t_tests_states = {}
 for aspect in ba_aspects:
-    dfs_rb_t_tests_states[aspect] = pairwise_ttests(df_rb,state_list,aspect,entity_column_name="user_state",datasource="rb")
+    dfs_rb_t_tests_states[aspect] = pairwise_ttests(df_rb,state_list,aspect,entity_column_name="user_state",datasource="rb",min_sample_size=MIN_TEST_SAMPLE_SIZE)
     aspect_rescaled = aspect + "_rescaled"
-    dfs_rb_t_tests_states[aspect_rescaled] = pairwise_ttests(df_rb,state_list,aspect_rescaled,entity_column_name="user_state",datasource="rb")
+    dfs_rb_t_tests_states[aspect_rescaled] = pairwise_ttests(df_rb,state_list,aspect_rescaled,entity_column_name="user_state",datasource="rb",min_sample_size=MIN_TEST_SAMPLE_SIZE)
 
 # %%
-print(dfs_rb_t_tests_states["aroma"][0].head(10))
+dfs_rb_t_tests_states["aroma"][0].head()
 
 # %%
 # Compare the results for the different aspects
@@ -518,7 +542,6 @@ df_rb_t_tests_states_results["ratio"] = df_rb_t_tests_states_results["significan
 df_ba_t_tests_states_results["datasource"] = "ba"
 df_rb_t_tests_states_results["datasource"] = "rb"
 df_t_tests_states_results = pd.concat([df_ba_t_tests_states_results,df_rb_t_tests_states_results])
-df_t_tests_states_results
 # Group by aspect and datasource
 df_t_tests_states_results_grouped = df_t_tests_states_results.groupby(["aspect","datasource"]).sum()
 df_t_tests_states_results_grouped
@@ -540,7 +563,7 @@ for aspect in ba_aspects:
     dfs_ba_t_tests_style_class_germany[aspect_rescaled] = pairwise_ttests(df_ba_germany,style_class_list,aspect_rescaled,entity_column_name="style_class",min_sample_size=30)
 
 # %%
-print(dfs_ba_t_tests_style_class_germany["aroma"][0].head(10))
+dfs_ba_t_tests_style_class_germany["aroma"][0].head()
 
 # %%
 # Compare the results for the different aspects
@@ -583,7 +606,7 @@ for aspect in ba_aspects:
 
 
 # %%
-print(dfs_ba_t_tests_style_germany["aroma"][0].head(10))
+dfs_ba_t_tests_style_germany["aroma"][0].head()
 
 # %%
 # Compare the results for the different aspects
@@ -617,7 +640,7 @@ style_counts = df_ba_germany["style"].value_counts().head(10)
 style_counts = style_counts.index.tolist()
 
 # %%
-plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style",filename="boxplot_style_germany.png")
+plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style",filename="boxplot_style_germany")
 
 
 # %%
@@ -682,50 +705,77 @@ def get_key(val):
             return key
 
 # %%
-dfs_ba_t_tests_states["rating"][0].head()
+# Get the average rating for each state
+df_ba_states_mean = df_ba.groupby("user_state").agg({"rating": "mean","aroma": "mean","palate": "mean","appearance": "mean","taste": "mean","overall": "mean"}).reset_index()
+df_ba_states_mean
 
 # %%
-df_t_test_to_plot = dfs_ba_t_tests_states["rating"][0][["user_state1", "user_state2", "p-value"]]
+# Get the average rating for each state RB
+df_rb_states_mean = df_rb.groupby("user_state").agg({"rating": "mean","aroma": "mean","palate": "mean","appearance": "mean","taste": "mean","overall": "mean"}).reset_index()
+df_rb_states_mean
 
-df_t_test_to_plot = df_t_test_to_plot[~(df_t_test_to_plot["user_state1"]=='United States')]
-
-df_t_test_to_plot["state_code_user_state1"] = df_t_test_to_plot["user_state1"].apply(lambda x: get_key(x))
-df_t_test_to_plot["state_code_user_state2"] = df_t_test_to_plot["user_state2"].apply(lambda x: get_key(x))
-
-df_t_test_to_plot.drop("user_state1", axis=1, inplace=True)
-df_t_test_to_plot.drop("user_state2", axis=1, inplace=True)
-
-
-#%%
-
-df_plot_p_value = pd.DataFrame()
-for key in states_codes.keys():
-    c = df_t_test_to_plot[df_t_test_to_plot["state_code_user_state1"].isin([key]) | df_t_test_to_plot["state_code_user_state2"].isin([key])]
-    c["state_code_user_state1"] = np.where(c["state_code_user_state1"] == key, c["state_code_user_state2"], c["state_code_user_state1"])
-    c["state_code_user_state2"] = states_codes.get(key)
-    c.rename(columns={"state_code_user_state2": "State"}, inplace=True)
-    c = c.append({'p-value': 0, "state_code_user_state1": key, "year": states_codes.get(key)}, ignore_index = True)
-    c = c.sort_values(by=["state_code_user_state1"])
-    frames = [df_plot_p_value, c]
-    df_plot_p_value = pd.concat(frames)
-    
 # %%
-fig = px.choropleth(df_plot_p_value,
-                    locations='state_code_user_state1', 
+# Convert all the aspects means to string and round them to 2 decimals
+for aspect in ba_aspects:
+    df_ba_states_mean[aspect] = df_ba_states_mean[aspect].apply(lambda x: f"{x:.2f}")
+    # Convert it back to float
+    df_ba_states_mean[aspect] = df_ba_states_mean[aspect].astype(float)
+
+# %%
+# Convert all the aspects means to string and round them to 2 decimals
+for aspect in rb_aspects:
+    df_rb_states_mean[aspect] = df_rb_states_mean[aspect].apply(lambda x: f"{x:.2f}")
+    # Convert it back to float
+    df_rb_states_mean[aspect] = df_rb_states_mean[aspect].astype(float)
+
+
+
+# %%
+# Assign the state codes to the states
+df_ba_states_mean["state_code"] = df_ba_states_mean["user_state"].apply(lambda x: get_key(x))
+df_rb_states_mean["state_code"] = df_rb_states_mean["user_state"].apply(lambda x: get_key(x))
+
+
+# %%
+ba_blocks = []
+rb_blocks = []
+for aspect in ba_aspects:
+    ba_blocks.append(dp.Plot(px.choropleth(df_ba_states_mean,
+                    locations='state_code', 
                     locationmode="USA-states", 
-                    color='p-value',
+                    color=aspect,
                     color_continuous_scale="Viridis_r", 
                     scope="usa",
-                    title="Independant T-test between 2 US States",
-                    animation_frame='State') #make sure 'period_begin' is string type and sorted in ascending order
+                    title=f"Mean {aspect}"),label=f"{aspect}"))
+    rb_blocks.append(dp.Plot(px.choropleth(df_rb_states_mean,
+                    locations='state_code', 
+                    locationmode="USA-states", 
+                    color=aspect,
+                    color_continuous_scale="Viridis_r", 
+                    scope="usa",
+                    title=f"Mean {aspect}"),label=f"{aspect}"))
 
+# %%
+states_app = dp.App(
+    dp.Page(
+        title="Beer Advocate",
+        blocks=[
+            dp.Select(
+                blocks=ba_blocks
+            ), 
+        ]
+    ),
+    dp.Page(
+        title="RateBeer",
+        blocks=[
+            dp.Select(
+                blocks=rb_blocks
+            ),
+        ]
+    ),
+)
 
-
-fig.show()
-print("If the p-value is smaller than our threshold, then we have evidence against the null hypothesis of equal population means.")
-
-
-
+states_app.save("Pages/States.html")
 
 # %% [markdown]
 # # Subsetting the data to specific style classes and styles
@@ -740,6 +790,8 @@ df_ba["style_class"].value_counts().plot(kind="bar")
 plt.title("Number of ratings per style class in BA")
 plt.xlabel("Style class")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/Number_of_ratings_per_style_class_in_BA.png",bbox_inches='tight')
 plt.show()
 
 # %%
@@ -831,6 +883,8 @@ df_rb["style_class"].value_counts().plot(kind="bar")
 plt.title("Number of ratings per style class in RB")
 plt.xlabel("Style class")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/style_class_distribution_rb.png",bbox_inches="tight")
 plt.show()
 
 # %%
@@ -857,6 +911,8 @@ df_ba["style"].value_counts().head(20).plot(kind="bar")
 plt.title("Number of ratings per style in BA - top 20")
 plt.xlabel("Style")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/style_distribution_ba.png",bbox_inches="tight")
 plt.show()
 
 # %%
@@ -899,6 +955,8 @@ df_rb["style"].value_counts().head(20).plot(kind="bar")
 plt.title("Number of ratings per style in RB - top 20")
 plt.xlabel("Style")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/style_distribution_rb.png",bbox_inches="tight")
 plt.show()
 
 # %%
@@ -961,9 +1019,6 @@ dfs_t_tests_countries[aspect_rescaled][0]
 dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
 
 
-# %%
-print(ba_aspects)
-
 # %% [markdown]
 #  ### Evaluate the significant results
 
@@ -998,12 +1053,25 @@ unique_countries
 # %%
 # For each of the unique countries, get the plot the number of ratings of the top n beers
 top_n = 20
+country_blocks = []
 for country in unique_countries:
-    df_ba[df_ba["user_country"] == country]["beer_name"].value_counts().head(top_n).plot(kind="bar")
+    fig = plt.figure()
+    df_ba[df_ba["user_country"] == country]["beer_name"].value_counts().head(top_n).plot(kind="bar")    
     plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + country)
     plt.xlabel("Beer")
     plt.ylabel("Number of ratings")
+    plt.tight_layout()
     plt.show()
+    country_blocks.append(dp.Plot(fig,label=country))
+
+# %%
+ratings_countries_app = dp.App(
+    dp.Select(
+        blocks = country_blocks
+    )
+)
+ratings_countries_app.save("Pages/ratings_countries_app.html")
+
 # %%
 # For each of the unique countries, get all ratings on the top n beers and store them in a dictionary
 top_n = 100
@@ -1015,19 +1083,7 @@ for country in unique_countries:
     top_n_beers_ratings = df_ba[df_ba["beer_name"].isin(top_n_beers)]
     # Store the ratings in a dictionary
     dict_top_n_beers[country] = top_n_beers_ratings
-dict_top_n_beers
 
-# %%
-# Get unique beer rating in the dict_top_n_beers
-unique_beers = []
-for country in unique_countries:
-    unique_beers.extend(dict_top_n_beers[country]["beer_name"].unique().tolist())
-unique_beers = list(set(unique_beers))
-len(unique_beers)
-
-# %%
-# Get the number of unique beers in df_ba
-len(df_ba["beer_name"].unique().tolist())
 
 # %%
 # For each significant country pair, t_test the average ratings of the top n beers
@@ -1050,7 +1106,7 @@ for index, row in df_significant_country_pairs.iterrows():
     t_statistic = t_test[0]
     # Store the results in a dictionary
     dict_t_tests_top_n_beers[index] = {"countryA":row["countryA"], "countryB":row["countryB"], "aspect":row["aspect"], "t_test_statistic":t_statistic, "p_value":p_value, "significant":significant}
-dict_t_tests_top_n_beers
+
 # %%
 # Create a dataframe with the results
 df_t_tests_top_n_beers = pd.DataFrame(dict_t_tests_top_n_beers).T
@@ -1063,9 +1119,6 @@ df_t_tests_top_n_beers["significant"].value_counts()
 
 # %% [markdown]
 #  ### States BA
-
-# %%
-dfs_ba_t_tests_states
 
 # %%
 significant_state_pairs_BA = {"stateA":[],"stateB":[],"aspect":[]}
@@ -1088,17 +1141,20 @@ df_significant_state_pairs_ba
 unique_states = df_significant_state_pairs_ba["stateA"].unique().tolist()
 unique_states.extend(df_significant_state_pairs_ba["stateB"].unique().tolist())
 unique_states = list(set(unique_states))
-unique_states
 
 # %%
-# For each of the unique countries, get the plot the number of ratings of the top n beers
+# For each of the unique states, get the plot the number of ratings of the top n beers
 top_n = 20
-for state in unique_states[:5]:
+state_blocks_ba = []
+for state in unique_states:
+    fig = plt.figure()
     df_ba[df_ba["user_state"] == state]["beer_name"].value_counts().head(top_n).plot(kind="bar")
     plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + state)
     plt.xlabel("Beer")
     plt.ylabel("Number of ratings")
-    plt.show()
+    plt.tight_layout()
+    state_blocks_ba.append(dp.Plot(fig,label=state))
+
 # %%
 # For each of the unique countries, get all ratings on the top n beers and store them in a dictionary
 top_n = 100
@@ -1110,7 +1166,11 @@ for state in unique_states:
     top_n_beers_ratings = df_ba[df_ba["beer_name"].isin(top_n_beers)]
     # Store the ratings in a dictionary
     dict_top_n_beers[state] = top_n_beers_ratings
-dict_top_n_beers
+# %%
+len(unique_states)
+# Still 50 states
+
+
 
 # %%
 # For each significant country pair, t_test the average ratings of the top n beers
@@ -1133,7 +1193,7 @@ for index, row in df_significant_state_pairs_ba.iterrows():
     t_statistic = t_test[0]
     # Store the results in a dictionary
     dict_t_tests_top_n_beers[index] = {"stateA":row["stateA"], "stateB":row["stateB"], "aspect":row["aspect"], "t_test_statistic":t_statistic, "p_value":p_value, "significant":significant}
-dict_t_tests_top_n_beers
+
 # %%
 # Create a dataframe with the results
 df_t_tests_top_n_beers_ba = pd.DataFrame(dict_t_tests_top_n_beers).T
@@ -1148,9 +1208,7 @@ df_t_tests_top_n_beers_ba["significant"].value_counts()
 # %% [markdown]
 #  ### States RB
 
-# %%
-# TODO: repeat the same analysis per state...
-dfs_rb_t_tests_states
+
 
 # %%
 significant_state_pairs_RB = {"stateA":[],"stateB":[],"aspect":[]}
@@ -1173,17 +1231,21 @@ df_significant_state_pairs_rb
 unique_states = df_significant_state_pairs_rb["stateA"].unique().tolist()
 unique_states.extend(df_significant_state_pairs_rb["stateB"].unique().tolist())
 unique_states = list(set(unique_states))
-unique_states
+len(unique_states)
+# Some states were dropped, they did not have significant differences with any other state, still 47 left
 
 # %%
 # For each of the unique countries, get the plot the number of ratings of the top n beers
 top_n = 20
-for state in unique_states[:5]:
+state_blocks_rb = []
+for state in unique_states:
+    fig = plt.figure()
     df_rb[df_rb["user_state"] == state]["beer_name"].value_counts().head(top_n).plot(kind="bar")
     plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + state)
     plt.xlabel("Beer")
     plt.ylabel("Number of ratings")
-    plt.show()
+    plt.tight_layout()
+    state_blocks_rb.append(dp.Plot(fig,label=state))
 # %%
 # For each of the unique countries, get all ratings on the top n beers and store them in a dictionary
 top_n = 100
@@ -1195,7 +1257,7 @@ for state in unique_states:
     top_n_beers_ratings = df_rb[df_rb["beer_name"].isin(top_n_beers)]
     # Store the ratings in a dictionary
     dict_top_n_beers[state] = top_n_beers_ratings
-dict_top_n_beers
+
 
 # %%
 # For each significant country pair, t_test the average ratings of the top n beers
@@ -1229,4 +1291,28 @@ df_t_tests_top_n_beers_rb
 df_t_tests_top_n_beers_rb["significant"].value_counts()
 
 
+# %%
+state_blocks_ba
+# %%
+state_blocks_rb
+# %%
+states_beer_app = dp.App(
+    dp.Page(
+        title="BeerAdvocate",
+        blocks=[
+            dp.Select(
+                blocks=state_blocks_ba
+            ), 
+        ]
+    ),
+    dp.Page(
+        title="RateBeer",
+        blocks=[
+            dp.Select(
+                blocks=state_blocks_rb
+            ),
+        ]
+    ),
+)
+states_beer_app.save("Pages/states_beer_app.html")
 # %%
