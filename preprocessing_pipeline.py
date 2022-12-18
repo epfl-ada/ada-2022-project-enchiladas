@@ -437,8 +437,17 @@ print(df_ba_ratings_filtered_beers_merged_users.columns)
 #  # Rescale Ratings
 # Some users rate on average more positively or more negativly with respect to others. Some of this assumed effect will occur, because users rate different beers which indeed are better or worse on average. We hereby assume, that some users are just more positive or negative in general, even if they rate the same beers.
 # To counteract this effect, we rescale the ratings to a -1,1 scale where 0 is the users average rating. This way, we can compare users on an equal footing.
+# 
+#  We rescale as follows:
+#   1. We compute the average rating for each user
+#   2. rescaled_rating = (rating - user_avg_rating) / scale(user_avg_rating, rating)
 
-# TODO: Formalize what we do. Ideally add citations.
+#  The scale function is defined as 
+#  scale(rating, user_avg_rating)
+#   - if rating > user_avg_rating: scale = 5 - user_avg_rating
+#   - if rating < user_avg_rating: scale = user_avg_rating - 1
+#   - if rating == user_avg_rating: scale = 1
+
 # %%
 def scale(rating, user_average, top=5, bottom=1):
     """
@@ -465,8 +474,6 @@ def rescale(rating, user_average, top = 5, bottom = 1):
 # - palate (1-5)
 # - overall (1-5)
 # - rating (1-5)
-
-# TODO: here might be a good place to explain the different usages of the individual ratings/aspects across the two datasets
 
 # %%
 # Sanity check the ranges of the ratings and aspects

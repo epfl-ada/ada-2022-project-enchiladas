@@ -57,18 +57,24 @@ print(df_rb["style_class"].value_counts())
 df_ba["user_country"].value_counts().head(20).plot(kind="bar", title="Number of ratings per country in BA",logy=True)
 plt.xlabel("Country")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/BA_ratings_per_country.png",bbox_inches='tight')
 
 # %%
 # Plot the number of ratings per user_state in BA last 20
-df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA",logy=True)
+df_ba["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in BA (top 20)",logy=True)
 plt.xlabel("State")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/BA_ratings_per_state.png",bbox_inches='tight')
 
 # %%
 # Plot the number of ratings per user_state in RB last 20
-df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB",logy=True)
+df_rb["user_state"].value_counts().tail(20).plot(kind="bar", title="Number of ratings per state in RB (top 20)",logy=True)
 plt.xlabel("State")
 plt.ylabel("Number of ratings")
+plt.tight_layout()
+plt.savefig("Plots/RB_ratings_per_state.png",bbox_inches='tight')
 
 # %%
 MIN_SAMPLE_SIZE = 1000
@@ -121,10 +127,8 @@ states_rb = states_rb[states_rb < MIN_SAMPLE_SIZE].index.tolist()
 print("States with less than", MIN_SAMPLE_SIZE, "ratings in BA:", len(states_ba))
 print("States with less than", MIN_SAMPLE_SIZE, "ratings in RB:", len(states_rb))
 
-# %%
-# Drop all states in the states_ba/rb list
-df_ba = df_ba[~df_ba["user_state"].isin(states_ba)]
-df_rb = df_rb[~df_rb["user_state"].isin(states_rb)]
+# %% [markdown]
+# Note that we do not drop states with less that 'MIN_SAMPLE_SIZE' ratings. We are aware of the fact that there are some states with few ratings, but we prefer keeping the data in order to gain a more complete picture.
 
 # %% [markdown]
 #  # Test average ratings accross states and countries
@@ -302,6 +306,11 @@ df_t_tests_countries_results
 # Compute the ratio of significant results
 df_t_tests_countries_results["ratio"] = df_t_tests_countries_results["significant"] / df_t_tests_countries_results["had_enough_data"]
 
+# %%
+# The significance level for the Sidak correction (it's the same for all aspects)
+alpha_l = dfs_t_tests_countries["aroma"][1]
+print(f"The Sidak corrected significance level {alpha_l:.2}")
+
 
 # %% [markdown]
 # Rescaling the ratings by their user's average decreases the number of significant t-tests for each aspect. It is interesting to see that there are still some countries that rate on average differently. We will investigate this further later on.
@@ -342,6 +351,8 @@ ax[1].set_title("Distribution of ratings (rescaled)")
 ax[1].set_xlabel("Rating")
 ax[1].set_ylabel("Count")
 ax[1].legend()
+plt.tight_layout()
+plt.savefig("Plots/distribution_of_ratings_of_a_pair_where_the_t_test_is_significant.png",bbox_inches='tight')
 plt.show()
 
 # %%
@@ -377,13 +388,15 @@ ax[1].set_title("Distribution of ratings (rescaled)")
 ax[1].set_xlabel("Rating")
 ax[1].set_ylabel("Count")
 ax[1].legend()
+plt.tight_layout()
+plt.savefig("Plots/distribution_of_ratings_of_a_pair_where_the_t_test_is_not_significant.png",bbox_inches='tight')
 plt.show()
 
 # %% [markdown]
 # Let's plot the distributions of rating for each aspect and all countries.
 
 # %%
-def plot_boxplot(df, aspect, countries, attribute="user_country"):
+def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None):
     """
     Plots a boxplot for the specified aspect
     """
@@ -401,6 +414,8 @@ def plot_boxplot(df, aspect, countries, attribute="user_country"):
     ax.set_xticklabels(countries,rotation=90)
     ax.set_xlabel("Country")
     ax.set_ylabel(aspect)
+    plt.tight_layout()
+    plt.savefig(f"Plots/{filename}.png",bbox_inches='tight')
     plt.show()
 
 # %%
@@ -408,10 +423,10 @@ def plot_boxplot(df, aspect, countries, attribute="user_country"):
 country_list = list(df_ba["user_country"].unique())
 # Plot the distribution of the aspects for the countries in the list
 for aspect in ba_aspects:
-    plot_boxplot(df_ba, aspect, country_list)
+    plot_boxplot(df_ba, aspect, country_list,filename=f"boxplot_of_{aspect}_for_all_countries")
     # plot rescaled aspect
     aspect_rescaled = aspect + "_rescaled"
-    plot_boxplot(df_ba, aspect_rescaled, country_list)
+    plot_boxplot(df_ba, aspect_rescaled, country_list, filename=f"boxplot_of_{aspect_rescaled}_for_all_countries")
 
 
 # %% [markdown]
@@ -448,6 +463,12 @@ for aspect in ba_aspects:
 df_ba_t_tests_states_results = pd.DataFrame(df_ba_t_tests_states_results)
 df_ba_t_tests_states_results
 
+# %%
+# Get the significance level
+significance_level = dfs_ba_t_tests_states["aroma"][1]
+# Print the significance level
+print(f"Significance level: {significance_level:.5f}")
+
 
 # %% [markdown]
 #  ### T-Testing for different US states in RB
@@ -482,6 +503,12 @@ for aspect in ba_aspects:
     df_rb_t_tests_states_results["total"].append(len(dfs_rb_t_tests_states[aspect_rescaled][0]))
 df_rb_t_tests_states_results = pd.DataFrame(df_rb_t_tests_states_results)
 df_rb_t_tests_states_results
+
+# %%
+# Get the significance level
+significance_level = dfs_rb_t_tests_states["aroma"][1]
+# Print the significance level
+print(f"Significance level: {significance_level:.5f}")
 
 # %% [markdown]
 # Compare the ratio of significant results to the total number of comparisons for each aspect in BA and RB
@@ -534,6 +561,12 @@ df_results_t_tests_style_class_germany = pd.DataFrame(results)
 # %%
 df_results_t_tests_style_class_germany
 
+# %%
+# Get the significance level
+significance_level = dfs_ba_t_tests_style_class_germany["aroma"][1]
+# Print the significance level
+print(f"Significance level: {significance_level:.5f}")
+
 # %% [markdown]
 #  ### T-Testing for differences in rating averages per style for some state or country
 # Take say Germany
@@ -572,13 +605,19 @@ df_results_t_tests_style_germany = pd.DataFrame(results)
 df_results_t_tests_style_germany
 
 # %%
+# Get the significance level
+significance_level = dfs_ba_t_tests_style_germany["aroma"][1]
+# Print the significance level
+print(f"Significance level: {significance_level:.5f}")
+
+# %%
 # box plot the most popular style classes in germany
 # Get the most popular style classes
 style_counts = df_ba_germany["style"].value_counts().head(10)
 style_counts = style_counts.index.tolist()
 
 # %%
-plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style")
+plot_boxplot(df_ba_germany,"rating",style_counts,attribute="style",filename="boxplot_style_germany.png")
 
 
 # %%
