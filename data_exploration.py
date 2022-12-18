@@ -1,7 +1,7 @@
 # %% [markdown]
 # TODO: choose what to do with this file for the final report
 # %% [markdown]
-#  # Data exploration
+#  # Data exploration 
 # 
 #  GEOGRAPHICAL DISTRIBUTION
 #  - #beers per country
