@@ -1,9 +1,14 @@
+# %% [markdown]
+# TODO: abstract of approach and key finidings
+
 # %%
 # import libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from helpers import *
+from prettify import *
+pd.set_option('display.max_columns', 500)
 # %% [markdown]
 # #RQ4: home bias
 # %%
@@ -246,10 +251,13 @@ plt.show()
 
 # %% [markdown]
 # ### Matrix factorization: nearest neighbour
-# create control treatment pairs where the user bias are close (within a bin of width epsilo)
+# create control treatment pairs where the user bias are close (within a bin of width epsilon)
 
 # %%
 # 2D hexagonal heat map plot of user bias and beer bias for treatment and control groups
+user_bias, beer_bias = get_biases(df, plot=True)
+df["user_bias"] = df.apply(lambda row: user_bias[row["user_id"]], axis=1)
+df["beer_bias"] = df.apply(lambda row: beer_bias[row["beer_id"]], axis=1)
 plt.hexbin(df[df["treatment"] == 0]["user_bias"], df[df["treatment"] == 0]["beer_bias"], bins = 'log', gridsize=25, label="control", alpha=0.5)
 plt.hexbin(df[df["treatment"] == 1]["user_bias"], df[df["treatment"] == 1]["beer_bias"], bins = 'log', gridsize=25, label="treatment", alpha=0.5)
 plt.xlabel("user bias")
@@ -257,14 +265,6 @@ plt.ylabel("beer bias")
 plt.legend()
 plt.show()
 
-# %%
-# create a new column with the log of bias (we add one to deal with the case where the bias is 0)
-def log_bias(df):
-    df["user_bias_log"] = df["user_bias"].apply(lambda x: np.log(x+1))
-    df["beer_bias_log"] = df["beer_bias"].apply(lambda x: np.log(x+1))
-    return df
-
-df = log_bias(df)
 # %%
 # 2D hexagonal heat map plot of user log bias and beer log bias for treatment and control groups
 plt.hexbin(df[df["treatment"] == 0]["user_bias_log"], df[df["treatment"] == 0]["beer_bias_log"], bins = 'log', gridsize=25, label="control", alpha=0.5)
@@ -280,13 +280,33 @@ def balance(row):
         control = control.sample(len(treatment))
     return pd.concat([treatment, control])
 
-def discretized_matching(df, column1="user_bias", column2="beer_bias", bins=20):    
-    df["user_bias_discretized"] = pd.qcut(df[column1], bins, labels=False)
-    df["beer_bias_discretized"] = pd.qcut(df[column2], bins, labels=False)
+# create a new column with the log of bias (we add one to deal with the case where the bias is 0)
+def log_bias(df):
+    df["user_bias_log"] = df["user_bias"].apply(lambda x: np.log(x+1))
+    df["beer_bias_log"] = df["beer_bias"].apply(lambda x: np.log(x+1))
+    return df
+
+def discretized_matching(df, method = "equal_frequency", column1="user_bias", column2="beer_bias", bins=20):
+    if method == "equal_frequency":
+        df["user_bias_discretized"] = pd.qcut(df[column1], bins, labels=False)
+        df["beer_bias_discretized"] = pd.qcut(df[column2], bins, labels=False)
+    elif method == "equal_width":
+        df["user_bias_discretized"] = pd.cut(df[column1], bins, labels=False)
+        df["beer_bias_discretized"] = pd.cut(df[column2], bins, labels=False)
+    elif method == "log_equal_frequency":
+        df = log_bias(df)
+        df["user_bias_discretized"] = pd.qcut(df[column1 + "_log"], bins, labels=False)
+        df["beer_bias_discretized"] = pd.qcut(df[column2 + "_log"], bins, labels=False)
+    elif method == "log_equal_width":
+        df = log_bias(df)
+        df["user_bias_discretized"] = pd.cut(df[column1 + "_log"], bins, labels=False)
+        df["beer_bias_discretized"] = pd.cut(df[column2 + "_log"], bins, labels=False)
+    else:
+        raise ValueError("method not supported")
     df_balanced = df.groupby(["user_bias_discretized", "beer_bias_discretized"]).apply(lambda x: balance(x)).reset_index(drop=True)
     return df_balanced
 
-df_balanced = discretized_matching(df, "user_bias", "beer_bias", bins = 20)
+df_balanced = discretized_matching(df, "equal_frequency","user_bias", "beer_bias", bins = 20)
 # %%
 # count per bin
 df_balanced.groupby(["user_bias_discretized", "beer_bias_discretized"]).count()
@@ -300,8 +320,55 @@ res = ttest_ind(df_balanced[df_balanced["treatment"] == 0]["rating"], df_balance
 print(res)
 # print difference of mean rating between control and treatment
 print(df_balanced[df_balanced["treatment"] == 1]["rating"].mean() - df_balanced[df_balanced["treatment"] == 0]["rating"].mean())
+
+# plot histogram of rating for treatment and control groups
+plt.hist(df_balanced[df_balanced["treatment"] == 1]["rating"], label="local reviews", alpha = 0.5, bins = 25, density = True)
+plt.hist(df_balanced[df_balanced["treatment"] == 0]["rating"], label="foreign reviews", alpha = 0.5, bins = 25, density = True)
+plt.xlabel("rating")
+plt.ylabel("density")
+# add a vertical line at the mean rating
+plt.axvline(df_balanced[df_balanced["treatment"] == 1]["rating"].mean(), color='b', linestyle='dashed', linewidth=1, label="mean rating local")
+plt.axvline(df_balanced[df_balanced["treatment"] == 0]["rating"].mean(), color='orangered', linestyle='dashed', linewidth=1, label="mean rating foreign")
+plt.legend()
+plt.show()
+
+# %%
+# boostrapping function to get the confidence interval
+# bootstrapping function
+# input: dataset, nb of iterations
+# output: sorted list of means, overal mean, 95% confidence interval
+
+def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
+    differences = []
+    for i in range(iterations):
+        treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
+        control_sample = np.random.choice(control, size = len(treatment), replace = True)
+        differences.append(np.mean(treatment_sample) - np.mean(control_sample))
+    
+    differences.sort()
+    return np.mean(differences), differences[int(np.floor(level/2*iterations))], differences[int(np.ceil(1-(level/2) * iterations))]
+
+N_BOOSTRAP = 1000 #number of time we boostrap each dataset (be careful with runtimes)
+# %%
+diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(df_balanced["rating"].loc[df_balanced["treatment"] == 1], df_balanced["rating"].loc[df_balanced["treatment"] == 0], level = 0.05)
+
+df_results = pd.DataFrame({"diff_user_mean": [diff_user_mean], "diff_user_low": [diff_user_low], "diff_user_high": [diff_user_high]})
+
+# %%
+df_results["err_low"] = df_results["diff_user_mean"] - df_results["diff_user_low"]
+df_results["err_high"] = df_results["diff_user_high"] - df_results["diff_user_mean"]
+fig, ax = plt.subplots()
+plt.errorbar([i for i in range(len(df_results))], df_results["diff_user_mean"].to_numpy(), yerr=df_results[["err_low", "err_high"]].transpose().to_numpy(), barsabove=True, capsize = 5, fmt = '.b', label = "mean (95% CI)")
+ax.axhline(0, 0, 1, linestyle = "--", color = "k", label = "no difference")
+plt.legend()
+plt.xticks([i for i in range(len(df_results))], ["full dataset"])
+plt.ylabel("user local - foreign rating difference")
+plt.title("diference in user rating between local and foreign reviews")
+plt.savefig("user_bias_confidence_interval.png")
+plt.show()
+
 # %% [markdown]
-# ### Matrix factorization (bis): comparison of bias vectors between control and treatment groups
+# ### Matrix factorization (ter): comparison of bias vectors between control and treatment groups
 # %%
 df_treatment = df_sample[df_sample["treatment"] == 1]
 df_control = df_sample[df_sample["treatment"] == 0]
@@ -335,29 +402,13 @@ print(res)
 print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
 # interestingly we seem to always find similar values. So the effect is small and significative or not depending on the method (probably also the sample size)
 # %% [markdown]
-# ### Matrix factorization (ter): analysis per country:
+# ### Matrix factorization: analysis per country:
 
 groupby_country = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
 topten_country = groupby_country.index[:10]
 df_topcountries = df[df["user_country"].isin(topten_country)]
 
 # %%
-# boostrapping function to get the confidence interval
-# bootstrapping function
-# input: dataset, nb of iterations
-# output: sorted list of means, overal mean, 95% confidence interval
-
-def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
-    differences = []
-    for i in range(iterations):
-        treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
-        control_sample = np.random.choice(control, size = len(treatment), replace = True)
-        differences.append(np.mean(treatment_sample) - np.mean(control_sample))
-    
-    differences.sort()
-    return np.mean(differences), differences[int(np.floor(level/2*iterations))], differences[int(np.ceil(1-(level/2) * iterations))]
-
-N_BOOSTRAP = 1000 #number of time we boostrap each dataset (be careful with runtimes)
 # sidak correct:
 alpha_1 = 1-(1-0.05)**(1/10)
 print(alpha_1)
