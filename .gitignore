@@ -15,3 +15,4 @@ Plots/*
 _site/Plots/*
 _site/t_test_results/*
 Gemfile.lock
+models/*
