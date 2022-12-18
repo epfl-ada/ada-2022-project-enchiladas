@@ -11,7 +11,7 @@ Text can be **bold**, _italic_, or ~~strikethrough~~.
 print("Hello Python!")
 ```
 
-<iframe src="./assets/bignumber.html" title="Tutorials" width="100%" height="350" frameBorder="0"></iframe>
+<iframe src="./pages/bignumber.html" title="Tutorials" width="100%" height="350" frameBorder="0"></iframe>
 
 There should be whitespace between paragraphs.
 
@@ -23,7 +23,7 @@ There should be whitespace between paragraphs. We recommend including a README, 
 This is a normal paragraph following a header. GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
 
 
-<iframe src="./assets/new_rep.html" title="Tutorials" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./pages/new_rep.html" title="Tutorials" width="100%" height="800" frameBorder="0"></iframe>
 
 
 
@@ -56,11 +56,16 @@ end
 *   This is an unordered list following a header.
 *   This is an unordered list following a header.
 
+
+
 ##### Header 5
 
 1.  This is an ordered list following a header.
 2.  This is an ordered list following a header.
 3.  This is an ordered list following a header.
+
+![Regression](./images/discount_regression.PNG)
+
 
 ###### Header 6
 

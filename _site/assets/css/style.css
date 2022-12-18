@@ -284,7 +284,7 @@ a:hover { text-decoration: underline; }
 
 @media screen and (max-width: 42em) { .btn { display: block; width: 100%; padding: 0.75rem; font-size: 0.9rem; } .btn + .btn { margin-top: 1rem; margin-left: 0; } }
 
-.page-header { background: url("../../beer.jpg"); text-align: center; width: 100%; height: auto; background-size: cover; background-attachment: fixed; position: relative; overflow: hidden; border-radius: 0 0 85% 85% / 30%; }
+.page-header { background: url("../../images/beer.jpg"); text-align: center; width: 100%; height: auto; background-size: cover; background-attachment: fixed; position: relative; overflow: hidden; border-radius: 0 0 85% 85% / 30%; }
 
 @media screen and (min-width: 64em) { .page-header { padding: 5rem 6rem; } }
 
