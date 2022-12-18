@@ -260,7 +260,7 @@ td, th { padding: 0; }
 
 #myBtn { position: fixed; /* Fixed/sticky position */ bottom: 20px; /* Place the button at the bottom of the page */ right: 30px; /* Place the button 30px from the right */ z-index: 99; /* Make sure it does not overlap */ cursor: pointer; /* Add a mouse pointer on hover */ padding: 15px; /* Some padding */ display: inline-block; color: white; background-color: #421919; border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
 
-#myBtn:hover { color: rgba(0, 0, 0, 0.8); text-decoration: none; background-color: #510a0a; border-color: rgba(255, 255, 255, 0.3); }
+#myBtn:hover { color: rgba(0, 0, 0, 0.8); text-decoration: none; background-color: #421919; border-color: rgba(255, 255, 255, 0.3); }
 
 body { padding: 0; margin: 0; font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #686564; }
 
@@ -272,9 +272,9 @@ a { color: #1e6bb8; text-decoration: none; }
 
 a:hover { text-decoration: underline; }
 
-.btn { display: inline-block; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.7); background-color: #421919; border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+.btn { display: inline-block; margin-bottom: 1rem; color: white; background-color: #421919; border-color: rgba(255, 255, 255, 0.2); border-style: solid; border-width: 1px; border-radius: 0.3rem; transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
 
-.btn:hover { color: rgba(255, 255, 255, 0.8); text-decoration: none; background-color: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); }
+.btn:hover { color: black; text-decoration: none; background-color: #421919; border-color: rgba(255, 255, 255, 0.3); }
 
 .btn + .btn { margin-left: 1rem; }
 
@@ -294,9 +294,9 @@ a:hover { text-decoration: underline; }
 
 .project-name { margin-top: 0; margin-bottom: 0.1rem; }
 
-@media screen and (min-width: 64em) { .project-name { font-size: 3.25rem; } }
+@media screen and (min-width: 64em) { .project-name { font-size: 4.25rem; } }
 
-@media screen and (min-width: 42em) and (max-width: 64em) { .project-name { font-size: 2.25rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .project-name { font-size: 3.25rem; } }
 
 @media screen and (max-width: 42em) { .project-name { font-size: 1.75rem; } }
 
@@ -372,7 +372,7 @@ a:hover { text-decoration: underline; }
 
 @media screen and (max-width: 42em) { .site-footer { font-size: 0.9rem; } }
 
-.site-footer-owner { display: block; font-weight: bold; color: #421919; }
+.site-footer-owner { display: block; font-weight: bold; }
 
 .site-footer-credits { color: #421919; }
 
