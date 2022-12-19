@@ -7,7 +7,7 @@ from nltk.tokenize import WhitespaceTokenizer, RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
-import gensim.downloader
+from gensim.models import KeyedVectors
 
 import spacy
 
@@ -43,10 +43,15 @@ class Corpus:
         if tokenize_type == 'whitespace':
             tokenizer = WhitespaceTokenizer().tokenize
         elif tokenize_type == 'words':
+            # keep only words without digits:
+            tokenizer = RegexpTokenizer(r'\b[^\d\W]+\b').tokenize
+        elif tokenize_type == 'words_naive':
+            # keep alphanumeric
             tokenizer = RegexpTokenizer(r'\w+').tokenize
-        elif tokenize_type == 'spacy':
+        elif "spacy" in tokenize_type:
+            name = vec_type.split("spacy-")[1]
             tokenizer = lambda x: x # don't do anything
-            nlp = spacy.load('en_core_web_sm')
+            nlp = spacy.load(name)
             nlp.max_length = 10**10 
         else:
             tokenizer = lambda x: x.split()
@@ -76,22 +81,25 @@ class Corpus:
                 vectorizer = CountVectorizer(**self.params)
 
             self.X = vectorizer.fit_transform(self.tokenized_texts)
-        elif "word2vec" in vec_type:
-            name = vec_type.split("word2vec-")[1]
-            glove_vectors = gensim.downloader.load(name) # load the word2vec model (pick one) 'glove-twitter-25'
+        elif "w2v" in vec_type:
+            name = vec_type.split("w2v-")[1]
+            vectors = KeyedVectors.load(f'models/{name}.model')
             self.X = []
+            self.missed = []
             for text in self.tokenized_texts:
-                vec = np.zeros(glove_vectors['hi'].shape)
+                vec = np.zeros(vectors.vector_size)
                 N = len(text)
+                missed_words = []
                 for item in text:
                     try:
-                        vec += glove_vectors[item]
+                        vec += vectors[item]
                     except:
-                        print(item+" not in word2vec model")
+                        missed_words.append(item)
                         pass
+                self.missed.append(missed_words)
                 self.X.append(np.array(vec)/N)
             self.X = np.array(self.X)
-        elif vec_type == "spacy":
+        elif "spacy" in vec_type:
             self.X = []
             for text in self.tokenized_texts:
                 self.X.append(np.array(nlp(text).vector))
@@ -124,7 +132,7 @@ def distance_matrix(corpus=None, X=None, metric='manhattan'):
         raise ValueError('Unsupported distance metric: %s' %(metric))
     if corpus:     
         try:
-            X = corpus.vectorizer.X
+            X = corpus.X
             try:
                 X = X.toarray()
             except AttributeError:

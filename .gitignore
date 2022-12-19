@@ -11,3 +11,9 @@ __pycache__/*
 Data/df_ba_ratings_filtered_md_beers.txt.pickle
 t_test_results/*
 _site/Data/*
+Plots/*
+_site/Plots/*
+_site/t_test_results/*
+Gemfile.lock
+models/*
+Pages/*

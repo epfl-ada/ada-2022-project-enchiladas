@@ -1,7 +1,25 @@
-# %% [markdown]
 # TODO: choose what to do with this file for the final report
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os.path
+import scipy.stats as stats
+from helpers import * #custom made functions
+import plotly.express as px
+from prettify import * #custom made functions
+print("import completed")
+
+# number of pandas rows to display
+pd.set_option('display.max_rows', 100)
+
+# %%
+# load data
+
 # %% [markdown]
-#  # Data exploration
+
+# %% [markdown]
+#  # Data exploration 
 # 
 #  GEOGRAPHICAL DISTRIBUTION
 #  - #beers per country
