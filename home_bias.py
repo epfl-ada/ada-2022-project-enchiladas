@@ -610,7 +610,7 @@ print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
 import datapane as dp
 # create datapane:
 
-method_distribution = dp.Text('The ratings of each dataset are split into two groups: local when the user rates a beer from its own counry and foreign. Reviews of the two groups are matched 1-1 based on the beer quality and the user critic level (some users might consider 4/5 to be a good grade, whereas some others might call it average). Beer quality and user critic level are computed using matrix factorisation with biases on the user-beer review matrix. The reviews are then discretized in bins of equal frequency of the log parameters and approximaely matched within each bin. Finally, a t-test is performed on the balanced dataset to asses the following hypothesis: \n\n H0: the mean rating of local reviews is equal to the mean rating of foreign reviews \n\n H1: the mean rating of local reviews is different from the mean rating of foreign reviews. \n\n The p-value is then used to assess the significance of the difference in mean rating between the two groups.')
+method_distribution = dp.Text('The ratings of each dataset are split into two groups: local when the user rates a beer from its own counry and foreign. To accounts for difference in users critic level bias and beer quality , we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from wich we recover the biases $b_{user}$ and $b_{beer}$. The reviews are then put into bins of equal frequency in user and beer biases, then approximaely matched by resampling the majoritarian group within each bin. Once the dataset is balanced, we run a t-test to compare the mean rating of local and foreign reviews. We find a small, but significant difference.')
 
 app = dp.App(
     dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/rating_distribution_homebias.jpg", name="home_bias_distribution", caption="distribution of rating for local and foreign")]),
@@ -618,8 +618,10 @@ app = dp.App(
 
 app.save(path="Images/home_bias.html")
 
+method_country = dp.Text('We group our review by user country and repeat the matching for each country in the top 10 number of reviews in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and sidak-corrected significance level.')
+
 app = dp.App(
     dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/homebias_confidence_intervall_countries.jpg", name="home_bias_confidence_countries", caption="Rating difference between local and foreign beers per country")]),
-    dp.Page(title="Method", blocks=["# Method", dp.Text("change me")]))
+    dp.Page(title="Method", blocks=["# Method", method_country]))
 
 app.save(path="Images/home_bias_countries.html")

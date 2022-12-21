@@ -76,10 +76,10 @@ _For further details, please see our notebooks_
 5. [X] See if one can explain these differences by removing any user-bias - it could be that some users are more negative in general. To do this, rescale the ratings for each user such that the mean corresponds to a value of 0, the max corresponds to a value of 1 and the min correponds to a value of -1.
 $$ GIVE FORMULA $$
 6. [X] Check if the difference may be because users are reviewing different beers. Visualise the main beers per country and also conduct a statistical test to determine [FINISH]
-7. [X] Next, go about explaining all of the difference by looking simultaneously at both beer and user biases. To do this, employ a matrix factorisation.
-    $$ GIVE FORMULA $$
-8. Following the matrix facrtorisation, furthermore propensity analyses [FINISH]
-9. [X] Examine the biases both globally and also per country.
+7. [X] Investigate wether consummers have a preference for local beers over foreign ones. To accounts for difference in users critic level bias and beer quality , we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from wich we recover the biases $b_{user}$ and $b_{beer}$.
+The matching is initially done by computing the minimum weight matching bi-partite graph between local and foreign group (weight is the euclidean distance of user and beer biases difference between subjects). However, as we scale up to the full dataset, the number of possible connection grows with $O(n^2)$. To speed up the process, we use a stochastic approximation where we randomly match each users within a discretized equal frequency bining of the user and beer biases.
+Once the dataset matched, we run a t-test to compare the mean rating of local and foreign reviews. We find a small, but significant difference.
+9. [X] We group our review by user country and repeat the matching for the top 10 countries present in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and sidak-corrected significance level. The results show that most country actually rate foreign beers higher than local ones. This simpson paradox was caused by the imbalance towards american reviews in the initial dataset.
 10. [X] Investigate the language data. Check the distribution of reviews per countries and filter to countries where we have enough data.
 11. [X] Construct an NLP pipeline so one can begin to look at language. To do this, we first preprocess the dataset by casefolding, tokenising and removing any non-alphabetic data. For each state and country, vectorise the corpus using the following models:
     - `fasttext-wiki-news-subwords-300`
