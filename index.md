@@ -9,7 +9,7 @@ title: Applied Beer Analysis
 
 
 <!-- # Introduction (Better title?) -->
-## Doesn't everyone like beer?
+## Doesn't everyone like beer?!
 Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!
 
  First have a look at means per state... Some preliminary geographical difference visible?
@@ -43,7 +43,7 @@ Significant in global ratings for top beers versus countries/states (Kasimir wil
 <!-- Matthieus part  -->
 
 <!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
-## We don't like no foreign beer
+## We don't like no foreign beers!
 
 If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products compared to foreign ones?
 
@@ -118,7 +118,7 @@ stiff upper lip vs American optimism
 Since countries talk differently, we can use the differences in the way they talk to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
 
 <!-- dendrogram across countries -->
-<iframe src="./Pages/dendrogram.html" title="Dendogram" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="800" frameBorder="0"></iframe>
 
 We can see that in general, geographic proximity does not entirely determine how similarly countries talk. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the UK has many more regional accents compared to other English-speaking countries [4]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as anticipated.
 
@@ -129,13 +129,15 @@ We can conduct the same analysis for US states to find the linguistic similarity
 <!-- network of states  -->
 <iframe src="./Pages/network.html" title="Network" width="100%" height="800" frameBorder="0"></iframe>
 
-We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, NY
+We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennysylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.
+
+We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that America is relatively homogeneous in general in its language usage.
 
 [ELABORATE]
 
 <!-- Final parts and takeaways -->
 <!-- Key bullet points and takeaways (Table) -->
-# Key Findings
+# So, what insights have we learned?
 - Countries rate differently (a lot of it is due to user bias)
 - Countries rate different beers (they have different quality)
 - Propensity matching (Matthieu: is there more to say?) 
@@ -148,8 +150,11 @@ Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-proje
 # References
 
 [1] 
+
 [2] http://www.europeanbeerguide.net/eustats.htm#production
+
 [3]
+
 [4] https://www.theguardian.com/notesandqueries/query/0,5753,-18336,00.html#:~:text=SEMANTIC%20ENIGMAS-,Why%20are%20there%20so%20many%20regional%20accents%20in%20the%20UK,to%20other%20English%2Dspeaking%20countries%3F&text=Until%20the%201930s%20communication%20between,means%20of%20retaining%20an%20identity.
 
 
