@@ -20,7 +20,7 @@ First have a look at means per state... Some preliminary geographical difference
 How about per country?
 
 <!-- Distribution of ratings per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Countries - Distribution" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/ratings_countries_app.html" title="Countries - Distribution" width="100%" height="1200" frameBorder="0"></iframe>
 
 Report some numbers and significance ratios.. (Kasimir will do)
 
@@ -31,7 +31,7 @@ Maybe due to the beers rated by country/state?
 Next idea: look at most rated beers per state and country:
 
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="1200" frameBorder="0"></iframe>
 
 <!-- Top beers per country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Top beers per country" width="100%" height="800" frameBorder="0"></iframe>
@@ -83,7 +83,7 @@ Foreign vs local beers (Oisin will do) [give numbers]
 -> Move to more general language analysis
 Do countries talk differently? -->
 
-## Do people also talk about foreign vs local beer differently?
+## Do people also talk about foreign and local beer differently?
 
 Clearly, a difference exists between foreign and local beers in terms of their ratings. But does this also manifest itself in the language used in these beer reviews?
 
@@ -102,7 +102,7 @@ Why is this? First of all, our results are quite uncertain - meaning that we can
 - It may be that users which review foreign beers constitute an entirely different social class to other users. Although the website itself attracts a very specific type of person, it is obvious that within this there are also wildly differing demographics. For example, perhaps it may be that users who review foreign beers are richer and travel more, constituting an upper class. Via education differences etc., this class likely also have a different means of talking as compared to the general populations. Thus, this may be a possible explanation.
 - There may be a psychological effect. When talking about foreign beers, it may that users exaggerate their own speaking mannerisms in order to distinguish themselves. For some, their language can be a mark of pride. As an example, the English are unlikely to ever use the word "soccer" in any case, but they may make a point of explicitly using or exaggerating the word "football" when the conversation is about American culture/people/things.
 
-## Why are we only looking at foreign vs local reviews? Don't people also talk about beer differently too?
+## Why are we only looking at foreign versus local reviews? Don't people also talk about beer differently too?
 
 Language and culture are interlinked, so we know different cultures have different ways of expressing their preferences for beers. Let's look at an example!
 
