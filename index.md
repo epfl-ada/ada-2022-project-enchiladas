@@ -93,9 +93,10 @@ Applying this to foreign versus local beer, we can find that there is a differen
 _How about if we just look at the US?_
 Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! [GIVE RESULTS]
 
-Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. _BUT,_ this is also a known psychological effect.
+Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. _BUT,_ the current trend can nonetheless be explained:
 
-[ELABORATE]
+- It may be that users which review foreign beers constitute an entirely different social class to other users. Although the website itself attracts a very specific type of person, it is obvious that within this there are also wildly differing demographics. For example, perhaps it may be that users who review foreign beers are richer and travel more, constituting an upper class. Via education differences etc., this class likely also have a different means of talking as compared to the general populations. Thus, this may be a possible explanation.
+- There may be a psychological effect. When talking about foreign beers, it may that users exaggerate their own speaking mannerisms in order to distinguish themselves. For some, their language can be a mark of pride. As an example, the English are unlikely to ever use the word "soccer" in any case, but they make a point of explicitly using or exaggerating the word "football" when the conversation is about American culture/people/things.
 
 ## Why are we only looking at foreign vs local reviews? Don't people also talk about beer differently too?
 
@@ -108,8 +109,7 @@ A canonical example of differences between English usage among countries is Amer
 
 However, we also see some cultural difference arising too!
 
-stiff upper lip vs American optimism
-[ELABORATE]
+There is also more prominence in the American wordcloud for positive words - we can see "great", "good", "really", "nice", "much", "good", "well", "nice" all occuring very often whereas in the English wordcloud these occur less frequently. This is a known difference between British and American culture - the British are known for having a "stiff upper lip" and Americans are known for being very optimistic and upbeat (e.g. see [here](https://www.dailymail.co.uk/news/article-2346351/Brits-DO-stiff-upper-lip-Americans-optimistic-romantic-Britons.html) and [here](https://www.theatlantic.com/politics/archive/2015/03/the-american-ethic-and-the-spirit-of-optimism/388538/))
 
 ## So, countries talk differently. Can we cluster countries based on how similarly they talk?
 
@@ -156,12 +156,6 @@ Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-proje
 [3]
 
 [4] https://www.theguardian.com/notesandqueries/query/0,5753,-18336,00.html#:~:text=SEMANTIC%20ENIGMAS-,Why%20are%20there%20so%20many%20regional%20accents%20in%20the%20UK,to%20other%20English%2Dspeaking%20countries%3F&text=Until%20the%201930s%20communication%20between,means%20of%20retaining%20an%20identity.
-
-
-
-
-
-
 
 
 
