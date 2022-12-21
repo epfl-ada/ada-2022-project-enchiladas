@@ -40,23 +40,26 @@ Significant in global ratings for top beers versus countries/states (Kasimir wil
 
 <!-- Matthieus part  -->
 
-Motivate propensity analysis. 
-We need to match on beers and users at the same time.
-(Matrix factorization! - we'll see how detailed...)
+If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consummer preferences towards local products compared to foreign ones ?
 
+Following paragraph motivate matching, remove if extra:
+
+To allow apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an obsevational study, match reviews between the two groups based on the beer quality and user's level of criticism (details are shown in the "method" tab of the next figure).
+
+Once we match reviews by pair, we the ratings are different. Let's look at the results below:
 <!-- Plot with distributions (Rating distribution per group - foreign vs local) -->
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0"></iframe>
 
 The difference of distribution of rating between local and foreign reviews is almost indistinguishable. Indeed, the users only seem to give on average (MEAN DIFF) points more to local beers compared to reviews. However, despite being small, the difference is still significant as shown by the small p-value (P VALUE).
 
-Since our dataset has a majority of reviews written by americans, the observation might not be representative of every country. In the following plot, let's look at the home bias when grouping user by country for the top 10 countries on the website to investigate if there are more information hidden under the hood.
+Since our dataset has a majority of reviews written by americans, the observation might not be representative of user in other countries. In the following plot, let's look at the home bias when grouping user by country for the top 10 countries on the website to investigate if there are more information hidden under the hood.
 
 <!-- Plot with confidence intervals  -->
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0"></iframe>
 
-Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradoxe: when users are combined, the majoritarian country (US) mask the effect of all other. Let's also note that Belgium, which is quite renowned for its beer, seem to still prefer their local beers.
+Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradoxe: when users are combined, the majoritarian country (US) mask the effect of all other. Let's also note that Belgians, which is quite renowned for its beer, seem to still prefer their local beers.
 
 Those result are interesting but it is hard to find a good explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. In "Favoritism Toward Foreign and Domestic Brands: A Comparison of Different Theoretical Explanations. Journal of International Marketing", [Balabanis, G., Stathopoulou, A., & Qiao, J. (2019)](https://openaccess.city.ac.uk/id/eprint/23521/) summarize the possible explanation to five effects, which will either bias the consummer toward choosing local brands or , conversely, foreign ones. Given our lack of data on consummer profile, it seems however impossible to further quantify each effect. Our analysis therefor only render the composition of all effect.
 
