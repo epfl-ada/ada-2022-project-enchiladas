@@ -89,6 +89,7 @@ $$ GIVE FORMULA $$
     - `glove-wiki-gigaword-300`
     - `glove-twitter-200`
     - `tf-idf`
+
     To make all the vectorisations comparable, standardise by row.
     Then compute distances from the vectorised corpuses using the following metrics:
     - `euclidean`
@@ -137,5 +138,5 @@ Oisín:
 ## Requirements
 [ADD AT END]
 
-## References
-[1] blah
+<!-- ## References
+[1] blah -->
