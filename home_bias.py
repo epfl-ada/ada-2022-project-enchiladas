@@ -4,8 +4,11 @@
 # # RQ4: home bias
 # %% [markdown]
 # The following section details the analysis of the home bias effect in beer reviews, ie. do consummers rate local beers higher or lower than foreign ones. We define a review to be "local" if the beer and the reviewer are from the same country (the country of the beer is taken to be the location of the main brewery). A contrario, the review is "foreign" if the country of the user and the beer differ. The hypothesis of home bias can be formalized as follows:
+#
 # H0: $\mu_{local} = \mu_{foreign}$, the home bias effect is not present)
-# H1: $\mu_{local} != \mu_{foreign}$, the home bias effect is present, either positively (local > foreign) or negatively (foreign > local)
+#
+# H1: $\mu_{local} \neq \mu_{foreign}$, the home bias effect is present, either positively (local > foreign) or negatively (foreign > local)
+#
 # To test this hypothesis, we divide or dataset into two groups: one with local reviews (treatment) and one with foreign reviews (control). We then try to reject the null-hypothesis using a t-test on the overall rating of the review.
 
 # %%
@@ -63,10 +66,9 @@ plt.xticks(x_axis, x_label, rotation=90)
 plt.legend()
 plt.show()
 # %% [markdown]
-# The distribution makes sense. most of the users are concentrated in the us. Therefore a beer from the us is mostly rated by locals and an beer with fewer user in its country (for example Belgium or Germany) mostly receives foreign reviews (as seen on the second plot).
-
-# %% [markdown]
-# looking at this very skewed distribution, it might make sense to subset the data to beers with a balanced distribution of local and foreign reviews (at least 10% of each). Let's see how many beers we would have to remove to get a balanced distribution.
+# The distribution of local reviews makes sense. most of the users are concentrated in the us. Therefore a beer from the us is mostly rated by locals and an beer with fewer user in its country of origin (for example Belgium or Germany) mostly receives foreign reviews (as seen on the second plot).
+#
+# Looking at this very skewed distribution, it might make sense to subset the data to beers with a balanced distribution of local and foreign reviews (at least 10% of each). Let's see how many beers we would have to remove to get a balanced distribution.
 # %%
 # how many beers do have a somewhat balance distribution ? (20-80%)
 groupby_beer[(groupby_beer["share_local_reviews"] > 0.2) & (groupby_beer["share_local_reviews"] < 0.8)]["share_local_reviews"].hist()
@@ -102,7 +104,7 @@ print("average difference of mean ratings between treatment and control", df[df[
 df_balanced = df[(df["share_local_reviews"] > 0.2) & (df["share_local_reviews"] < 0.8)]
 df_balanced[df_balanced["treatment"] == 1]["rating"].hist(bins=20, alpha=0.5, label="local reviews")
 df_balanced[df_balanced["treatment"] == 0]["rating"].hist(bins=20, alpha=0.5, label="foreign reviews")
-plt.title("same for beers with balanced distribution of local and foreign reviews")
+plt.title("distribution of reviews for beer with at least 20% of local and 20% of foreign reviews")
 plt.show()
 
 # run t-test
@@ -239,8 +241,6 @@ df = get_biases(df, plot=True)
 # The following algorithm creates a bipartite graph where each node of the control group is connected to each node of the treatment group. The weight of the edge is the squared distance between the user bias and the beer bias of the two reviews. The algorithm then finds the minimum weight matching between the two groups. The matching is done using the [Hungarian algorithm](https://en.wikipedia.org/wiki/Hungarian_algorithm).
 # The main issue of this approach is that we need to create 3.1e11 ($O(n^2)$) connections between the nodes of the two groups, which would simply take to loong. We therefore take a sample of the reviews to try the algorithm.
 # %%
-df_sample = df.sample(frac = 0.05)
-# %%
 import networkx as nx
 
 def graph_matching(df, concat = False):
@@ -281,7 +281,11 @@ def graph_matching(df, concat = False):
     else:
         return df_control, df_treatment
 # %%
+# run the graph matching algorithm (slow)
+df_sample = df.sample(frac = 0.001)
+
 df_control, df_treatment = graph_matching(df_sample)
+
 # run a t-test on rating with the matching dataframe
 res = ttest_ind(df_control["rating"], df_treatment["rating"])
 print(res)
@@ -374,7 +378,7 @@ def discretized_matching(df, bin_method = "equal_frequency", bins=20, column1="u
     return df_balanced
 # %%
 # run-test with exact matching and equal frequency
-df_balanced = discretized_matching(df.sample(frac = 0.01, random_state=42), bin_method="equal_frequency", bins = 20)
+df_balanced = discretized_matching(df.sample(frac = 0.001, random_state=42), bin_method="equal_frequency", bins = 20)
 # sanity check
 # sanity check if there are the same number of reviews in treatment and control groups
 df_balanced.groupby("treatment").count()
@@ -389,7 +393,7 @@ print(df_balanced["distance"].mean())
 
 # %%
 
-def random_balance(row):
+def random_balance(row, compute_distance=True):
     treatment = row[row["treatment"] == 1]
     control = row[row["treatment"] == 0]
     if len(treatment) == 0 or len(control) == 0:
@@ -399,21 +403,19 @@ def random_balance(row):
     else:
         control = control.sample(len(treatment), random_state=42)
     # compute the distance of each review to the mean of the treatment and control groups
-    treatment["distance"] = treatment.apply(lambda x: np.sqrt((x["user_bias"] - treatment["user_bias"].mean())**2 + (x["beer_bias"] - treatment["beer_bias"].mean())**2), axis=1)
-    control["distance"] = control.apply(lambda x: np.sqrt((x["user_bias"] - control["user_bias"].mean())**2 + (x["beer_bias"] - control["beer_bias"].mean())**2), axis=1)
+    if compute_distance:
+        treatment["distance"] = treatment.apply(lambda x: np.sqrt((x["user_bias"] - treatment["user_bias"].mean())**2 + (x["beer_bias"] - treatment["beer_bias"].mean())**2), axis=1)
+        control["distance"] = control.apply(lambda x: np.sqrt((x["user_bias"] - control["user_bias"].mean())**2 + (x["beer_bias"] - control["beer_bias"].mean())**2), axis=1)
     return pd.concat([treatment, control])
 
 # redefine discretized_matching to include the random balancing method
-def discretized_matching(df, bin_method = "equal_frequency", match_method = "random_matching", bins=20, column1="user_bias", column2="beer_bias"):
+def discretized_matching_updated(df, bin_method = "equal_frequency", match_method = "random_matching", bins=20, column1="user_bias", column2="beer_bias", compute_distance=True):
     #approximately matches each review to a review in the other group by binning the user and beer bias and then balancing each bin
     df = bin_data(df, bin_method, bins, column1, column2)
-    
-    # performs approximate graph matching within each bin
-    df_balanced = df.groupby(["user_bias_discretized", "beer_bias_discretized"]).apply(lambda x: discretized_graph_matching(x)).reset_index(drop=True)
 
     # choose matching method
     if match_method == "random_matching":
-        df_balanced = df.groupby(["user_bias_discretized", "beer_bias_discretized"]).apply(lambda x: random_balance(x)).reset_index(drop=True)
+        df_balanced = df.groupby(["user_bias_discretized", "beer_bias_discretized"]).apply(lambda x: random_balance(x, compute_distance)).reset_index(drop=True)
     elif match_method == "graph_matching":
         df_balanced = df.groupby(["user_bias_discretized", "beer_bias_discretized"]).apply(lambda x: discretized_graph_matching(x)).reset_index(drop=True)
     else:
@@ -428,7 +430,7 @@ df_sample = df
 bin_methods = ["equal_frequency", "equal_width", "log_equal_frequency", "log_equal_width"]
 for method in bin_methods:
     print(method)
-    df_balanced = discretized_matching(df_sample, bin_method=method)
+    df_balanced = discretized_matching_updated(df_sample, bin_method=method, match_method="random_matching", bins = 20)
     # total number of reviews in the balanced dataframe
     print(len(df_balanced))
     # average distance between the matching reviews
@@ -445,7 +447,7 @@ for method in bin_methods:
 # %% [markdown]
 # Finally, we can run the matching on the full dataset and perform a t-test between the rating of the two groups in the matched reviews dataset.
 # %%
-df_balanced = discretized_matching(df, bin_method="log_equal_frequency", match_method = "random_matching", bins = 20)
+df_balanced = discretized_matching_updated(df, bin_method="log_equal_frequency", match_method = "random_matching", bins = 20, compute_distance = False)
 
 # %%
 # run a t-test on rating with the balanced dataframe
@@ -463,7 +465,7 @@ plt.ylabel("density")
 plt.axvline(df_balanced[df_balanced["treatment"] == 1]["rating"].mean(), color='b', linestyle='dashed', linewidth=1, label="mean rating local")
 plt.axvline(df_balanced[df_balanced["treatment"] == 0]["rating"].mean(), color='orangered', linestyle='dashed', linewidth=1, label="mean rating foreign")
 plt.legend()
-plt.savefig("rating_distribution.png")
+plt.savefig("Images/rating_distribution_homebias.jpg", dpi = 500)
 plt.title("Rating distribution")
 plt.show()
 # %%
@@ -472,6 +474,7 @@ def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
     # bootstrapping function
     # input: dataset, nb of iterations
     # output: overal mean, 95% confidence interval
+    np.random.seed(42)
     differences = []
     for i in range(iterations):
         treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
@@ -497,12 +500,9 @@ plt.legend()
 plt.xticks([i for i in range(len(df_results))], ["full dataset"])
 plt.ylabel("user local - foreign rating difference")
 plt.title("diference in user rating between local and foreign reviews")
-plt.savefig(img_path + "user_bias_confidence_interval.png")
 plt.show()
-
 # %% [markdown]
 # The difference of distribution of rating between local and foreign reviews is almost indistinguishable. However, looking at the 95% confidence intervall, the effect is still statistically significant. We can conclude that the local beers are rated higher than the foreign beers, but not by much.
-
 # %% [markdown]
 # ### Matrix factorization: analysis per country:
 # %% [markdown]
@@ -513,6 +513,7 @@ plt.show()
 # get the top 10 countries
 groupby_country = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
 topten_country = groupby_country.index[:10]
+print("The top 10 countries are: ", topten_country)
 df_topcountries = df[df["user_country"].isin(topten_country)]
 # %%
 # sidak correction
@@ -526,7 +527,7 @@ for country in topten_country:
     print(f"country: {country}, number of reviews: {len(df_country)}")
     df_country = get_biases(df_country)
     # perform matching of the country
-    df_country = discretized_matching(df_country, bin_method = "equal_frequency", match_method = "random_matching", bins = 10)
+    df_country = discretized_matching_updated(df_country, bin_method = "equal_frequency", match_method = "random_matching", bins = 10)
     # run a t-test on rating with the balanced dataframe
     res = ttest_ind(df_country[df_country["treatment"] == 1]["rating"], df_country[df_country["treatment"] == 0]["rating"])
     print(f"{country}: {res}")
@@ -542,20 +543,21 @@ for country in topten_country:
 # %%
 # plotting of the results
 df_results = pd.DataFrame(list_results)
+df_results["idx"] = [i for i in range(len(df_results))]
 # computing error bars
 df_results["err_low"] = df_results["diff_user_mean"] - df_results["diff_user_low"]
 df_results["err_high"] = df_results["diff_user_high"] - df_results["diff_user_mean"]
 
 # plotting
 fig, ax = plt.subplots(figsize = (10, 5))
-plt.errorbar([i for i in range(len(df_results))], df_results["diff_user_mean"].to_numpy(), yerr=df_results[["err_low", "err_high"]].transpose().to_numpy(), fmt = 'o', color = 'b', label = f"mean ({(1 - alpha_1)*100:.3f}% CI)")
-ax.axhline(0, 0, 1, linestyle = "--", color = "k", label = "no difference")
+plt.errorbar([i for i in range(len(df_results))], df_results["diff_user_mean"].to_numpy(), yerr=df_results[["err_low", "err_high"]].transpose().to_numpy(), fmt = 'o', color = 'chocolate', label = f"mean ({(1 - alpha_1)*100:.3f}% CI)")
+ax.axhline(0, 0, 1, linestyle = "--", color = "gray", label = "no difference")
 plt.xticks([i for i in range(len(df_results))], topten_country)
 plt.ylabel("diference in user average rating for local and foreign beers")
 plt.title("user local - foreign rating difference")
 plt.legend()
+plt.savefig("Images/homebias_confidence_intervall_countries.jpg", dpi = 500)
 plt.show()
-
 # %% [markdown]
 # Developping the analysis per country revealed a form of simpson's paradoxe. Altough the general dataset seem to be biased towards local beers, when analysing per country bias, we notice that 8 of the top 10 countries are biased towards foreign beers. This effect was hidden in the global analysis because the dataset mostly consists of reviews from the US, which is slightly positively biased towards local beers.
 # 
@@ -600,3 +602,24 @@ print(np.mean(user_bias_treatment) - np.mean(user_bias_control))
 res = ttest_ind(beer_bias_treatment, beer_bias_control)
 print(res)
 print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
+
+# %% [markdown]
+# ## Creating datapane for the website
+# %%
+# %%
+import datapane as dp
+# create datapane:
+
+method_distribution = dp.Text('The ratings of each dataset are split into two groups: local when the user rates a beer from its own counry and foreign. Reviews of the two groups are matched 1-1 based on the beer quality and the user critic level (some users might consider 4/5 to be a good grade, whereas some others might call it average). Beer quality and user critic level are computed using matrix factorisation with biases on the user-beer review matrix. The reviews are then discretized in bins of equal frequency of the log parameters and approximaely matched within each bin. Finally, a t-test is performed on the balanced dataset to asses the following hypothesis: \n\n H0: the mean rating of local reviews is equal to the mean rating of foreign reviews \n\n H1: the mean rating of local reviews is different from the mean rating of foreign reviews. \n\n The p-value is then used to assess the significance of the difference in mean rating between the two groups.')
+
+app = dp.App(
+    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/rating_distribution_homebias.jpg", name="home_bias_distribution", caption="distribution of rating for local and foreign")]),
+    dp.Page(title="Method", blocks=["# Method", method_distribution]))
+
+app.save(path="Images/home_bias.html")
+
+app = dp.App(
+    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/homebias_confidence_intervall_countries.jpg", name="home_bias_confidence_countries", caption="Rating difference between local and foreign beers per country")]),
+    dp.Page(title="Method", blocks=["# Method", dp.Text("change me")]))
+
+app.save(path="Images/home_bias_countries.html")
