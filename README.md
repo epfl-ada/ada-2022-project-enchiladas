@@ -78,10 +78,10 @@ $$ GIVE FORMULA $$
 6. [X] Check if the difference may be because users are reviewing different beers. Visualise the main beers per country and also conduct a statistical test to determine [FINISH]
 7. [X] Next, go about explaining all of the difference by looking simultaneously at both beer and user biases. To do this, employ a matrix factorisation.
     $$ GIVE FORMULA $$
-    and then furthermore propensity analyses [FINISH]
-8. [X] Examine the biases both globally and also per country.
-9. [X] Investigate the language data. Check the distribution of reviews per countries and filter to countries where we have enough data.
-10. [X] Construct an NLP pipeline so one can begin to look at language. To do this, we first preprocess the dataset by casefolding, tokenising and removing any non-alphabetic data. For each state and country, vectorise the corpus using the following models:
+8. Following the matrix facrtorisation, furthermore propensity analyses [FINISH]
+9. [X] Examine the biases both globally and also per country.
+10. [X] Investigate the language data. Check the distribution of reviews per countries and filter to countries where we have enough data.
+11. [X] Construct an NLP pipeline so one can begin to look at language. To do this, we first preprocess the dataset by casefolding, tokenising and removing any non-alphabetic data. For each state and country, vectorise the corpus using the following models:
     - `fasttext-wiki-news-subwords-300`
     - `conceptnet-numberbatch-17-06-300`
     - `word2vec-ruscorpora-300`
@@ -95,10 +95,10 @@ $$ GIVE FORMULA $$
     - `euclidean`
     - `cityblock`
     - `cosine`
-11. [X] Run the NLP pipeline for 4 cases: on the raw data per country and state, on beer-specific words per country and state, ignoring the most common words per country and state and lastly on foreign versus local reviews.
-12. [X] Check if there is a difference in the language used for foreign versus local reviews. Investigate specifically if non-American reviewers sound more American when reviewing American beer.
-13. [X] Look more generally to see if we can pinpoint cultural differences between countries. Look at wordclouds to check whether or not countries use the same data.
-14. [X] Quantify the distance per country and state See if we can reconstruct geographical proximities or not.
+12. [X] Run the NLP pipeline for 4 cases: on the raw data per country and state, on beer-specific words per country and state, ignoring the most common words per country and state and lastly on foreign versus local reviews.
+13. [X] Check if there is a difference in the language used for foreign versus local reviews. Investigate specifically if non-American reviewers sound more American when reviewing American beer.
+14. [X] Look more generally to see if we can pinpoint cultural differences between countries. Look at wordclouds to check whether or not countries use the same data.
+15. [X] Quantify the distance per country and state See if we can reconstruct geographical proximities or not.
 
 _Note_: RateBeer only have reviews from the US, so we conduct the analysis for RateBeer and BeerAdvocate separately. Furthermore, the rating systems on the websites are different also. When looking at the US, we compare results.
 
