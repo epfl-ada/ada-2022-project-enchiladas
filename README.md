@@ -52,25 +52,51 @@ To understand this, we look at a number of important sub-questions
     - df_rb: RateBeer reviews for all of the matched beers including user data (pickled)
     By working on the pre-filtered merged dataset from 1., the sizes are reduced to 200mb and fit easily into RAM.
 3. [X] From the pickled datasets, filter again depending on the research question (e.g. by minimum number of reviews or countries of interest), address similarity/differences between the two rating dataframes (min-max scaling), visualize the basic data (rating distributions for the two userbase, geographical distribution), enrich the beer styles by grouping similar beer styles together
-4. [X] Conduct preliminary analysis by investigating mean differences in ratings for palette, aroma, overall etc. per country and per state. Conduct t-tests with Sidak correction to investigate if this is significant.
-5. [X] See if one can explain these differences by removing any user-bias i.e. it could be that some users are more negative in general.
-6. [X] Next, go about explaining all of the difference by looking simultaneously at both beer and user biases. To do this, employ a matrix factorisation.
-7. 
-8. 
-9. 
-10.
-11. 
-4. [ ] We conduct the analysis for RateBeer and BeerAdvocate separately, and then compare the results. This allows us to check if our findings are robust between the two platforms, controlling for an extra source of variation due to differing user bases.
-    - [ ] Investigate RQ1 by viewing ratings for different beer styles for each country. Specifically, we want conduct t-tests investigating if there are differences in this between countries, using the Sidak correction.
-    - [ ] Investigate RQ2 by seeing if general ratings differ per country. As in the previous point, we can do this using t-tests. Then furthermore we can see if certain countries are more critical on certain rating aspects.
-    - [ ] Investigate RQ3 by finding word frequencies and computing distances between the language corpuses i.e. reviews for each country. To achieve this, we will leverage existing methods and research such as [Ruzicka](https://github.com/mikekestemont/ruzicka), [PyStyl](https://github.com/mikekestemont/pystyl) or [word-cloud](https://github.com/amueller/word_cloud). Furthermore, we will investigate if there are differences for foreign and local reviews.
-    - [ ] Investigate RQ4 (the home bias/home advantage). Using a t-test, we compare the average user ratings given to local vs. foreign beers to see if they are different. To control the effect of cofounders, we match users based on propensity. Propensity score measures the probability of a user to rate beer from his own country/state vs. from a foreign one given observed covariates. Is is learned using a logistic regression with labels being 1 if the reviewed beer is local, 0 if it is foreign. Some features considered are for example user's avg ratings, number of ratings, user "taste" (ratings per style), country, etc...
+4. [X] Conduct preliminary analysis by investigating mean differences in ratings for palette, aroma, overall etc. per country and per state. Conduct independent t-tests in order to test if this difference is significant. Specifically, the test statistic is then constructed as follows
+    $$ t = \frac{\mu_1 - \mu_2}{\sqrt{\frac{s_1^2}{N_1}+\frac{s_2^2}{N_2}}}$$
+    where $\mu_i$ is the sample mean for the sample $i$ and $s_i$ is the _corrected_ sample standard deviation.
+    Since we are conducting multiple t-tests, use the Sidak correction. Specifically, if we want our final test to be equivalent to a signifance level of $\alpha$ and we have $m$ independent hypothesis tests, then we conduct each individual hypothesis test at a significance level of
+    $$ \alpha_1 = 1 - (1-\alpha)^{\frac{1}{m}}$$
+5. [X] See if one can explain these differences by removing any user-bias i.e. it could be that some users are more negative in general. To do this, rescale the ratings such that the mean corresponds to a value of 0, the max a value of 1 and the min a value of -1.
+$$ GIVE FORMULA $$
+6. [X] Move investigation onto checking if the difference may be because users are reviewing different beers. [EXPLAIN MORE]
+7. [X] Next, go about explaining all of the difference by looking simultaneously at both beer and user biases. To do this, employ a matrix factorisation.
+    $$ GIVE FORMULA $$
+    and then furthermore propensity analyses.
+8. [X] Then look per country.
+9. [X] Begin to look at language. Ergo, construct an NLP pipeline as follows:
+    [GIVE DETAILS]
+9. [X] Check if this is also reflected by language. Specifically, is there a difference in the language used for foreign vs local.
+10. [X] Look more generally to see if we can pinpoint cultural differences between countries. Start just by looking at wordclouds
+11. [X] Quantify the distance per country and state See if we can reconstruct geographical proximity.
 
-## Requirements
+_Note_: RateBeer only have reviews from the US, so we conduct the analysis for RateBeer and BeerAdvocate separately. Furthermore, the rating systems on the websites are different also. When looking at the US, we compare results.
+
+## Limitations
+- Lack of data for some regions
+- Dataset is skewed
+- RB and BA are not directly comparable
+- NLP models do not always have all words and also words can have different meanings in beer context to general English
 
 ## Organization within the team:
-- Matthieu: Home bias (RQ4) and map visualisation (RQ 1,2,4)
-- Oisín: Textual analysis distance and dendogram (RQ3)
-- Kasimir: Bag of word for textual analysis, heat maps (RQ3)
-- Andrea: Style preferences and aspects analysis (RQ1,2)
-- Everyone: wrap-up of data story and visualization
+Andrea: 
+- Create data visualisation pipeline using datapane
+- Set-up website
+- Front end development
+Kasimir:
+- Initial investigation into differences in averages per country
+- Investigation using t-tests
+- Investigation if user scaling explains the bias
+- Investigation if beers rated are different
+Matthieu:
+- Create matrix factorisation
+- Propensity matching
+- Conduct analysis per country
+Oisín:
+- Create NLP pipeline
+
+## Requirements
+[ADD AT END]
+
+## References
+[1] blah
