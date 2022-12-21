@@ -50,17 +50,15 @@
     <main id="content" class="main-content" role="main">
       
       <button onclick="topFunction()" id="myBtn" title="Go to top">Top</button>
-
-      <p>Countries have (perhaps stereotypical) associations with different beer preferences. For example, one might think the Germans 
-        all love Helles but judge Guinness with the highest contempt. We aim to investigate if there truly is such a geographical and 
-        cultural influence on beer preferences by looking at differences in consumer ratings, and in preferences in beer styles and beer characteristics. 
-        By utilizing the written reviews data from two of the biggest beer-ranking websites, we will be able to investigate if there are 
-        regional variations in language usage for beer reviews.
-
-        Finally, it is also often said that beers from home taste better. Leveraging the geographical information for users and beers, 
-        will be able to investigate whether there exists a "home bias" (preference for local produce) when users rate beers.</p>
-      
-      <div style="text-align:center">        
+      <div style="margin-top:30px;">
+        <p>Have you ever asked yourself if you love Guiness in Ireland as much as you love it at home? Or have you ever asked yourself 
+        how the Irish rate their most famous beer compared to you or people from other countries? And how do we all express our feelings
+        about different beers compared to each other? If you like to learn more about how beer preferences and descriptions are influenced
+        by geography and cultural background, then do not hesitate to click on the below displayed button and get a profound insight in the 
+        beer rating world and the beer rating biases induced by rater's origin.
+        </p>
+      </div>
+      <div style="text-align:center; margin-top:60px">        
         <a href="#story_start" class="btn">Start Story</a><br />
       </div>
       <p></p>
@@ -70,24 +68,90 @@
       <div id="progress-bar"></div>
 
       <div class="container">
-          <h2 id="story_start">Start Story</h2>
-          <p># 
-<!-- RQ 1 and 2 --></p>
+          <h1 id="story_start">An Applied Beer Analysis Story...</h1>
+          <h1 id="todo">TODO</h1>
+<ul>
+  <li>Motivate story - Interesting intro - blabla</li>
+  <li>Once attention is grabbed, detail the research questions</li>
+</ul>
 
-<!-- todo fix the titles  -->
-<iframe src="./Pages/States.html" title="States" width="100%" height="800" frameborder="0"></iframe>
-<iframe src="./Pages/states_beer_app.html" title="States" width="100%" height="800" frameborder="0"></iframe>
-<iframe src="./Pages/ratings_countries_app.html" title="States" width="100%" height="800" frameborder="0"></iframe>
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="States" width="100%" height="800" frameborder="0"></iframe>
+<h1 id="introduction-better-title">Introduction (Better title?)</h1>
+<p>First have a look at means per state… Some preliminary geographical difference visible?</p>
 
-<h1 id="rq-3">RQ 3</h1>
+<!-- Map of states and their average rating -->
+<iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameborder="0"></iframe>
+
+<p>How about per country?</p>
+
+<!-- Distribution of ratings per country -->
+<iframe src="./Pages/ratings_countries_app.html" title="Countries - Distribution" width="100%" height="800" frameborder="0"></iframe>
+
+<p>Report some numbers and significance ratios.. (Kasimir will do)</p>
+
+<p>Some differences occur! Why?
+Attempt to remove user bias by rescaling the ratings per user. (Kasimir will do) TODO: method for Countries-dist -&gt; describe rescaling
+Somewhat fails (again report numbers using a table!)
+Maybe due to the beers rated by country/state? 
+Next idea: look at most rated beers per state and country:</p>
+
+<!-- Top beers per state -->
+<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="800" frameborder="0"></iframe>
+
+<!-- Top beers per country -->
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Top beers per country" width="100%" height="800" frameborder="0"></iframe>
+
+<p>Our data is skewed. Global average is not representative for the actual quality of beers.
+Indeed, very different beers rated per country
+Significant in global ratings for top beers versus countries/states (Kasimir will do) (Add a table!)</p>
+
+<!-- Mattieuhs part  -->
+
+<p>Motivate propensity analysis. 
+We need to match on beers and users at the same time.
+(Matrix factorization! - we’ll see how detailed…)</p>
+
+<!-- Plot with distributions (Rating distribution per group - foreign vs local) -->
+
+<p>There is a small difference overall, we look per country:</p>
+
+<!-- Plot with confidence intervals  -->
+
+<p>Discuss results. 
+Note: Belgium, US: top (big beer drinking countries) (Matthieu will do)</p>
+
+<!-- Oisins part -->
+<p>Motivate look at language:
+Is this bias reflected in language?
+Foreign vs local beers (Oisin will do) [give numbers]
+-&gt; Move to more general language analysis
+Do countries talk differently?</p>
+
+<!-- the beer wordcloud  -->
 <iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="1000" frameborder="0"></iframe>
 
+<p>Discuss: why different…</p>
+
+<p>Some differences, can we cluster countries or states based on language?</p>
+
+<!-- dendogram across countries -->
 <iframe src="./Pages/dendogram.html" title="Dendogram" width="100%" height="800" frameborder="0"></iframe>
 
+<p>Discuss</p>
+
+<!-- network of states  -->
 <iframe src="./Pages/network.html" title="Network" width="100%" height="800" frameborder="0"></iframe>
 
-<h1 id="rq-4">RQ 4</h1>
+<p>Discuss</p>
+
+<!-- Final parts and takeaways -->
+<p>Key bullet points and takeaways (Table)</p>
+<ul>
+  <li>Countries rate differently (a lot of it is due to user bias)</li>
+  <li>Countries rate different beers (they have different quality)</li>
+  <li>Propensity matching (Matthieu: is there more to say?)</li>
+  <li>Countries talk differently about beer</li>
+  <li>Cultural difference is not entirely geographical (network)</li>
+</ul>
 
 <p>Text can be <strong>bold</strong>, <em>italic</em>, or <del>strikethrough</del>.</p>
 
