@@ -14,8 +14,6 @@ print("import completed")
 # number of pandas rows to display
 pd.set_option('display.max_rows', 100)
 
-
-
 # %% [markdown]
 #  # RQ1 & RQ 2
 # Are beer style preferences influenced by geography/culture?
@@ -397,7 +395,7 @@ plt.show()
 # Let's plot the distributions of rating for each aspect and all countries.
 
 # %%
-def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None):
+def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None, include_title = True):
     """
     Plots a boxplot for the specified aspect
     """
@@ -407,7 +405,8 @@ def plot_boxplot(df, aspect, countries, attribute="user_country",filename=None):
         data = df[df[attribute] == country][aspect].to_numpy(dtype=float)
         ax.boxplot(data,positions=[i+1], notch=0, sym='+', vert=1, whis=1.5)
         # Change the color of the boxplot depending on whether 
-    ax.set_title(f"Distribution of '{aspect}'")
+    if include_title:
+        ax.set_title(f"Distribution of '{aspect}'")
     # set axes limits and labels
     ax.set_xlim(0.5, len(countries)+0.5)
     ticks = np.arange(1, len(countries)+1)
@@ -426,10 +425,10 @@ country_list = list(df_ba["user_country"].unique())
 ba_blocks = []
 ba_blocks_rescaled = []
 for aspect in ba_aspects:
-    ba_blocks.append(dp.Plot(plot_boxplot(df_ba, aspect, country_list,filename=f"boxplot_of_{aspect}_for_all_countries_ba"), label=aspect))
+    ba_blocks.append(dp.Plot(plot_boxplot(df_ba, aspect, country_list,filename=f"boxplot_of_{aspect}_for_all_countries_ba", include_title=False), label=aspect))
     # plot rescaled aspect
     aspect_rescaled = aspect + "_rescaled"
-    ba_blocks_rescaled.append(dp.Plot(plot_boxplot(df_ba, aspect_rescaled, country_list, filename=f"boxplot_of_{aspect_rescaled}_for_all_countries"),label=aspect))
+    ba_blocks_rescaled.append(dp.Plot(plot_boxplot(df_ba, aspect_rescaled, country_list, filename=f"boxplot_of_{aspect_rescaled}_for_all_countries", include_title=False),label=aspect))
 
 # %%
 countries_app = dp.App(
@@ -449,6 +448,10 @@ countries_app = dp.App(
             ),
         ]
     ),
+    dp.Page(
+        title="Method",
+        blocks=["# Method",dp.Text("We boxplot the distribution of ratings for each aspect and each country.")]
+    )
 )
 countries_app.save("Pages/boxplots_of_aspects_for_all_countries.html")
 
@@ -735,32 +738,38 @@ for aspect in rb_aspects:
 df_ba_states_mean["state_code"] = df_ba_states_mean["user_state"].apply(lambda x: get_key(x))
 df_rb_states_mean["state_code"] = df_rb_states_mean["user_state"].apply(lambda x: get_key(x))
 
+# %%
+ba_aspects
+
 
 # %%
 ba_blocks = []
 rb_blocks = []
-for aspect in ba_aspects:
+rb_scales = ["(1-10)","(1-5)","(1-10)","(1-5)","(1-20)","(0-5)"]
+# ['aroma', 'appearance', 'taste', 'palate', 'overall', 'rating']
+for i,aspect in enumerate(ba_aspects):
     ba_blocks.append(dp.Plot(px.choropleth(df_ba_states_mean,
                     locations='state_code', 
+                    title="Scale (1-5)",
                     locationmode="USA-states", 
                     color=aspect,
-                    color_continuous_scale="Viridis_r", 
-                    scope="usa",
-                    title=f"Mean {aspect}"),label=f"{aspect}"))
+                    color_continuous_scale="Hot", 
+                    scope="usa"),
+                    label=f"Mean '{aspect}'"))
     rb_blocks.append(dp.Plot(px.choropleth(df_rb_states_mean,
                     locations='state_code', 
+                    title=f"Scale {rb_scales[i]}",
                     locationmode="USA-states", 
                     color=aspect,
-                    color_continuous_scale="Viridis_r", 
-                    scope="usa",
-                    title=f"Mean {aspect}"),label=f"{aspect}"))
+                    color_continuous_scale="Hot", 
+                    scope="usa"),
+                    label=f"Mean '{aspect}'"))
 
 # %%
 states_app = dp.App(
     dp.Page(
         title="Beer Advocate",
-        blocks=[
-            dp.Select(
+        blocks=[dp.Select(
                 blocks=ba_blocks
             ), 
         ]
@@ -773,6 +782,10 @@ states_app = dp.App(
             ),
         ]
     ),
+    dp.Page(
+        title="Method",
+        blocks=["# Method",dp.Text("We plot the mean rating for each aspect for each state.")],
+    )
 )
 
 states_app.save("Pages/States.html")
