@@ -3,14 +3,16 @@ layout: default
 title: Applied Beer Analysis
 ---
 
-
-# TODO
+<!-- # TODO
 - Motivate story - Interesting intro - blabla
-- Once attention is grabbed, detail the research questions
+- Once attention is grabbed, detail the research questions -->
 
 
-# Introduction (Better title?)
-First have a look at means per state... Some preliminary geographical difference visible?
+<!-- # Introduction (Better title?) -->
+## Doesn't everyone like beer?
+Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!
+
+ First have a look at means per state... Some preliminary geographical difference visible?
 
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameBorder="0"></iframe>
@@ -61,14 +63,36 @@ Since our dataset has a majority of reviews written by americans, the observatio
 
 Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradoxe: when users are combined, the majoritarian country (US) mask the effect of all other. Let's also note that Belgians, which is quite renowned for its beer, seem to still prefer their local beers.
 
-Those result are interesting but it is hard to find a good explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. In "Favoritism Toward Foreign and Domestic Brands: A Comparison of Different Theoretical Explanations. Journal of International Marketing", [Balabanis, G., Stathopoulou, A., & Qiao, J. (2019)](https://openaccess.city.ac.uk/id/eprint/23521/) summarize the possible explanation to five effects, which will either bias the consummer toward choosing local brands or , conversely, foreign ones. Given our lack of data on consummer profile, it seems however impossible to further quantify each effect. Our analysis therefor only render the composition of all effect.
+Those result are interesting but it is hard to find a good explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. In "Favoritism Toward Foreign and Domestic Brands: A Comparison of Different Theoretical Explanations. Journal of International Marketing", [Balabanis, G., Stathopoulou, A., & Qiao, J. (2019)](https://openaccess.city.ac.uk/id/eprint/23521/) summarize the possible explanation to five effects, which will either bias the consummer toward choosing local brands or , conversely, foreign ones. Given our lack of data on consummer profile, it seems however impossible to further quantify each effect. Our analysis therefore only render the composition of all effect.
 
 <!-- Oisins part -->
-Motivate look at language:
+<!-- Motivate look at language:
 Is this bias reflected in language?
 Foreign vs local beers (Oisin will do) [give numbers]
 -> Move to more general language analysis
-Do countries talk differently?
+Do countries talk differently? -->
+
+## Do people also talk about foreign vs local beer differently?
+
+Clearly, a difference exists between foreign and local beers in terms of their ratings. But does this also manifest itself in the language used in these beer reviews?
+
+Firstly, we need to tackle a simpler question: how can we even quantify whether or not people talk differently?
+
+To do this, we leverage state-of-the-art machine learning methods which have been specifically developed for textual analyses like this [3]. Using these methods, this allows us to find how close two texts are - which is precisely what we need!
+Also, we use an ensemble model, meaning we can even track how much variation we have in our predictions!
+
+Applying this to foreign versus local beer, we can find that there is a difference of [GIVE VALS]. This agrees with the previous result i.e. people do treat foreign and local beers differently, but it is very uncertain.
+
+_How about if we just look at the US?_
+Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! [GIVE RESULTS]
+
+Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. _BUT,_ this is also a known psychological effect.
+
+[ELABORATE]
+
+## Why are we only looking at foreign vs local reviews? Don't people also talk about beer differently too?
+
+Language and culture are interlinked, so we expect different cultures to have different ways of expressing their preferences for beers.
 
 <!-- the beer wordcloud  -->
 <iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="1000" frameBorder="0"></iframe>
@@ -260,3 +284,7 @@ Long, single-line code blocks should not wrap. They should horizontally scroll i
 ```
 The final element.
 ```
+
+## References
+[1]
+[2] http://www.europeanbeerguide.net/eustats.htm#production
