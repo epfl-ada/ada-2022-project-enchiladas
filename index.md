@@ -7,8 +7,13 @@ title: Applied Beer Analysis
 
 
 # RQ 1
-
 # RQ 2
+
+
+<iframe src="./Pages/States.html" title="States" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="States" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/ratings_countries_app.html" title="States" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="States" width="100%" height="800" frameBorder="0"></iframe>
 
 # RQ 3
 
