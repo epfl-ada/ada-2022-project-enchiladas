@@ -221,7 +221,7 @@ def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_co
         # check if a csv file with the hashed arguments exists
         if os.path.exists(f"t_test_results/{hashed_arguments}.csv"):
             # load the csv file
-            print("loading t-test results from a precomputed csv file")
+            # print("loading t-test results from a precomputed csv file")
             df_t_test_results = pd.read_csv(f"t_test_results/{hashed_arguments}.csv")
             return df_t_test_results, alpha_1
 
@@ -859,7 +859,7 @@ def perform_t_tests_per_class(class_list, df, filter_name, df_name, entity_name,
 # For each style_class, subset the data and run the t-test for each aspect
 # Create a dictionary to store the results
 df_ba_t_tests_style_classes_countries = perform_t_tests_per_class(top_5_style_classes_ba, df_ba, "style_class", "BA", "user_country")
-df_ba_t_tests_style_classes_countries
+df_ba_t_tests_style_classes_countries.head()
 
 # %%
 # Compute the average ratio of significant results per style class
@@ -876,7 +876,7 @@ print("Proportion of significant results rescaled",df_ba_t_tests_style_classes_c
 
 # %%
 df_ba_t_tests_style_classes_states = perform_t_tests_per_class(top_5_style_classes_ba, df_ba, "style_class", "BA", "user_state")
-df_ba_t_tests_style_classes_states
+df_ba_t_tests_style_classes_states.head()
 
 # %%
 # Compute the average ratio of significant results per style class
@@ -907,7 +907,7 @@ top_5_style_classes_rb
 
 # %%
 df_rb_t_tests_style_classes_states = perform_t_tests_per_class(top_5_style_classes_rb, df_rb, "style_class", "RB", "user_state")
-df_rb_t_tests_style_classes_states
+df_rb_t_tests_style_classes_states.head()
 
 # %%
 # Compute the average ratio of significant results per style class
@@ -936,7 +936,7 @@ top_5_styles_ba
 
 # %%
 df_ba_t_tests_style_countries = perform_t_tests_per_class(top_5_styles_ba, df_ba, "style", "BA", "user_country")
-df_ba_t_tests_style_countries
+df_ba_t_tests_style_countries.head()
 
 # %%
 # Compute the average ratio of significant results per style 
@@ -948,7 +948,7 @@ print("Proportion of significant results rescaled",df_ba_t_tests_style_countries
 
 # %%
 df_ba_t_tests_style_states = perform_t_tests_per_class(top_5_styles_ba, df_ba, "style", "BA", "user_state")
-df_ba_t_tests_style_states
+df_ba_t_tests_style_states.head()
 
 # %%
 # Compute the average ratio of significant results per style 
@@ -979,7 +979,7 @@ top_5_styles_rb
 
 # %%
 df_rb_t_tests_style_states = perform_t_tests_per_class(top_5_styles_rb, df_rb, "style", "RB", "user_state")
-df_rb_t_tests_style_states
+df_rb_t_tests_style_states.head()
 
 # %%
 # Compute the average ratio of significant results per style
@@ -1064,6 +1064,14 @@ unique_countries = list(set(unique_countries))
 unique_countries
 
 # %%
+# Filter warnings for plots
+import warnings
+warnings.filterwarnings("ignore")
+# Also do not show the plots, there are too many. To see the plot please refer to the datastory.
+plt.ioff()
+
+
+# %%
 # For each of the unique countries, get the plot the number of ratings of the top n beers
 top_n = 20
 country_blocks = []
@@ -1074,7 +1082,6 @@ for country in unique_countries:
     plt.xlabel("Beer")
     plt.ylabel("Number of ratings")
     plt.tight_layout()
-    plt.show()
     country_blocks.append(dp.Plot(fig,label=country))
 
 # %%
@@ -1130,7 +1137,7 @@ for index, row in df_significant_country_pairs.iterrows():
 # %%
 # Create a dataframe with the results
 df_t_tests_top_n_beers = pd.DataFrame(dict_t_tests_top_n_beers).T
-df_t_tests_top_n_beers
+df_t_tests_top_n_beers.head()
 
 # %%
 # Get the ratio of significant results
@@ -1158,7 +1165,7 @@ for aspect in ba_aspects:
 # %%
 # Create a dataframe with the significant country pairs
 df_significant_state_pairs_ba = pd.DataFrame(significant_state_pairs_BA)
-df_significant_state_pairs_ba
+df_significant_state_pairs_ba.head()
 
 # %%
 # Get unique state names
@@ -1219,7 +1226,7 @@ for index, row in df_significant_state_pairs_ba.iterrows():
 # %%
 # Create a dataframe with the results
 df_t_tests_top_n_beers_ba = pd.DataFrame(dict_t_tests_top_n_beers).T
-df_t_tests_top_n_beers_ba
+df_t_tests_top_n_beers_ba.head()
 
 # %%
 # Get the ratio of significant results
@@ -1248,7 +1255,7 @@ for aspect in ba_aspects:
 # %%
 # Create a dataframe with the significant country pairs
 df_significant_state_pairs_rb = pd.DataFrame(significant_state_pairs_RB)
-df_significant_state_pairs_rb
+df_significant_state_pairs_rb.head()
 
 # %%
 # Get unique country names
@@ -1314,7 +1321,7 @@ dict_t_tests_top_n_beers
 # %%
 # Create a dataframe with the results
 df_t_tests_top_n_beers_rb = pd.DataFrame(dict_t_tests_top_n_beers).T
-df_t_tests_top_n_beers_rb
+df_t_tests_top_n_beers_rb.head()
 
 # %%
 # Get the ratio of significant results
