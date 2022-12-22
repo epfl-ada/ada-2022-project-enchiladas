@@ -15,15 +15,17 @@ print("import completed")
 pd.set_option('display.max_rows', 100)
 
 # %% [markdown]
-#  # RQ1 & RQ 2
-# Are beer style preferences influenced by geography/culture?
+#  # RQ 1 & RQ 2
+# RQ 1: Are beer style preferences influenced by geography/culture?
+# RQ 2: Do different cultures prioritise/prefer different aspects of beers such as palate? Are some cultures more critical of beer?
+# 
+# In this document we explore RQ 1 and RQ 2 by doing the following:
+# Do a t-test comparing the mean ratings of different beer styles for each country/state
 # Investigate RQ1 by viewing ratings for different beer styles for each country. Specifically, we want conduct t-tests investigating if there are differences in this between countries, using the Sidak correction.
+# Second, we use rescaled ratings and repeat above procedure. Individual users rate on average more or less positive, this is why we rescale the ratings by subtracting the mean rating of each user. (This has already be done in the preprocessing notebook.)
+# Next, we subset our data to the most popular style classes and style and look if the proportion of significant differences remains the same.
+# As a final test and motivation for propensity matching, we look at the most ranked beers per country and perform a t-test on all ratings for those beers accross countries. 
 
-# For each country / for each state:
-# compute the CI Sidak correction
-# For Each Beerstyle: 
-# - Perform a t-test comparing means of each country
-# TODO: deepen this explanation
 
 # %%
 #  ## Load BA data
@@ -31,7 +33,10 @@ ba_pickle_filename = "df_ba_ratings_filtered_beers_merged_users.pickle"
 df_ba = pd.read_pickle(f"Data/{ba_pickle_filename}")
 df_ba.info()
 # %%
+# Sanity check data
 df_ba.isna().sum()
+# User state is nan for the ratings outside the US
+
 
 # %%
 #  ## Load RB data
@@ -41,15 +46,11 @@ df_rb.info()
 
 # %%
 df_rb.isna().sum()
-
-# %%
-# print value counts of style_class 
-print(df_ba["style_class"].value_counts())
-print(df_rb["style_class"].value_counts())
+# Beer state is nan for the ratings outside the US. Some beer country codes couldn't be assigned. We do not use these anywhere.
 
 # %% [markdown]
 #  # Country and state filtering
-# Find states and countries with enough ratings. We want to have at least 1000 ratings per country/state. Otherwise we discard the country/state. Looking at the distributions of ratings per country, we see that there are not many countries with more than 1000 ratings. Our data is very US-centric.
+# Find states and countries with enough ratings. We want to have at least 1000 ratings per country. Otherwise we discard the country. Looking at the distributions of ratings per country, we see that there are not many countries with more than 1000 ratings. Our data is very US-centric.
 
 # %%
 # Plot the number of ratings per country in BA top 20
@@ -77,6 +78,7 @@ plt.savefig("Plots/RB_ratings_per_state.png",bbox_inches='tight')
 
 # %%
 MIN_SAMPLE_SIZE = 1000
+# Looking at the plots above, 1000 seems to be a reasonable cutoff for the countries.
 
 # %%
 # Show top 10 countries with most ratings in BA
@@ -89,6 +91,7 @@ df_ba["user_state"].value_counts().head(10)
 # %%
 # Show top 10 countries with most ratings in RB
 df_rb["user_country"].value_counts().head(10)
+# RB has only ratings from the US
 
 # %%
 # Show top 10 states with most ratings in RB
@@ -136,9 +139,8 @@ print("States with less than", MIN_SAMPLE_SIZE, "ratings in RB:", len(states_rb)
 #
 # In order to test this, we do pairwise t-tests among all possible pairs of states and countries respectively. We arbitrarily pick a minimum number of ratings per state/country (`MIN_SAMPLE_SIZE`). If a state/country has less than `MIN_SAMPLE_SIZE` ratings, we do not consider it for the t-tests.
 # 
-# We use the Sidak correction to correct for multiple comparisons. Suppose we have a list of states/countries with `n` elements. We perform `n(n-1)/2` t-tests. The Sidak correction is `1 - (1 - alpha)^(1/n)`, where `alpha` is the significance level (default = 0.05).
+# We use the Sidak correction to correct for multiple comparisons. Suppose we have a list of states/countries with `n` elements. We perform `l=n(n-1)/2` t-tests. The Sidak correction is `1 - (1 - alpha)^(1/l)`, where `alpha` is the significance level (0.05).
 #
-# Next, we want to figure out, if the average rating differs among style_classes, styles or even individual beers. Thus, we repeat the same procedure for each style_class and style. Here we allow for a lower sample size (`MIN_TEST_SAMPLE_SIZE`) which we set to 100. We do this to be able to perform tests even on countries/states with only a few ratings per style/style class.
 # 
 # %%
 MIN_TEST_SAMPLE_SIZE = 100
@@ -224,7 +226,7 @@ def pairwise_ttests(df, entity_list, column_name_to_test,alpha = 0.05, entity_co
             return df_t_test_results, alpha_1
 
 
-    df_t_test_results = pd.DataFrame(columns = [f"{entity_column_name}1", f"{entity_column_name}2", "t-statistic", "p-value", "significant","average_entity1","average_entity2","std_entity1","std_entity2","had_enough_data"])
+    df_t_test_results = pd.DataFrame(columns = [f"{entity_column_name}1", f"{entity_column_name}2", "t-statistic", "p-value", "significant","average_entity1","average_entity2","std_entity1","std_entity2","had_enough_data"]) # initialize df
     
 
     # Perform t-tests for each pair of countries
@@ -355,7 +357,7 @@ plt.savefig("Plots/distribution_of_ratings_of_a_pair_where_the_t_test_is_signifi
 plt.show()
 
 # %%
-# Plot the distribution of ratings of a pair where the t-test is not significant
+# Plot any distribution of ratings of a pair where the t-test is not significant
 df_t_test_results_of_rating = dfs_t_tests_countries[aspect][0]
 df_t_test_results_of_rating_rescaled = dfs_t_tests_countries[aspect_rescaled][0]
 # Only keep non-significant results
@@ -450,7 +452,7 @@ countries_app = dp.App(
     ),
     dp.Page(
         title="Method",
-        blocks=["# Method",dp.Text("We boxplot the distribution of ratings for each aspect and each country.")]
+        blocks=["# Method",dp.Text("We boxplot the distribution of ratings for each aspect and each country. We rescale by subtracting the users average ratings from a given rating. Then we divide the result by a scaling function such that the best possible rating is 1 and the worst is -1.")]
     )
 )
 countries_app.save("Pages/boxplots_of_aspects_for_all_countries.html")
@@ -458,6 +460,7 @@ countries_app.save("Pages/boxplots_of_aspects_for_all_countries.html")
 
 # %% [markdown]
 #  ### T-Testing for different US states in BA
+# Repeat the pairwise t-tests for all US states in BA.
 # %%
 # Create a list of aspects for ba
 ba_aspects = ["aroma", "appearance", "taste", "palate", "overall", "rating"] 
@@ -494,7 +497,7 @@ df_ba_t_tests_states_results
 # Get the significance level
 significance_level = dfs_ba_t_tests_states["aroma"][1]
 # Print the significance level
-print(f"Significance level: {significance_level:.5f}")
+print(f"Sidak corrected significance level: {significance_level:.5f}")
 
 
 # %% [markdown]
@@ -535,7 +538,7 @@ df_rb_t_tests_states_results
 # Get the significance level
 significance_level = dfs_rb_t_tests_states["aroma"][1]
 # Print the significance level
-print(f"Significance level: {significance_level:.5f}")
+print(f"Sidak corrected significance level: {significance_level:.5f}")
 
 # %% [markdown]
 # Compare the ratio of significant results to the total number of comparisons for each aspect in BA and RB
@@ -591,7 +594,7 @@ df_results_t_tests_style_class_germany
 # Get the significance level
 significance_level = dfs_ba_t_tests_style_class_germany["aroma"][1]
 # Print the significance level
-print(f"Significance level: {significance_level:.5f}")
+print(f"Sidak corrected significance level: {significance_level:.5f}")
 
 # %% [markdown]
 #  ### T-Testing for differences in rating averages per style for some state or country
@@ -634,7 +637,7 @@ df_results_t_tests_style_germany
 # Get the significance level
 significance_level = dfs_ba_t_tests_style_germany["aroma"][1]
 # Print the significance level
-print(f"Significance level: {significance_level:.5f}")
+print(f"Sidak corrected significance level: {significance_level:.5f}")
 
 # %%
 # box plot the most popular style classes in germany
@@ -739,10 +742,6 @@ df_ba_states_mean["state_code"] = df_ba_states_mean["user_state"].apply(lambda x
 df_rb_states_mean["state_code"] = df_rb_states_mean["user_state"].apply(lambda x: get_key(x))
 
 # %%
-ba_aspects
-
-
-# %%
 ba_blocks = []
 rb_blocks = []
 rb_scales = ["(1-10)","(1-5)","(1-10)","(1-5)","(1-20)","(0-5)"]
@@ -793,9 +792,7 @@ states_app.save("Pages/States.html")
 # %% [markdown]
 # # Subsetting the data to specific style classes and styles
 # Does the number of significant results change when we subset the data to specific style classes and styles?
-# Subset the data to specific style classes and styles
-# First focus on style classes
-# Figure out how many ratings we have per style class
+# In particular, we determine first the most popular style classes and styles and then repeat the above tests for each of the most popular style classes and styles. 
 # %%
 # How many ratings do we have per style class?
 # In BA
@@ -889,6 +886,9 @@ df_ba_t_tests_style_classes_states
 # Average the ratios
 print("Proportion of significant results ",df_ba_t_tests_style_classes_states["ratio_significant_results"].mean())
 print("Proportion of significant results rescaled",df_ba_t_tests_style_classes_states["ratio_significant_results_rescaled"].mean())
+
+# %% [markdown]
+# Also in RB, 43% of the results are significant when we subset to the top 5 style classes. Considering only rescaled data, we have 13 % of significant results.
 
 # %%
 # In RB
@@ -990,8 +990,9 @@ print("Proportion of significant results ",df_rb_t_tests_style_states["ratio_sig
 print("Proportion of significant results rescaled",df_rb_t_tests_style_states["ratio_significant_results_rescaled"].mean())
 
 # %% [markdown]
-# TODO: discuss results and motivate the following analysis
-# Subsetting to most popular style or style_class does not make much difference..
+# All in all it looks like we reduce the proportion of significant results slightly if we not only rescale the ratings by user average, but also by subsetting to specific styles or style classes.
+# This motivates us, to investigate whether some country simply rate beers that are overall better than others.
+# For this we first subset our data to only the significant results for each aspect.
 
 # %%
 # Get a list of countries/states that have significant results for a given style
@@ -1034,15 +1035,14 @@ dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled]
 
 # %% [markdown]
 #  ### Evaluate the significant results
-
-# %%
-# For Each of the significant results. Are the beer averages significantly different?
-# Get a list of all beers rated by the 
+# For each of the significant results, we gather a selection of the most rated beers for each state/country. For the collection of these beers we use the overall ratings (that is accross the entire dataset, not just on a specific country) and do a t-test to see whether the average rating of the beers is significantly different between the two countries.
 
 
 # %%
+# Create a dictionary to store the significant country pairs
 significant_country_pairs = {"countryA":[],"countryB":[],"aspect":[]}
 for aspect in ba_aspects:
+    # Get the significant results
     aspect_rescaled = aspect + "_rescaled"
     significant = dfs_t_tests_countries[aspect_rescaled][0][dfs_t_tests_countries[aspect_rescaled][0]["significant"] == True]
     for index, row in significant.iterrows():
@@ -1079,8 +1079,15 @@ for country in unique_countries:
 
 # %%
 ratings_countries_app = dp.App(
-    dp.Select(
+    dp.Page(
+        title = "Top rated beers by country",
+        blocks = [dp.Select(
         blocks = country_blocks
+        )]
+    ),
+    dp.Page(
+        title = "Method",
+        blocks = ["# Method ", dp.Text("We rank the beers by how often they have been rated in a given country.")]
     )
 )
 ratings_countries_app.save("Pages/ratings_countries_app.html")
@@ -1129,13 +1136,17 @@ df_t_tests_top_n_beers
 # Get the ratio of significant results
 df_t_tests_top_n_beers["significant"].value_counts()
 
+# %% [markdown]
+# Indeed, most top rated beers for the countries where the rescaled averages are significantly different are significantly different as well. Can this also be observed for the states?
 
 # %% [markdown]
 #  ### States BA
 
 # %%
+# Create a dictionary to store the significant state pairs
 significant_state_pairs_BA = {"stateA":[],"stateB":[],"aspect":[]}
 for aspect in ba_aspects:
+    # Get the significant results
     aspect_rescaled = aspect + "_rescaled"
     significant = dfs_ba_t_tests_states[aspect_rescaled][0][dfs_ba_t_tests_states[aspect_rescaled][0]["significant"] == True]
     for index, row in significant.iterrows():
@@ -1150,7 +1161,7 @@ df_significant_state_pairs_ba = pd.DataFrame(significant_state_pairs_BA)
 df_significant_state_pairs_ba
 
 # %%
-# Get unique country names
+# Get unique state names
 unique_states = df_significant_state_pairs_ba["stateA"].unique().tolist()
 unique_states.extend(df_significant_state_pairs_ba["stateB"].unique().tolist())
 unique_states = list(set(unique_states))
@@ -1183,8 +1194,6 @@ for state in unique_states:
 len(unique_states)
 # Still 50 states
 
-
-
 # %%
 # For each significant country pair, t_test the average ratings of the top n beers
 # Create a dictionary to store the results
@@ -1216,16 +1225,18 @@ df_t_tests_top_n_beers_ba
 # Get the ratio of significant results
 df_t_tests_top_n_beers_ba["significant"].value_counts()
 
-
+# %% [markdown]
+# Also for the states, most most rated beers are on average significantly different for pairs of states where the rescaled averages are significantly different.
 
 # %% [markdown]
 #  ### States RB
-
-
+# Is this also the case in the RB dataset?
 
 # %%
+# Create a dictionary to store the significant state pairs
 significant_state_pairs_RB = {"stateA":[],"stateB":[],"aspect":[]}
 for aspect in ba_aspects:
+    # Get the significant results
     aspect_rescaled = aspect + "_rescaled"
     significant = dfs_rb_t_tests_states[aspect_rescaled][0][dfs_rb_t_tests_states[aspect_rescaled][0]["significant"] == True]
     for index, row in significant.iterrows():
@@ -1248,10 +1259,16 @@ len(unique_states)
 # Some states were dropped, they did not have significant differences with any other state, still 47 left
 
 # %%
+# get a list of all states 
+all_states = df_rb["user_state"].unique().tolist()
+# order that list by the number of ratings
+all_states.sort(key=lambda x: len(df_rb[df_rb["user_state"] == x]), reverse=True)
+
+# %%
 # For each of the unique countries, get the plot the number of ratings of the top n beers
 top_n = 20
 state_blocks_rb = []
-for state in unique_states:
+for state in all_states:
     fig = plt.figure()
     df_rb[df_rb["user_state"] == state]["beer_name"].value_counts().head(top_n).plot(kind="bar")
     plt.title("Number of ratings per beer in BA - top " + str(top_n) + " for " + state)
@@ -1303,11 +1320,9 @@ df_t_tests_top_n_beers_rb
 # Get the ratio of significant results
 df_t_tests_top_n_beers_rb["significant"].value_counts()
 
+# %% [markdown]
+# Also in the RB dataset, most most rated beers are on average significantly different for pairs of states where the rescaled averages are significantly different.
 
-# %%
-state_blocks_ba
-# %%
-state_blocks_rb
 # %%
 states_beer_app = dp.App(
     dp.Page(
@@ -1326,6 +1341,10 @@ states_beer_app = dp.App(
             ),
         ]
     ),
+    dp.Page(
+        title="Method",
+        blocks=["# Method",dp.Text("We report the most rated beers per state.")]
+    )
 )
 states_beer_app.save("Pages/states_beer_app.html")
 # %%
