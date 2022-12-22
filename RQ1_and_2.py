@@ -11,9 +11,6 @@ import hashlib
 import datapane as dp
 print("import completed")
 
-# number of pandas rows to display
-pd.set_option('display.max_rows', 100)
-
 # %% [markdown]
 #  # RQ 1 & RQ 2
 # RQ 1: Are beer style preferences influenced by geography/culture?
