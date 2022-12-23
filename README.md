@@ -67,7 +67,7 @@ _For further details, please see our notebooks_
     where $\mu_i$ is the sample mean for the sample $i$ and $s_i$ is the _corrected_ sample standard deviation.
     Since we are conducting multiple t-tests, use the Šidák correction. Specifically, if we want our final test to be equivalent to a signifance level of $\alpha$ and we have $m$ independent hypothesis tests, then we conduct each individual hypothesis test at a significance level of
     $$ \alpha_1 = 1 - (1-\alpha)^{\frac{1}{m}} $$
-- [X] 2. A) See if one can explain these differences by removing any user-bias - it could be that some users are more negative in general. To do this, rescale the ratings for each user such that the mean corresponds to a value of 0, the max corresponds to a value of 1 and the min correponds to a value of -1.
+- [X] 2. A) We rescale the ratings for each user such that the mean corresponds to a value of 0, the max corresponds to a value of 1 and the min correponds to a value of -1. We then rerun the same analysis to see if there is now a difference compared to the previous results.
     - Specifically, for a rating $r$ we compute a rescaled rating as follows: $r_{rescaled} = \frac{r - u_{avg}}{scale(r,u_{avg})}$
     - Here, the scale function is given by:
       - if $r > u_{uvg}:$ $scale = 5 - u_{uvg}$
