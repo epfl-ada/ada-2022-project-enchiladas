@@ -67,7 +67,19 @@ Proportion of significant results rescaled 0.07058875196982614 -->
 ## The question remains, why do some countries rate beer significantly differently? 
 Even after our rescaling we still saw an effect. Is it because they rate different style of beer?
 We investigate this question by looking at the most rated beer styles on both dataset and repeating the pairwise t-tests for each of the most popular styles per dataset.
-Interestingly, the most rated beer styles are different for the two platforms. The most rated beer styles in the BeerAdvocate dataset are 'American IPA', 'American Double / Imperial IPA', 'American Pale Ale (APA)', 'Saison / Farmhouse Ale', 'American Wild Ale' while the most rated beer styles in the RateBeer dataset are 'India Pale Ale (IPA)', 'Imperial IPA', 'American Pale Ale', 'Belgian Strong Ale', 'Imperial Stout'.
+Interestingly, the most rated beer styles are different for the two platforms. 
+The most rated beer styles in the BeerAdvocate dataset are 
+- 'American IPA'
+- 'American Double / Imperial IPA'
+- 'American Pale Ale (APA)'
+- 'Saison / Farmhouse Ale'
+- 'American Wild Ale' 
+whilst the most rated beer styles in the RateBeer dataset are 
+- 'India Pale Ale (IPA)'
+- 'Imperial IPA'
+- 'American Pale Ale'
+- 'Belgian Strong Ale'
+- 'Imperial Stout'
 <!-- Should we make a table? -->
 Subsetting to these styles and recomputing the t-tests, the number of significant results for the countries drops by only 1% for the country differences in rescaled ratings.
 In the BeerAdvocate dataset the number of significant results for the state pairs remains 13% whilst in the RateBeer dataset the number of significant results drops to 7%.
