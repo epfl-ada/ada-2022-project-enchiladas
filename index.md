@@ -10,27 +10,27 @@ title: Applied Beer Analysis
 
 <!-- # Introduction (Better title?) -->
 ## Doesn't everyone like beer?!
-Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!
+Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer the same way!
 
-Beer reviewers certainly like beer, but do they like beer by the same amount or do some countries/states like beer more than others?
-To investigate, we look at average ratings across the states for different beer aspects.
+Users from beer rating website (such as [BeerAdvocate](https://www.beeradvocate.com/) or [RateBeer](https://www.ratebeer.com/ratebeerbest/)) are certainly beer enthusiast, but do their preferences vary from state to state or country to country?
+To begin our investigation, let's look at average ratings across the US states for different beer aspects.
 
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
-At first sight, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.00004, we observe that about 50% of the country pairs actually have a significantly different rating distribution among all aspects.
-<!-- 49% in RateBeer data ^ (think we can just say approx 50) (thumbs up!) -->
+They do differ quite a lot ! Indeed, we observe that about **50% of the states pairs** actually have a significantly different rating distribution among all aspects.
 
-## How about per country?
-We also look if there are any significant differences between countries and not just states. The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+## How about other countries?
+The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
-Again, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.0014, we observe that even 80% of the country pairs actually have a different rating distribution among all aspects.
+Here, the results vary even more ! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
 
-_Why is this the case?_
-One reason could be that some users simply are more positive in rating beers than others. We can find out if this is the case by rescaling the ratings each user gives by their respective average. The figure above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+_Can we trust this result?_
+<!-- I leave you to edit this part Kasimir-->
+This naive initial approach do have some limitation however. One reason could be that some users simply are more positive in rating beers than others. We can find out if this is the case by rescaling the ratings each user gives by their respective average. The rescaled tab above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
 Indeed, the number of significantly different results across countries decreases to only 21% at the same significance level after this rescaling!
 For the states we observe a similar decrease - the number of significantly different results drops to 13% in the BeerAdvocate dataset and to only 10% in the RateBeer dataset.
 
@@ -65,22 +65,17 @@ Proportion of significant results  0.33342168487948537
 Proportion of significant results rescaled 0.07058875196982614 -->
 
 ## The question remains, why do some countries rate beer significantly differently? 
-Even after our rescaling we still saw an effect. Is it because they rate different style of beer?
-We investigate this question by looking at the most rated beer styles on both dataset and repeating the pairwise t-tests for each of the most popular styles per dataset.
+Even after our rescaling to account for bias of the users, we still see an effect. Is it because the users rate different style of beer?
+Let's investigate this question by looking at the most rated beer styles on both dataset and repeating the pairwise t-tests for each of the most popular styles per dataset.
 Interestingly, the most rated beer styles are different for the two platforms. 
-The most rated beer styles in the BeerAdvocate dataset are 
-- 'American IPA'
-- 'American Double / Imperial IPA'
-- 'American Pale Ale (APA)'
-- 'Saison / Farmhouse Ale'
-- 'American Wild Ale' 
-whilst the most rated beer styles in the RateBeer dataset are 
-- 'India Pale Ale (IPA)'
-- 'Imperial IPA'
-- 'American Pale Ale'
-- 'Belgian Strong Ale'
-- 'Imperial Stout'
-<!-- Should we make a table? -->
+| **BeerAdvocate**               | **RateBeer**         |
+|--------------------------------|----------------------|
+| American IPA                   | India Pale Ale (IPA) |
+| American Double / Imperial IPA | Imperial IPA         |
+| American Pale Ale (APA)        | American Pale Ale    |
+| Saison / Farmhouse Ale         | Belgian Strong Ale   |
+| American Wild Ale              | Imperial Stout       |
+<!-- Should we make a table? Yes-->
 Subsetting to these styles and recomputing the t-tests, the number of significant results for the countries drops by only 1% for the country differences in rescaled ratings.
 In the BeerAdvocate dataset the number of significant results for the state pairs remains 13% whilst in the RateBeer dataset the number of significant results drops to 7%.
 
