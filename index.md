@@ -136,10 +136,7 @@ I.e. we can't tell if the not-significant results also have more insignificant d
 
 If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?
 
-<!-- TODO -->
-Following paragraph motivate matching, remove if extra:
-
-To allow for an apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user's level of criticism (details are shown in the "method" tab of the next figure).
+To allow apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user's level of criticism (details are shown in the "method" tab of the next figure).
 
 <!-- By pair? -->
 Once we match reviews by pair, we the ratings are different. Let's look at the results below:
@@ -147,7 +144,7 @@ Once we match reviews by pair, we the ratings are different. Let's look at the r
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="1000" frameBorder="0"></iframe>
 
-The difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average XX (between countries) or YY (between states) points more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (P VALUES).
+The difference of distribution of rating between local and foreign reviews is almost indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states) points more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
 
 <!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
 ## Simpson's paradox?
