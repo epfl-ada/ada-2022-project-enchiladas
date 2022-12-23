@@ -58,8 +58,8 @@
           <p></p>
           <emph>Have you ever wondered why this is?</emph>
           <p>
-          Our culture and geographical background heavily influence our perception of the world in general [1], but (much 
-          more importantly) also influence both our preferences for beer, and also how we rate and discuss them. In this data story,
+          Our culture and geographical background heavily influence our perception of the world in general [1], but (<emph>much 
+          more importantly</emph>) also influence both our preferences for beer, and also how we rate and discuss them. In this data story,
           we take you on a journey through these geographical differences to better understand why they exist at all.
         </p>
 
@@ -94,100 +94,116 @@
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameborder="0"></iframe>
 
+<p>signficicance level: : 0.00004
+average unrescaled significant results:
+for rescaled ratings:</p>
+
 <p>How about per country?</p>
 
-<!-- Distribution of ratings per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Countries - Distribution" width="100%" height="1200" frameborder="0"></iframe>
+<!-- Ratings per Country -->
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" height="800" frameborder="0"></iframe>
 
 <p>Report some numbers and significance ratios.. (Kasimir will do)</p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: right">significant</th>
-      <th style="text-align: right">total tests</th>
-      <th style="text-align: right">aspect</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: right">27</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">aroma</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">6</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">aroma_rescaled</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">31</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">appearance</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">14</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">appearance_rescaled</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">29</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">taste</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">7</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">taste_rescaled</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">29</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">palate</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">5</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">palate_rescaled</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">30</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">overall</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">7</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">overall_rescaled</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">30</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">rating</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">6</td>
-      <td style="text-align: right">36</td>
-      <td style="text-align: right">rating_rescaled</td>
-    </tr>
-  </tbody>
-</table>
+<p>| significant | total tests |              aspect |
+|————:|————:|——————–:|
+|          27 |          36 |               aroma |
+|           6 |          36 |      aroma_rescaled |
+|          31 |          36 |          appearance |
+|          14 |          36 | appearance_rescaled |
+|          29 |          36 |               taste |
+|           7 |          36 |      taste_rescaled |
+|          29 |          36 |              palate |
+|           5 |          36 |     palate_rescaled |
+|          30 |          36 |             overall |
+|           7 |          36 |    overall_rescaled |
+|          30 |          36 |              rating |
+|           6 |          36 |     rating_rescaled |
+corrected level 0.0014</p>
+
+<p>Rescaled:
+Aroma: US vs (Australia, Belgium, Canada, England, Netherlands, Sweden)
+Palate: US vs (Australia, Canada, England, Netherlands, Sweden)
+Appearance: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+and Germany vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Taste: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Overall: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Rating: US vs (Australia, Belgium, Canada, Netherlands, Sweden)</p>
 
 <p>Some differences occur! Why?
 Attempt to remove user bias by rescaling the ratings per user. (Kasimir will do) TODO: method for Countries-dist -&gt; describe rescaling
-Somewhat fails (again report numbers using a table!)
-Maybe due to the beers rated by country/state? 
-Next idea: look at most rated beers per state and country:</p>
+Users have bias…
+Somewhat fails (again report numbers using a table!)</p>
+
+<p>Maybe due to the beers rated by country/state? 
+Style classes:
+countries:
+Proportion of significant results  0.6435185185185186
+Proportion of significant results rescaled 0.20370370370370372
+most popular classes BA:
+India Pale Ales’, ‘Pale Ales’, ‘Stouts’, ‘Wild/Sour Beers’, ‘Strong Ales’]</p>
+
+<p>BA: states:
+Proportion of significant results  0.43197278911564624
+Proportion of significant results rescaled 0.13208616780045357</p>
+
+<p>RB:
+most popular classes
+[‘Pale Ales’, ‘India Pale Ales’, ‘Stouts’, ‘Strong Ales’, ‘Wild/Sour Beers’]
+Proportion of significant results  0.33342168487948537
+Proportion of significant results rescaled 0.07058875196982614</p>
+
+<p>Style:
+most popular styles ba
+[‘American IPA’,
+ ‘American Double / Imperial IPA’,
+ ‘American Pale Ale (APA)’,
+ ‘Saison / Farmhouse Ale’,
+ ‘American Wild Ale’]</p>
+
+<p>countries:
+ Proportion of significant results  0.6435185185185186
+Proportion of significant results rescaled 0.20370370370370372</p>
+
+<p>states:
+Proportion of significant results  0.43197278911564624
+Proportion of significant results rescaled 0.13208616780045357</p>
+
+<p>most popular styles rb
+‘India Pale Ale (IPA)’,
+ ‘Imperial IPA’,
+ ‘American Pale Ale’,
+ ‘Belgian Strong Ale’,
+ ‘Imperial Stout’]
+Proportion of significant results  0.3334216848794854
+Proportion of significant results rescaled 0.07058875196982614</p>
+
+<p>Next idea: look at most rated beers per state and country:</p>
 
 <!-- Top beers per state -->
 <iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="1200" frameborder="0"></iframe>
 
 <!-- Top beers per country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Top beers per country" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height="1200" frameborder="0"></iframe>
 
-<p>Our data is skewed. Global average is not representative for the actual quality of beers.
+<p>Top beers are different…
+Our data is skewed. Global average is not representative for the actual quality of beers.
 Indeed, very different beers rated per country
 Significant in global ratings for top beers versus countries/states (Kasimir will do) (Add a table!)</p>
+
+<p>Accross all aspects…</p>
+
+<p>BA countries: (Significant)
+True     38
+False     7</p>
+
+<p>BA states: (Significant)
+True     870
+False     77</p>
+
+<p>RB states: (Significant)
+True     540
+False    182</p>
 
 <!-- Matthieus part  -->
 
