@@ -203,7 +203,7 @@ We can see that in general, geographic proximity does not entirely determine how
 We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size equal to the root of the number of reviews.
 
 <!-- network of states  -->
-<iframe src="./Pages/network.html" title="Network" width="100%" height="750" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/network.html" title="Network" width="100%" height="770" frameBorder="0" scrolling="no"></iframe>
 
 We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennsylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.
 
