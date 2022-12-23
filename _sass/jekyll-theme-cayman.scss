@@ -177,8 +177,9 @@ a {
   //background-repeat: no-repeat;
   //background-attachment: fixed;
   //background-size: 100% 100%;
+  color: $header-heading-color;
   background: url('../../images/beer.jpg');
-  opacity: 90%; 
+  opacity: 100%; 
 	text-align: center;
 	width: 100%;
 	height: auto;
@@ -190,7 +191,7 @@ a {
   
 
   @include large {
-    padding: 5rem 6rem;
+    padding: 5rem 6rem; //12rem 13rem;//5rem 6rem;
   }
 
   @include medium {
