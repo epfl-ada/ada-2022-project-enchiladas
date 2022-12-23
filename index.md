@@ -34,7 +34,7 @@ The limits of this initial naive analysis quickly show up. Availability of beers
 
 ## Differences in beer quality between regions ?
 
-The answer seems obvious! Although user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
+The answer might seem obvious if you ask certain enthusiasts! Although user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
 
 To illustrate this point, let's subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
 
