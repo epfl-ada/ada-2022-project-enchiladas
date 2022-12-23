@@ -118,7 +118,7 @@ We also note that states with more reviews are quite similar, with most of the o
 - Cultural differences are complicated and are not entirely determined by geographical proximity.
 
 # Where can I find out more?
-Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-project-enchiladas), and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our approach.
+Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-project-enchiladas), and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our fine mathematical approaches.
 
 ![Beer math](Beer_meme.png)
 
