@@ -100,15 +100,15 @@
 To begin with our investigation, let’s look at average ratings across the US states. You can use the menue to select which aspects of the beer is rated:</p>
 
 <!-- Map of states and their average rating -->
-<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
+<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="700"></iframe>
 
 <p>They do differ quite a lot! Indeed, we observe that about <strong>50% of the states pairs</strong> actually have a significantly different rating distribution among all aspects.</p>
 
 <h2 id="how-about-other-countries">How about other countries?</h2>
-<p>The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.</p>
+<p>The figure below shows the distribution of ratings among all aspects for the most occuring countries in the BeerAdvocate dataset.</p>
 
 <!-- Ratings per Country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="600"></iframe>
 
 <p>Here, the results vary even more! We do observe that <strong>80% of the country pairs</strong> actually have a different rating distribution among all aspects.</p>
 
@@ -200,7 +200,7 @@ Proportion of significant results rescaled 0.07058875196982614 -->
 <p>To illustrate this point, let’s subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
 
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="1250" frameborder="0" scrolling="no"></iframe>
 
 <p>As expected, beer quality does influence the ratings a lot! Indeed, we found that 84% of the pairs within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a <strong>vast majority</strong> of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user’s biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.</p>
