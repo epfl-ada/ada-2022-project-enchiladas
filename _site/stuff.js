@@ -40,11 +40,11 @@ document.addEventListener('scroll', processScroll);
 
 
 
-// $(document).scroll(function () {
-//     $('section').each(function () {
-//         if($(this).position().top <= $(document).scrollTop() && ($(this).position().top + $(this).outerHeight()) > $(document).scrollTop()) {
+$(document).scroll(function () {
+    $('section').each(function () {
+        if($(this).position().top <= $(document).scrollTop() && ($(this).position().top + $(this).outerHeight()) > $(document).scrollTop()) {
             
-//             console.log($(this).attr('id'));
-//         }
-//     });
-// });
+            console.log($(this).attr('id'));
+        }
+    });
+});
