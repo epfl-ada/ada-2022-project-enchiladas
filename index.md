@@ -31,15 +31,14 @@ We do observe quite some variation amongst countries. To assess if these variati
 _Can we trust this result?_
 The limits of this initial naive analysis quickly show themselves. The availability of beers depends heavily on the geographical location. As a result, users from different regions end up rating different products, which are not necessarily of the same quality. This could greatly affect a user's ratings. The following section assesses if this might be problematic to the quality of our analysis.
 
-
-## Are there differences in beer quality between regions?
-
-The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
-
 To illustrate this point, let's subset our reviews to the most rated beers for each state and an assortment of countries. They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
 
 <!-- Top beers per state -->
 <iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height=600 frameborder="0" scrolling="no"></iframe>
+
+## Are there differences in beer quality between regions?
+
+The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
 
 As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that **84% of the country pairs** within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a **vast majority** of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user's biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.
