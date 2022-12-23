@@ -12,19 +12,20 @@ title: Applied Beer Analysis
 ## Doesn't everyone like beer?!
 Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!
 
-Beer reviewers certainly like beer, but do they like beer by the same amount or do some countries or states like beer more than others?
-The figure below shows the average ratings accoss the states for different beer aspects.
+Beer reviewers certainly like beer, but do they like beer by the same amount or do some countries/states like beer more than others?
+To investigate, we look at average ratings across the states for different beer aspects.
 
 <!-- Map of states and their average rating -->
-<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" onload="resizeIframe(this)"></iframe>
+<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="700"></iframe>
 
-At first sight, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Sidak corrected significance level of 0.00004, we observe that about 50 % (49 % in the RateBeer dataset) of the country pairs actually have a different rating distribution among all aspects.
-How are ratings distributed among countries? The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+At first sight, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.00004, we observe that about 50% of the country pairs actually have a significantly different rating distribution among all aspects.
+<!-- 49% in RateBeer data ^ (think we can just say approx 50) (thumbs up!) -->
+
+## How about per country?
+We also look if there are any significant differences between countries. The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
-TODO: Increase font size
-TODO: add formula in methods 
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" onload="resizeIframe(this)"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="700"></iframe>
 
 Again, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Sidak corrected significance level of 0.0014, we observe that even 80 % of the country pairs actually have a different rating distribution among all aspects.
 Why is this the case? One reason could be, that some users simply are more positive in rating beers than others. We can find out if this is the case by rescaling the ratings each user gives by their respective average. The figure above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
@@ -96,39 +97,16 @@ Proportion of significant results rescaled 0.07058875196982614 -->
 Just looking at the styles is not enough. We need to look at the actual beers. We can do this by looking at the most rated beers per country and state. The figure below shows the most rated beers per country in the BeerAdvocate dataset and the figure below that shows the most rated beers per state in the BeerAdvocate and the RateBeer dataset.
 
 <!-- Top beers per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height=1200></iframe>
+<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height=1300 frameborder="0" scrolling="no"></iframe>
 
 Indeed, the most rated beers per country differ. Feel free to explore which beers are the most rated in your country!
 
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height=1200></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height=1200 frameborder="0" scrolling="no"></iframe>
 
 Not unexpectedly, also the most rated beers per state differ. 
-We can test if the most rated beers for a country indeed has a significant global different average than the set of most rated beers of another country. If we 
-
-Top beers are different...
-Our data is skewed. Global average is not representative for the actual quality of beers.
-Indeed, very different beers rated per country
-Significant in global ratings for top beers versus countries/states (Kasimir will do) (Add a table!)
-
-Accross all aspects...
-
-BA countries: (Significant)
-True     38
-False     7
-
-BA states: (Significant)
-True     870
-False     77
-
-RB states: (Significant)
-True     540
-False    182
-
-TODO: mention the limitation that we did not do the same comparison for not-significant results.
-I.e. we can't tell if the not-significant results also have more insignificant differences when looking at global beer averages
-
-
+We can test if the most rated beers for a country indeed has a significant global different average than the set of most rated beers of another country. Doing this, we see that for countries, only about 16 % of tests are not significant. Similarly, for states, only about 8 % of tests in the BeerAdvocate dataset and 25 % of tests in the RateBeer dataset are not significant.
+These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. Indeed, we did not check if our method of subsetting to all ratings of the most rated beers per country is actually giving insignificant results for previously insignificant country-pairs. Instead of digging down this path, we resort to a better method in the next section.
 
 <!-- Matthieus part  -->
 
