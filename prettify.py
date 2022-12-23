@@ -1,4 +1,5 @@
 import matplotlib as mpl
+from cycler import cycler
 
 def mm2inch(*tupl):
     inch = 25.4 #1 inch = 25.4 mm
@@ -21,10 +22,10 @@ def mm2inch(*tupl):
 # or, with subplots:
 # plt.subplots(figsize=figsize)
 
-mpl.rcParams['figure.titleweight'] = 'bold'
-mpl.rcParams['font.weight'] = 'bold'
-mpl.rcParams['axes.labelweight'] = 'bold'
-mpl.rcParams['axes.titleweight'] = 'bold'
+# mpl.rcParams['figure.titleweight'] = 'bold'
+# mpl.rcParams['font.weight'] = 'bold'
+# mpl.rcParams['axes.labelweight'] = 'bold'
+# mpl.rcParams['axes.titleweight'] = 'bold'
 mpl.rcParams['lines.linewidth'] = 2
 mpl.rcParams['legend.fontsize'] = 12
 mpl.rcParams['axes.titlesize'] = 14
@@ -33,5 +34,24 @@ mpl.rcParams['xtick.labelsize'] = 12
 mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['figure.dpi'] = 500
 
-mpl.rc('font',**{'family':'serif','serif':['Times']})
+# set the front color
+# mpl.rcParams['axes.edgecolor'] = 'black'
+# mpl.rcParams['patch.edgecolor'] = '#70290d'
+# #boxplot.boxprops.color:     black
+# mpl.rcParams['boxplot.boxprops.color'] = '#70290d'
+# # mpl.rcParams['axes.color_cycle'] = '#70290d'
+# mpl.rcParams['patch.facecolor'] = '#70290d'
+
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#CD7E2A', '#6FA1BB','#6C3622'])
+
+# mpl.rcParams['fig.edgecolor'] = '#70290d'
+# mpl.rcParams['axes.labelcolor'] = 'black'
+# mpl.rcParams['xtick.color'] = 'black'
+# mpl.rcParams['ytick.color'] = 'black'
+# mpl.rcParams['text.color'] = 'black'
+
+
+
+# mpl.rc('font',**{'family':'serif','serif':['Times']})
+mpl.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 # mpl.rc('text', usetex=True) # use this if you want to use latex
