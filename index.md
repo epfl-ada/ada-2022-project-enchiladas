@@ -26,22 +26,22 @@ The figure below shows the distribution of ratings among all aspects for the mos
 <!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="500"></iframe>
 
-Here, the results vary even more! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
+We do observe quite some variation amongst countries. To assess if these variations are significant, we conduct country to country independent t-tests for each aspect rating. The results then vary even more than in for states! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
 
-_But can we trust this result?_
-The limits of this initial naive analysis quickly show up. For instance, the availability of a beer heavily depends on the geographical location. As a result, users from different regions end up rating different products. Therefore, it makes sense to assess if this might be problematic to the quality of our analysis.
+_Can we trust this result?_
+The limits of this initial naive analysis quickly show themselves. The availability of beers depends heavily on the geographical location. As a result, users from different regions end up rating different products, which are not necessarily of the same quality. This could greatly affect a user's ratings. The following section assesses if this might be problematic to the quality of our analysis.
 
 
 ## Are there differences in beer quality between regions?
 
 The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
 
-To illustrate this point, let's subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
+To illustrate this point, let's subset our reviews to the most rated beers for each state/country states. They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
 
 <!-- Top beers per state -->
 <iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height=1250 frameborder="0" scrolling="no"></iframe>
 
-As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that **84% of the pairs** within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a **vast majority** of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
+As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that **84% of the country pairs** within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a **vast majority** of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user's biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.
 
 <!-- Matthieus part  -->
