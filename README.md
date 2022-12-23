@@ -129,7 +129,6 @@ Andrea:
 Kasimir:
 - Initial investigation into differences in averages per country
 - Investigation using t-tests
-- Investigation if user scaling explains the bias
 - Investigation of ratings per style class and style
 - Investigation if some countries rate beers that are just better overall
 - Documentation of code
