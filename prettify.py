@@ -1,3 +1,5 @@
+# Simple python script to set some font sizes etc. for plots
+
 import matplotlib as mpl
 from cycler import cycler
 

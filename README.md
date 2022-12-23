@@ -11,7 +11,17 @@ Our method is dicussed in detail in the Methods section.
 ## Our Work
 [Website](https://epfl-ada.github.io/ada-2022-project-enchiladas/) | [Code](https://github.com/epfl-ada/ada-2022-project-enchiladas) | [Milestone2](https://github.com/epfl-ada/ada-2022-project-enchiladas/tree/fe78b2989b4e2ac2de91e916df7d9e12c9a344b8)
 
+## Research Question
+_How are beer preferences affected by geography or culture?_
+
+To understand this, we look at 4 key sub-questions:
+1. Are beer ratings different by country or state? If so, also by aspect?
+2. Why are beer ratings different by country and state? 
+3. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts? Vice-versa, is there a "home advantage" for local beers, i.e. is the average rating from local reviewers higher than from foreign reviewers?
+4. Do different cultures have stylistically different ways of writing reviews and discussing beer? Do users talk about foreign beers differently than they talk about their local ones?
+
 ## Code Structure
+The main files are as follows:
 ```
 .
 ├── Data/
@@ -20,12 +30,13 @@ Our method is dicussed in detail in the Methods section.
 ├── states_rb/
 ├── country/
 ├── helpers.py
-├── ldist.ipynb
 ├── nlp_viz.ipynb
-├── RQ12.ipynb
-├── home_bias.ipynb
-├── home_bias.py
+├── RQ12_rating_and_aspects.ipynb
+├── RQ3_home_bias.ipynb
+├── RQ4_language_analysis.ipynb
 ├── nlp.py
+├── nlp_viz.py
+├── preprocessing_pipeline.ipynb
 └── README.md
 ```
 The files/folders contain the following information:
@@ -41,19 +52,12 @@ The files/folders contain the following information:
 - `states_ba/`, `states_rb/` and `country/` contain vectorised representations of the corpuses obtained from the NLP pipeline
 - `helpers.py` contains some useful general functions
 - `prettify.py` contains the plot style definitions
+- `preprocessing_pipeline.ipynb` cleans our initial data and creates the pickled files for upstream analysis
 - `nlp.py` contains NLP-specific functions used in the NLP pipeline
-- `RQ12.ipynb` contains the code for the analysis of RQ1 and RQ2
-- [FINISH]
-
-
-## Research Question
-_How are beer preferences affected by geography or culture?_
-
-To understand this, we look at 4 key sub-questions:
-1. Are beer ratings different by country or state? If so, also by aspect?
-2. Why are beer ratings different by country and state? 
-3. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts? Vice-versa, is there a "home advantage" for local beers, i.e. is the average rating from local reviewers higher than from foreign reviewers?
-4. Do different cultures have stylistically different ways of writing reviews and discussing beer? Do users talk about foreign beers differently than they talk about their local ones?
+- `nlp_viz.ipynb` is a small notebook for generating the final plots for RQ4
+- `RQ12_rating_and_aspects.ipynb` contains the code for the analysis of RQ1 and RQ2
+- `RQ3_home_bias` contains the code for the analysis of RQ3
+- `RQ3_language_analysis` contains the code for the analysis of RQ4
 
 ## Methods
 _For further details, please see our notebooks_
@@ -70,11 +74,12 @@ _For further details, please see our notebooks_
       - if $r < u_{uvg}:$ $scale = u_{uvg} - 1$
       - if $r == u_{uvg}:$ $scale = 1$
 - [X] 2. B) Check if the difference may be because users are reviewing different beers. Visualise the main beers per country and also conduct a statistical test to determine if the most ranked beers of two countries have globally significant average ratings as well.
-- [X] 3. Investigate whether consumers have a preference for local beers over foreign ones. To account for differences in users' critic level and for differences in beer quality, we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from which we recover the biases $b_{user}$ and $b_{beer}$. Following on from this, a propensity matching is then undertaken.
+- [X] 3. A) Investigate whether consumers have a preference for local beers over foreign ones. To account for differences in users' critic level and for differences in beer quality, we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from which we recover the biases $b_{user}$ and $b_{beer}$. 
+- [X] 3. B) Following on from this, a propensity matching is then undertaken.
 The matching is initially done by computing the minimum weight matching bi-partite graph between the local and foreign group (where the weight is the Euclidean distance of user and beer biases difference between subjects). However, as we scale up to the full dataset, the number of possible connection grows with $O(n^2)$. To speed up the process, we use a stochastic approximation where we randomly match each users within a discretized equal frequency binning of the user and beer biases.
-Once the dataset is matched, we run a t-test to compare the mean rating of local and foreign reviews. 
+- [X] 3. C) Once the dataset is matched, we run a t-test to compare the mean rating of local and foreign reviews. 
 <!-- We find a small, but significant difference. -->
-We then group our reviews by user country and repeat the matching for the top 10 countries present in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and a Šidák-corrected significance level. 
+- [X] 3. D) We then group our reviews by user country and repeat the matching for the top 10 countries present in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and a Šidák-corrected significance level. 
 <!-- The results show that most countries actually rate foreign beers higher than local ones. This effect (Simpson's paradox) was caused by the imbalance towards American reviews in the initial dataset. Looking at per US state bias also reveal quite different behaviour, with some states showing positive and other negative bias toward home products. However, we didn't find any overall trend to explain those differences. -->
 -  [X] 4. A) Investigate the language data. Check the distribution of reviews per countries and filter to countries where we have enough data.
 - [X] 4. B) Construct an NLP pipeline so one can begin to look at language. To do this, we first preprocess the dataset by casefolding, tokenising and removing any non-alphabetic data. For each state and country, vectorise the corpus using the following models:
@@ -134,7 +139,4 @@ Oisín:
 - Documentation of code
 
 ## Requirements
-[ADD AT END]
-
-<!-- ## References
-[1] blah -->
+See `requirements.txt`
