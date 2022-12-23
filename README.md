@@ -5,7 +5,7 @@ Countries have (perhaps stereotypical) associations with different beer preferen
 
 We furthermore conduct an observational study to evaluate if consummers are biased towards rating beers from their own country higher (or lower) than foreign ones.
 
-Finaly, utilizing the written reviews data from two of the biggest beer-ranking websites, we will be able to investigate if there are regional variations in language usage for beer reviews.
+Finally, utilizing the written reviews data from two of the biggest beer-ranking websites, we investigate if there are regional variations in language usage for beer reviews.
 
 Our method is dicussed in detail in the Methods section.
 
@@ -30,6 +30,7 @@ The main files are as follows:
 ├── states_ba/
 ├── states_rb/
 ├── country/
+├── Pages/
 ├── helpers.py
 ├── nlp_viz.ipynb
 ├── RQ12_rating_and_aspects.ipynb
@@ -51,6 +52,7 @@ The files/folders contain the following information:
     - `glove-twitter-200`
     - `tf-idf`
 - `states_ba/`, `states_rb/` and `country/` contain vectorised representations of the corpuses obtained from the NLP pipeline
+- `Pages/` contains the final plots used in our datastory
 - `helpers.py` contains some useful general functions
 - `prettify.py` contains the plot style definitions
 - `preprocessing_pipeline.ipynb` cleans our initial data and creates the pickled files for upstream analysis
