@@ -88,18 +88,12 @@
 
       <div class="container" style="margin-top: 80px;">
           <h1 id="story_start">An Applied Beer Analysis Story...</h1>
-          <!-- # TODO
-- Motivate story - Interesting intro - blabla
-- Once attention is grabbed, detail the research questions -->
-
-<!-- # Introduction (Better title?) -->
-<h2 id="doesnt-everyone-like-beer">Doesn’t everyone like beer?!</h2>
+          <h2 id="doesnt-everyone-like-beer">Doesn’t everyone like beer?!</h2>
 <p>Beer is the world’s most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer the same way!</p>
 
 <p>Users from beer rating websites (such as <a href="https://www.beeradvocate.com/">BeerAdvocate</a> or <a href="https://www.ratebeer.com/ratebeerbest/">RateBeer</a>) are certainly beer enthusiasts, but do their preferences vary from state to state or country to country?
 To begin with our investigation, let’s look at average ratings across the US states. You can use the menu to select which aspects of the beer to view:</p>
 
-<!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="600"></iframe>
 
 <p>They do differ quite a lot! Indeed, we observe that about <strong>50% of the states pairs</strong> actually have a significantly different rating distribution among all aspects.</p>
@@ -107,7 +101,6 @@ To begin with our investigation, let’s look at average ratings across the US s
 <h2 id="how-about-other-countries">How about other countries?</h2>
 <p>The figure below shows the distribution of ratings among all aspects for the most occuring countries in the BeerAdvocate dataset.</p>
 
-<!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="500"></iframe>
 
 <p>We do observe quite some variation amongst countries. To assess if these variations are significant, we conduct country to country independent t-tests for each aspect rating. The results then vary even more than in for states! We do observe that <strong>80% of the country pairs</strong> actually have a different rating distribution among all aspects.</p>
@@ -115,21 +108,19 @@ To begin with our investigation, let’s look at average ratings across the US s
 <p><em>Can we trust this result?</em>
 The limits of this initial naive analysis quickly show themselves. The availability of beers depends heavily on the geographical location. As a result, users from different regions end up rating different products, which are not necessarily of the same quality. This could greatly affect a user’s ratings. The following section assesses if this might be problematic to the quality of our analysis.</p>
 
+<p>To illustrate this point, let’s subset our reviews to the most rated beers for each state and an assortment of countries. They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
+
+<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="600" frameborder="0" scrolling="no"></iframe>
+
 <h2 id="are-there-differences-in-beer-quality-between-regions">Are there differences in beer quality between regions?</h2>
 
 <p>The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.</p>
 
-<p>To illustrate this point, let’s subset our reviews to the most rated beers for each state and an assortment of countries. They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
-
-<!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="600" frameborder="0" scrolling="no"></iframe>
-
 <p>As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that <strong>84% of the country pairs</strong> within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a <strong>vast majority</strong> of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user’s biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.</p>
 
-<!-- Matthieus part  -->
 <h2 id="we-need-matching-between-reviews">We need matching between reviews!</h2>
-<p>To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to have isolate the effect of the user’s behaviour. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user’s level of criticism (more details can be found in the “method” tab of the next figure, or in our <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">github repo</a>).</p>
+<p>To allow for beer to beer comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to isolate the effect of the user’s cultural beliefs. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user’s level of criticism (more details can be found in the “method” tab of the next figure, or in our <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">github repo</a>).</p>
 
 <p>Now that we have established a better method, let’s apply it to answer some interesting questions!</p>
 
@@ -137,31 +128,21 @@ These numbers have to be taken with a grain of salt. We are not able to estimate
 
 <p>We have already seen different countries rate beers differently. If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?</p>
 
-<p>To isolate this effect, we match each local review to a similar foreign review. The following figure observes the distribution of the two groups:
-<!-- Plot with distributions (Rating distribution per group - foreign vs local) --></p>
+<p>To isolate this effect, we match each local review to a similar foreign review. The following figure observes the distribution of the two groups:</p>
 
-<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="700" frameborder="0" scrolling="no"></iframe>
 
-<p>Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they <strong>prefer local beers compared to foreign ones</strong>. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).</p>
+<p>Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to differ with the ratings on average 0.018 (between countries) or 0.014 (between states), in <strong>favor of the local beers over the foreign ones</strong>. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).</p>
 
 <h2 id="simpsons-paradox">Simpson’s paradox?</h2>
 
 <p>Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. To investigate if there is more information hidden under the hood, let’s have a look at the home bias when grouping users by country for the top 10 countries.</p>
 
-<!-- Plot with confidence intervals  -->
-
-<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="550" frameborder="0" scrolling="no"></iframe>
 
 <p>Interestingly, there now seem to be a <strong>majority of countries showing a more pronounced negative home bias</strong>, meaning that user would actually <strong>rate foreign beers higher</strong> than local beers. This contradiction is a manifestation of <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">Simpson’s paradox</a>: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don’t see any global trend.</p>
 
 <p>These results are interesting but it is hard to find a good foolproof explanation behind each user’s behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis <em>et al.</em> [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore concludes that the composition of all these effects leads to reviewers of certain country having a more or less pronouced preference for local (the US or Belgium) or foreign beers (England, Australia, Spain, etc.).</p>
-
-<!-- Oisins part -->
-<!-- Motivate look at language:
-Is this bias reflected in language?
-Foreign vs local beers (Oisin will do) [give numbers]
--> Move to more general language analysis
-Do countries talk differently? -->
 
 <h2 id="do-people-also-talk-about-foreign-and-local-beer-differently">Do people also talk about foreign and local beer differently?</h2>
 
@@ -177,7 +158,7 @@ Also, we use an ensemble model, meaning we can even track how much variation we 
 <p><em>What if we just look at the US?</em>
 Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! In fact, reviews by non-Americans of American beers are <strong>even further away</strong> (18.5% further) from reviews of Americans than reviews of non-Americans of their own local beers.</p>
 
-<p>Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. <em>BUT,</em> the current trend can nonetheless be explained:</p>
+<p>Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. <em>But,</em> the current trend can nonetheless be explained:</p>
 
 <ul>
   <li>It may be that users which review foreign beers constitute an entirely different social class to other users. Although the website itself attracts a very specific type of person, it is obvious that within this there are also wildly differing demographics. For example, perhaps it may be that users who review foreign beers are richer and travel more, constituting an upper class. Via education differences etc., this class likely also have a different means of talking as compared to the general populations. Thus, this may be a possible explanation.</li>
@@ -188,8 +169,7 @@ Could it be that the non-Americans sound more American when talking about Americ
 
 <p>Language and culture are interlinked, so we know <strong>different cultures have different ways of expressing their preferences</strong> for beers. Let’s look at an example!</p>
 
-<!-- the beer wordcloud  -->
-<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="650" frameborder="0" scrolling="no"></iframe>
 
 <p>A canonical example of differences between English usage among countries is American versus British English. Even at a cursory glance, we can already see the spelling differences occurring - American spellings of “color” and “flavor” versus British spellings of “colour” and “flavour”.</p>
 
@@ -199,12 +179,9 @@ Could it be that the non-Americans sound more American when talking about Americ
 
 <h2 id="can-we-group-countries-that-talk-beer-in-a-similar-way">Can we group countries that talk beer in a similar way?</h2>
 
-<!-- Some differences, can we cluster countries or states based on language? -->
-
 <p>Since users of different countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?</p>
 
-<!-- dendrogram across countries -->
-<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="700" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="550" frameborder="0" scrolling="no"></iframe>
 
 <p>We can see that in general, <strong>geographic proximity does not entirely determine how similarly countries talk</strong>. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as we can imagine they share a lot of common culture.</p>
 
@@ -212,15 +189,12 @@ Could it be that the non-Americans sound more American when talking about Americ
 
 <p>We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size indicating the number of reviews of the state.</p>
 
-<!-- network of states  -->
-<iframe src="./Pages/network.html" title="Network" width="100%" height="770" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/network.html" title="Network" width="100%" height="550" frameborder="0" scrolling="no"></iframe>
 
 <p>We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennsylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.</p>
 
 <p>We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that United States is relatively homogeneous in general in its language usage.</p>
 
-<!-- Final parts and takeaways -->
-<!-- Key bullet points and takeaways (Table) -->
 <h1 id="so-what-insights-have-we-garnered">So, what insights have we garnered?</h1>
 <ul>
   <li>Users of different regions rate beers differently.</li>
@@ -233,7 +207,7 @@ Could it be that the non-Americans sound more American when talking about Americ
 </ul>
 
 <h1 id="where-can-i-find-out-more">Where can I find out more?</h1>
-<p>Our code is publicly available <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">here</a>, and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our approach.</p>
+<p>Our code is publicly available <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">here</a>, and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our fine mathematical approaches.</p>
 
 <h1 id="references">References</h1>
 

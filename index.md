@@ -45,7 +45,7 @@ We have already seen different countries rate beers differently. If each country
 
 To isolate this effect, we match each local review to a similar foreign review. The following figure observes the distribution of the two groups:
 
-<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="700" frameBorder="0" scrolling="no"></iframe>
 
 Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to differ with the ratings on average 0.018 (between countries) or 0.014 (between states), in **favor of the local beers over the foreign ones**. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
 
@@ -53,7 +53,7 @@ Once matched, the difference of distribution of rating between local and foreign
 
 Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. To investigate if there is more information hidden under the hood, let's have a look at the home bias when grouping users by country for the top 10 countries.
 
-<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="550" frameBorder="0" scrolling="no"></iframe>
 
 Interestingly, there now seem to be a **majority of countries showing a more pronounced negative home bias**, meaning that user would actually **rate foreign beers higher** than local beers. This contradiction is a manifestation of [Simpson's paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox): when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
 
@@ -82,7 +82,7 @@ Why is this? First of all, our results are quite uncertain - meaning that we can
 
 Language and culture are interlinked, so we know **different cultures have different ways of expressing their preferences** for beers. Let's look at an example!
 
-<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="800" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="650" frameBorder="0" scrolling="no"></iframe>
 
 A canonical example of differences between English usage among countries is American versus British English. Even at a cursory glance, we can already see the spelling differences occurring - American spellings of "color" and "flavor" versus British spellings of "colour" and "flavour".
 
@@ -94,7 +94,7 @@ There is also more prominence in the American wordcloud for positive words - we 
 
 Since users of different countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
 
-<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="700" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="550" frameBorder="0" scrolling="no"></iframe>
 
 We can see that in general, **geographic proximity does not entirely determine how similarly countries talk**. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as we can imagine they share a lot of common culture.
 
@@ -102,7 +102,7 @@ We can see that in general, **geographic proximity does not entirely determine h
 
 We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size indicating the number of reviews of the state.
 
-<iframe src="./Pages/network.html" title="Network" width="100%" height="770" frameBorder="0" scrolling="no"></iframe>
+<iframe src="./Pages/network.html" title="Network" width="100%" height="550" frameBorder="0" scrolling="no"></iframe>
 
 We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennsylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.
 
@@ -119,8 +119,6 @@ We also note that states with more reviews are quite similar, with most of the o
 
 # Where can I find out more?
 Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-project-enchiladas), and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our fine mathematical approaches.
-
-![Beer math](Beer_meme.png)
 
 # References
 
