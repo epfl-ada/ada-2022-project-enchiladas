@@ -16,7 +16,7 @@ Users from beer rating websites (such as [BeerAdvocate](https://www.beeradvocate
 To begin with our investigation, let's look at average ratings across the US states. You can use the menue to select which aspects of the beer is rated:
 
 <!-- Map of states and their average rating -->
-<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="700"></iframe>
+<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="600"></iframe>
 
 They do differ quite a lot! Indeed, we observe that about **50% of the states pairs** actually have a significantly different rating distribution among all aspects.
 
@@ -24,12 +24,12 @@ They do differ quite a lot! Indeed, we observe that about **50% of the states pa
 The figure below shows the distribution of ratings among all aspects for the most occuring countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="600"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="500"></iframe>
 
 Here, the results vary even more! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
 
-_Can we trust this result?_
-The limits of this initial naive analysis quickly show up. Availability of beers heavily depends on the geographical location. As a result, users from different regions end up rating different products. The following section assesses if this might be problematic to the quality of our analysis.
+_But can we trust this result?_
+The limits of this initial naive analysis quickly show up. For instance, the availability of a beer heavily depends on the geographical location. As a result, users from different regions end up rating different products. Therefore, it makes sense to assess if this might be problematic to the quality of our analysis.
 
 
 ## Differences in beer quality between regions ?
