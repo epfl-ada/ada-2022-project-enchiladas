@@ -21,10 +21,10 @@ def mm2inch(*tupl):
 # or, with subplots:
 # plt.subplots(figsize=figsize)
 
-mpl.rcParams['figure.titleweight'] = 'bold'
-mpl.rcParams['font.weight'] = 'bold'
-mpl.rcParams['axes.labelweight'] = 'bold'
-mpl.rcParams['axes.titleweight'] = 'bold'
+# mpl.rcParams['figure.titleweight'] = 'bold'
+# mpl.rcParams['font.weight'] = 'bold'
+# mpl.rcParams['axes.labelweight'] = 'bold'
+# mpl.rcParams['axes.titleweight'] = 'bold'
 mpl.rcParams['lines.linewidth'] = 2
 mpl.rcParams['legend.fontsize'] = 12
 mpl.rcParams['axes.titlesize'] = 14
@@ -34,4 +34,5 @@ mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['figure.dpi'] = 500
 
 # mpl.rc('font',**{'family':'serif','serif':['Times']})
+mpl.rc('font',**{'family':'sans-serif','sans-serif':['Open Sans']})
 # mpl.rc('text', usetex=True) # use this if you want to use latex
