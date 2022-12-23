@@ -42,7 +42,9 @@ mpl.rcParams['figure.dpi'] = 500
 # # mpl.rcParams['axes.color_cycle'] = '#70290d'
 # mpl.rcParams['patch.facecolor'] = '#70290d'
 
-mpl.rcParams['axes.prop_cycle'] = cycler(color=['#CD7E2A', '#6FA1BB','#6C3622'])
+# mpl.rcParams['axes.prop_cycle'] = cycler(color=['#CD7E2A', '#6FA1BB','#6C3622'])
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#6c3c06', '#c8700b',"#f4a041","#f18913","#9a5608","#3d2203"])
+
 
 # mpl.rcParams['fig.edgecolor'] = '#70290d'
 # mpl.rcParams['axes.labelcolor'] = 'black'

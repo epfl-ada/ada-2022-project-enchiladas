@@ -20,7 +20,7 @@
 ├── helpers.py
 ├── ldist.ipynb
 ├── nlp_viz.ipynb
-├── RQ1_and_2.py
+├── RQ12.ipynb
 ├── home_bias.ipynb
 ├── home_bias.py
 ├── nlp.py
