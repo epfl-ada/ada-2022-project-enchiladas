@@ -123,10 +123,8 @@ As expected, beer quality do influence its rating a lot ! Indeed, we found that 
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user's biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.
 
 <!-- Matthieus part  -->
-## Let's do some propensity matching!
-To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews based on the beer quality and user's level of criticism.
-
-That is, in order to do good comparisons, we match ratings to each other that are similar: we can match ratings _from users_ with similar rating patterns and _about beers_ with similar ratings. More details can be found in the "method" tab of the next figure, or in our github repo.
+## Matching between groups!
+To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to have isolate the effect of the user's behaviour. To mimic this in an observational study, we instead match reviews with a similar beer quality and user's level of criticism (more details can be found in the "method" tab of the next figure, or in our [github repo](https://github.com/epfl-ada/ada-2022-project-enchiladas))
 
 Now that we have established a better method, let's apply it to answer some interesting questions!
 
@@ -134,15 +132,13 @@ Now that we have established a better method, let's apply it to answer some inte
 
 If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?
 
-<!-- By pair? -->
-Once we match reviews by pair, we observe that the ratings are different. Let's look at the results below:
+To isolate this effect, we match each local review to a smilar foreign review. The following figure observes the distribution of the two groups:
 <!-- Plot with distributions (Rating distribution per group - foreign vs local) -->
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0" scrolling="no"></iframe>
 
-The difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they move more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
+Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they move more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
 
-<!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
 ## Simpson's paradox?
 
 Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. In the following plot, we have a look at the home bias when grouping users by country for the top 10 countries to investigate if there is more information hidden under the hood.
@@ -151,10 +147,9 @@ Since our dataset has a majority of reviews written by Americans, the observatio
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameBorder="0" scrolling="no"></iframe>
 
-Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradox: when users are combined, the majoritarian country (the US) masks the effect of all others.  Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
+Interestingly, there now seem to be a **majority of countries showing a more pronounced negative home bias,** meaning that user would actually **rate foreign beers higher** than local beers. This contradiction is a manifestation of Simpson's paradox: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
 
-<!-- Should we write references as [1] or nah? -->
-These results are interesting but it is hard to find a good foolproof explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis _et al._ [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore only yield the composition of all effects.
+These results are interesting but it is hard to find a good foolproof explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis _et al._ [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore concludes that the composition of all these effects leads to reviewers of certain country having a more or less pronouced preference for local (the US or Belgium) or foreign beers (England, Australia, Spain, etc...).
 
 <!-- Oisins part -->
 <!-- Motivate look at language:
@@ -174,7 +169,7 @@ Also, we use an ensemble model, meaning we can even track how much variation we 
 
 Applying this to foreign versus local beer, we can find that there is a difference of μ ± σ = 0.38 ± 0.17. This agrees with the previous result i.e. people do treat foreign and local beers differently, but it is very uncertain.
 
-_How about if we just look at the US?_
+_What if we just look at the US?_
 Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! In fact, reviews by non-Americans of American beers are _even further away_ (18.5% further) from reviews of Americans than reviews of non-Americans of their own local beers.
 
 Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. _BUT,_ the current trend can nonetheless be explained:
@@ -182,7 +177,7 @@ Why is this? First of all, our results are quite uncertain - meaning that we can
 - It may be that users which review foreign beers constitute an entirely different social class to other users. Although the website itself attracts a very specific type of person, it is obvious that within this there are also wildly differing demographics. For example, perhaps it may be that users who review foreign beers are richer and travel more, constituting an upper class. Via education differences etc., this class likely also have a different means of talking as compared to the general populations. Thus, this may be a possible explanation.
 - There may be a psychological effect. When talking about foreign beers, it may that users exaggerate their own speaking mannerisms in order to distinguish themselves. For some, their language can be a mark of pride. As an example, the English are unlikely to ever use the word "soccer" in any case, but they may make a point of explicitly using or exaggerating the word "football" when the conversation is about American culture/people/things.
 
-## Why are we only looking at foreign versus local reviews? Don't people also talk about beer differently too?
+## Do beer talk also differ from region to region?
 
 Language and culture are interlinked, so we know different cultures have different ways of expressing their preferences for beers. Let's look at an example!
 
@@ -195,20 +190,20 @@ However, we also see some cultural difference arising too!
 
 There is also more prominence in the American wordcloud for positive words - we can see "great", "good", "really", "nice", "much", "good", "well", "nice" all occuring very often whereas in the English wordcloud these occur less frequently. This is a known difference between British and American culture - the British are known for having a "stiff upper lip" and Americans are known for being very optimistic and upbeat (e.g. see [9] and [10]).
 
-## So, countries talk differently. Can we cluster countries based on how similarly they talk?
+## Can we group countries that talk beer in a similar way?
 
 <!-- Some differences, can we cluster countries or states based on language? -->
 
-Since countries talk differently, we can use the differences in the way they talk to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
+Since users of differnt countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
 
 <!-- dendrogram across countries -->
 <iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="700" frameBorder="0" scrolling="no"></iframe>
 
-We can see that in general, geographic proximity does not entirely determine how similarly countries talk. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as anticipated.
+We can see that in general, geographic proximity does not entirely determine how similarly countries talk. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as we can imagine they share a lot of common culture.
 
 ## How about for states?
 
-We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size equal to the root of the number of reviews.
+We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size indicating the number of reviews of the state.
 
 <!-- network of states  -->
 <iframe src="./Pages/network.html" title="Network" width="100%" height="770" frameBorder="0" scrolling="no"></iframe>
@@ -222,7 +217,8 @@ We also note that states with more reviews are quite similar, with most of the o
 # So, what insights have we garnered?
 - Countries rate differently (a lot of it is due to user bias)
 - Countries rate different beers (they have different quality)
-- Propensity matching (Matthieu: is there more to say?) 
+- There is therefore a need to account for differences in user and beer biases when comparing ratings
+- Once those differences are accounted, there is a small but significant home bias amongst beer reviews, which differs from region to region.
 - Countries talk differently about beer
 - Cultural difference is not entirely geographical (network)
 
