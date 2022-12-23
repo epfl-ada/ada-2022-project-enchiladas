@@ -21,7 +21,7 @@ To begin with our investigation, let's look at average ratings across the US sta
 They do differ quite a lot! Indeed, we observe that about **50% of the states pairs** actually have a significantly different rating distribution among all aspects.
 
 ## How about other countries?
-The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+The figure below shows the distribution of ratings among all aspects for the most occuring countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="800"></iframe>

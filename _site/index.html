@@ -3,13 +3,20 @@
   <head>
     <meta charset="UTF-8">
 
+    <script>
+      function resizeIframe(obj) {
+        obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+        console.log("called resizeIframe()")
+      }
+    </script>
+
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Applied Beer Analysis | My neighbor’s beer is best anyway!</title>
+<title>Applied Beer Analysis | Travelling across the beer preferences of the world!</title>
 <meta name="generator" content="Jekyll v4.3.1" />
 <meta property="og:title" content="Applied Beer Analysis" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="My neighbor’s beer is best anyway!" />
-<meta property="og:description" content="My neighbor’s beer is best anyway!" />
+<meta name="description" content="Travelling across the beer preferences of the world!" />
+<meta property="og:description" content="Travelling across the beer preferences of the world!" />
 <link rel="canonical" href="http://localhost:4000/" />
 <meta property="og:url" content="http://localhost:4000/" />
 <meta property="og:site_name" content="Applied Beer Analysis" />
@@ -17,7 +24,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Applied Beer Analysis" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","description":"My neighbor’s beer is best anyway!","headline":"Applied Beer Analysis","name":"Applied Beer Analysis","url":"http://localhost:4000/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","description":"Travelling across the beer preferences of the world!","headline":"Applied Beer Analysis","name":"Applied Beer Analysis","url":"http://localhost:4000/"}</script>
 <!-- End Jekyll SEO tag -->
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -42,7 +49,7 @@
 
     <header class="page-header" role="banner">
       <h1 class="project-name">Applied Beer Analysis</h1>
-      <h2 class="project-tagline">My neighbor's beer is best anyway!</h2>
+      <h2 class="project-tagline">Travelling across the beer preferences of the world!</h2>
       
       
     </header>
@@ -87,155 +94,145 @@
 
 <!-- # Introduction (Better title?) -->
 <h2 id="doesnt-everyone-like-beer">Doesn’t everyone like beer?!</h2>
-<p>Beer is the world’s most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!</p>
+<p>Beer is the world’s most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer the same way!</p>
 
-<p>First have a look at means per state… Some preliminary geographical difference visible?</p>
+<p>Users from beer rating websites (such as <a href="https://www.beeradvocate.com/">BeerAdvocate</a> or <a href="https://www.ratebeer.com/ratebeerbest/">RateBeer</a>) are certainly beer enthusiasts, but do their preferences vary from state to state or country to country?
+To begin with our investigation, let’s look at average ratings across the US states. You can use the menue to select which aspects of the beer is rated:</p>
 
 <!-- Map of states and their average rating -->
-<iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
-<p>signficicance level: : 0.00004
-average unrescaled significant results:
-for rescaled ratings:</p>
+<p>They do differ quite a lot! Indeed, we observe that about <strong>50% of the states pairs</strong> actually have a significantly different rating distribution among all aspects.</p>
 
-<p>How about per country?</p>
+<h2 id="how-about-other-countries">How about other countries?</h2>
+<p>The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.</p>
 
 <!-- Ratings per Country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
-<p>Report some numbers and significance ratios.. (Kasimir will do)</p>
+<p>Here, the results vary even more! We do observe that <strong>80% of the country pairs</strong> actually have a different rating distribution among all aspects.</p>
 
-<p>| significant | total tests |              aspect |
-|————:|————:|——————–:|
-|          27 |          36 |               aroma |
-|           6 |          36 |      aroma_rescaled |
-|          31 |          36 |          appearance |
-|          14 |          36 | appearance_rescaled |
-|          29 |          36 |               taste |
-|           7 |          36 |      taste_rescaled |
-|          29 |          36 |              palate |
-|           5 |          36 |     palate_rescaled |
-|          30 |          36 |             overall |
-|           7 |          36 |    overall_rescaled |
-|          30 |          36 |              rating |
-|           6 |          36 |     rating_rescaled |
-corrected level 0.0014</p>
+<p><em>Can we trust this result?</em>
+<!-- I leave you to edit this part Kasimir-->
+However, this naive initial approach does have some limitations. One reason could be that some users are simply more positive in rating beers than others. We can find out if this is the case by rescaling the ratings for each user to remove this bias. The rescaled tab above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+Indeed, the number of significantly different results across countries decreases to only 21% at the same significance level after this rescaling!
+For the states we observe a similar decrease - the number of significantly different results drops to 13% in the BeerAdvocate dataset and to only 10% in the RateBeer dataset.</p>
 
-<p>Rescaled:
+<p>Interestingly, the only significant pairs left are between the US and other countries, with the very interesting exception of Germany for the aspect ‘appearance’. Germans seem to also rate beers significantly different in terms of appearance than other countries. <em>BUT</em>, even after this rescaling, we still have some significant results.</p>
+
+<p>If a user’s personal bias can’t explain differences of ratings between countries, what else could it be?</p>
+
+<!-- TOOD: include this as a table somehow? -->
+<!-- Rescaled:
 Aroma: US vs (Australia, Belgium, Canada, England, Netherlands, Sweden)
 Palate: US vs (Australia, Canada, England, Netherlands, Sweden)
 Appearance: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
 and Germany vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
 Taste: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
 Overall: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
-Rating: US vs (Australia, Belgium, Canada, Netherlands, Sweden)</p>
+Rating: US vs (Australia, Belgium, Canada, Netherlands, Sweden) -->
 
-<p>Some differences occur! Why?
-Attempt to remove user bias by rescaling the ratings per user. (Kasimir will do) TODO: method for Countries-dist -&gt; describe rescaling
-Users have bias…
-Somewhat fails (again report numbers using a table!)</p>
-
-<p>Maybe due to the beers rated by country/state? 
-Style classes:
+<!-- TODO: discuss: I want to not mention style classes, so that we do not have to explain style classes and we keep the story simple.. -->
+<!-- Style classes:
 countries:
 Proportion of significant results  0.6435185185185186
 Proportion of significant results rescaled 0.20370370370370372
 most popular classes BA:
-India Pale Ales’, ‘Pale Ales’, ‘Stouts’, ‘Wild/Sour Beers’, ‘Strong Ales’]</p>
+India Pale Ales', 'Pale Ales', 'Stouts', 'Wild/Sour Beers', 'Strong Ales']
 
-<p>BA: states:
+BA: states:
 Proportion of significant results  0.43197278911564624
-Proportion of significant results rescaled 0.13208616780045357</p>
+Proportion of significant results rescaled 0.13208616780045357
 
-<p>RB:
+RB:
 most popular classes
-[‘Pale Ales’, ‘India Pale Ales’, ‘Stouts’, ‘Strong Ales’, ‘Wild/Sour Beers’]
+['Pale Ales', 'India Pale Ales', 'Stouts', 'Strong Ales', 'Wild/Sour Beers']
 Proportion of significant results  0.33342168487948537
-Proportion of significant results rescaled 0.07058875196982614</p>
+Proportion of significant results rescaled 0.07058875196982614 -->
 
-<p>Style:
+<h2 id="differences-in-beer-quality">Differences in beer quality?</h2>
+
+<!--
+Even after our rescaling to account for bias of the users, we still see an effect. Is it because the users rate different style of beer?
+Let's investigate this question by looking at the most rated beer styles on both dataset and repeating the pairwise t-tests for each of the most popular styles per dataset.
+Interestingly, the most rated beer styles are different for the two platforms.
+
+| **BeerAdvocate**               | **RateBeer**         |
+|--------------------------------|----------------------|
+| American IPA                   | India Pale Ale (IPA) |
+| American Double / Imperial IPA | Imperial IPA         |
+| American Pale Ale (APA)        | American Pale Ale    |
+| Saison / Farmhouse Ale         | Belgian Strong Ale   |
+| American Wild Ale              | Imperial Stout       |
+
+
+Subsetting to these styles and recomputing the t-tests, the number of significant results for the countries drops by only 1% for the country differences in rescaled ratings.
+In the BeerAdvocate dataset the number of significant results for the state pairs remains 13% whilst in the RateBeer dataset the number of significant results drops to 7%.
+--!>
+<!-- Data for styles:
+Style:
 most popular styles ba
-[‘American IPA’,
- ‘American Double / Imperial IPA’,
- ‘American Pale Ale (APA)’,
- ‘Saison / Farmhouse Ale’,
- ‘American Wild Ale’]</p>
+['American IPA',
+ 'American Double / Imperial IPA',
+ 'American Pale Ale (APA)',
+ 'Saison / Farmhouse Ale',
+ 'American Wild Ale']
 
-<p>countries:
+ countries:
  Proportion of significant results  0.6435185185185186
-Proportion of significant results rescaled 0.20370370370370372</p>
+Proportion of significant results rescaled 0.20370370370370372
 
-<p>states:
+states:
 Proportion of significant results  0.43197278911564624
-Proportion of significant results rescaled 0.13208616780045357</p>
+Proportion of significant results rescaled 0.13208616780045357
 
-<p>most popular styles rb
-‘India Pale Ale (IPA)’,
- ‘Imperial IPA’,
- ‘American Pale Ale’,
- ‘Belgian Strong Ale’,
- ‘Imperial Stout’]
+most popular styles rb
+'India Pale Ale (IPA)',
+ 'Imperial IPA',
+ 'American Pale Ale',
+ 'Belgian Strong Ale',
+ 'Imperial Stout']
 Proportion of significant results  0.3334216848794854
-Proportion of significant results rescaled 0.07058875196982614</p>
+Proportion of significant results rescaled 0.07058875196982614 -->
 
-<p>Next idea: look at most rated beers per state and country:</p>
+<p>The answer seems obvious! Although user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.</p>
+
+<p>To illustrate this point, let’s subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
 
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="1200" frameborder="0"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
 
-<!-- Top beers per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height="1200" frameborder="0"></iframe>
-
-<p>Top beers are different…
-Our data is skewed. Global average is not representative for the actual quality of beers.
-Indeed, very different beers rated per country
-Significant in global ratings for top beers versus countries/states (Kasimir will do) (Add a table!)</p>
-
-<p>Accross all aspects…</p>
-
-<p>BA countries: (Significant)
-True     38
-False     7</p>
-
-<p>BA states: (Significant)
-True     870
-False     77</p>
-
-<p>RB states: (Significant)
-True     540
-False    182</p>
+<p>As expected, beer quality does influence the ratings a lot! Indeed, we found that 84% of the pairs within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a <strong>vast majority</strong> of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
+These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user’s biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.</p>
 
 <!-- Matthieus part  -->
+<h2 id="we-need-matching-between-reviews">We need matching between reviews!</h2>
+<p>To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to have isolate the effect of the user’s behaviour. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user’s level of criticism (more details can be found in the “method” tab of the next figure, or in our <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">github repo</a>).</p>
 
-<h2 id="beer-from-home-always-taste-better">Beer from home always taste better!</h2>
+<p>Now that we have established a better method, let’s apply it to answer some interesting questions!</p>
 
-<p>If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?</p>
+<h2 id="does-beer-from-home-always-taste-better">Does beer from home always taste better?</h2>
 
-<!-- TODO -->
-<p>Following paragraph motivate matching, remove if extra:</p>
+<p>We have already seen different countries rate beers differently. If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?</p>
 
-<p>To allow apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user’s level of criticism (details are shown in the “method” tab of the next figure).</p>
-
-<p>Once we match reviews by pair, we the ratings are different. Let’s look at the results below:
+<p>To isolate this effect, we match each local review to a similar foreign review. The following figure observes the distribution of the two groups:
 <!-- Plot with distributions (Rating distribution per group - foreign vs local) --></p>
 
-<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="1000" frameborder="0"></iframe>
+<iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
 
-<p>The difference of distribution of rating between local and foreign reviews is almost indistinguishable. Indeed, the users only seem to give on average XX (between countries) or YY (between states) points more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (P VALUES).</p>
+<p>Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they <strong>prefer local beers compared to foreign ones</strong>. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).</p>
 
-<!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
-<h2 id="simpsons-paradoxe">Simpson’s paradoxe?</h2>
+<h2 id="simpsons-paradox">Simpson’s paradox?</h2>
 
-<p>Since our dataset has a majority of reviews written by americans, the observation might not be representative of user in other countries. In the following plot, let’s look at the home bias when grouping user by country for the top 10 countries on the website to investigate if there are more information hidden under the hood.</p>
+<p>Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. To investigate if there is more information hidden under the hood, let’s have a look at the home bias when grouping users by country for the top 10 countries.</p>
 
 <!-- Plot with confidence intervals  -->
 
-<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameborder="0" scrolling="no"></iframe>
 
-<p>Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson’s paradox: when users are combined, the majoritarian country (US) masks the effect of all others.  Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However here we don’t see any global trend.</p>
+<p>Interestingly, there now seem to be a <strong>majority of countries showing a more pronounced negative home bias,</strong> meaning that user would actually <strong>rate foreign beers higher</strong> than local beers. This contradiction is a manifestation of <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">Simpson’s paradox</a>: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don’t see any global trend.</p>
 
-<!-- Should we write references as [1] or nah? -->
-<p>These results are interesting but it is hard to find a good foolproof explanation behind each user’s behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis <em>et al.</em> [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore only yield the composition of all effects.</p>
+<p>These results are interesting but it is hard to find a good foolproof explanation behind each user’s behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis <em>et al.</em> [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore concludes that the composition of all these effects leads to reviewers of certain country having a more or less pronouced preference for local (the US or Belgium) or foreign beers (England, Australia, Spain, etc.).</p>
 
 <!-- Oisins part -->
 <!-- Motivate look at language:
@@ -253,10 +250,10 @@ Do countries talk differently? -->
 <p>To do this, we leverage state-of-the-art machine learning methods which have been specifically developed for textual analyses like this (word2vec [5], GloVe [6] and FastTest [7, 8]). Using these methods, this allows us to find how close two texts are - which is precisely what we need!
 Also, we use an ensemble model, meaning we can even track how much variation we have in our predictions.</p>
 
-<p>Applying this to foreign versus local beer, we can find that there is a difference of μ ± σ = 0.38 ± 0.17. This agrees with the previous result i.e. people do treat foreign and local beers differently, but it is very uncertain.</p>
+<p>Applying this to foreign versus local beer, we can find that there is a difference of μ ± σ = 0.38 ± 0.17. This agrees with the previous result i.e. <strong>people do treat foreign and local beers differently</strong>, but it is very uncertain.</p>
 
-<p><em>How about if we just look at the US?</em>
-Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! In fact, reviews by non-Americans of American beers are <em>even further away</em> (18.5% further) from reviews of Americans than reviews of non-Americans of their own local beers.</p>
+<p><em>What if we just look at the US?</em>
+Could it be that the non-Americans sound more American when talking about American beer rather than their local beers? The answer surprisingly is no! In fact, reviews by non-Americans of American beers are <strong>even further away</strong> (18.5% further) from reviews of Americans than reviews of non-Americans of their own local beers.</p>
 
 <p>Why is this? First of all, our results are quite uncertain - meaning that we cannot rule out the opposite trend. <em>BUT,</em> the current trend can nonetheless be explained:</p>
 
@@ -265,12 +262,12 @@ Could it be that the non-Americans sound more American when talking about Americ
   <li>There may be a psychological effect. When talking about foreign beers, it may that users exaggerate their own speaking mannerisms in order to distinguish themselves. For some, their language can be a mark of pride. As an example, the English are unlikely to ever use the word “soccer” in any case, but they may make a point of explicitly using or exaggerating the word “football” when the conversation is about American culture/people/things.</li>
 </ul>
 
-<h2 id="why-are-we-only-looking-at-foreign-versus-local-reviews-dont-people-also-talk-about-beer-differently-too">Why are we only looking at foreign versus local reviews? Don’t people also talk about beer differently too?</h2>
+<h2 id="do-beer-talk-also-differ-from-region-to-region">Do beer talk also differ from region to region?</h2>
 
-<p>Language and culture are interlinked, so we know different cultures have different ways of expressing their preferences for beers. Let’s look at an example!</p>
+<p>Language and culture are interlinked, so we know <strong>different cultures have different ways of expressing their preferences</strong> for beers. Let’s look at an example!</p>
 
 <!-- the beer wordcloud  -->
-<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="1000" frameborder="0"></iframe>
+<iframe src="./Pages/wordcloud.html" title="Wordcloud" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
 
 <p>A canonical example of differences between English usage among countries is American versus British English. Even at a cursory glance, we can already see the spelling differences occurring - American spellings of “color” and “flavor” versus British spellings of “colour” and “flavour”.</p>
 
@@ -278,41 +275,43 @@ Could it be that the non-Americans sound more American when talking about Americ
 
 <p>There is also more prominence in the American wordcloud for positive words - we can see “great”, “good”, “really”, “nice”, “much”, “good”, “well”, “nice” all occuring very often whereas in the English wordcloud these occur less frequently. This is a known difference between British and American culture - the British are known for having a “stiff upper lip” and Americans are known for being very optimistic and upbeat (e.g. see [9] and [10]).</p>
 
-<h2 id="so-countries-talk-differently-can-we-cluster-countries-based-on-how-similarly-they-talk">So, countries talk differently. Can we cluster countries based on how similarly they talk?</h2>
+<h2 id="can-we-group-countries-that-talk-beer-in-a-similar-way">Can we group countries that talk beer in a similar way?</h2>
 
 <!-- Some differences, can we cluster countries or states based on language? -->
 
-<p>Since countries talk differently, we can use the differences in the way they talk to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?</p>
+<p>Since users of different countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?</p>
 
 <!-- dendrogram across countries -->
-<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="700" frameborder="0" scrolling="no"></iframe>
 
-<p>We can see that in general, geographic proximity does not entirely determine how similarly countries talk. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as anticipated.</p>
+<p>We can see that in general, <strong>geographic proximity does not entirely determine how similarly countries talk</strong>. This does make sense, since geographic proximity also does not determine how similarly two people sound either. For example, it is known that the United Kingdom has the largest variation of accents of any country in the world [11, 12]. In fact, we see exactly this effect, with the UK nations not being particularly close. On the other hand, Canada and the United States are very similar as we can imagine they share a lot of common culture.</p>
 
 <h2 id="how-about-for-states">How about for states?</h2>
 
-<p>We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size equal to the root of the number of reviews.</p>
+<p>We can conduct the same analysis for US states to find the linguistic similarity between them. We plot these on a 2D grid, with a marker size indicating the number of reviews of the state.</p>
 
 <!-- network of states  -->
-<iframe src="./Pages/network.html" title="Network" width="100%" height="800" frameborder="0"></iframe>
+<iframe src="./Pages/network.html" title="Network" width="100%" height="770" frameborder="0" scrolling="no"></iframe>
 
 <p>We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennsylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.</p>
 
-<p>We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that America is relatively homogeneous in general in its language usage.</p>
+<p>We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that United States is relatively homogeneous in general in its language usage.</p>
 
 <!-- Final parts and takeaways -->
 <!-- Key bullet points and takeaways (Table) -->
 <h1 id="so-what-insights-have-we-garnered">So, what insights have we garnered?</h1>
 <ul>
-  <li>Countries rate differently (a lot of it is due to user bias)</li>
-  <li>Countries rate different beers (they have different quality)</li>
-  <li>Propensity matching (Matthieu: is there more to say?)</li>
-  <li>Countries talk differently about beer</li>
-  <li>Cultural difference is not entirely geographical (network)</li>
+  <li>Users of different regions rate beers differently.</li>
+  <li>Those variations are however also influenced by the user criticism levels and the beer quality.</li>
+  <li>There is therefore a need to account for differences in user and beer biases when comparing ratings, using 1-to-1 review matching.</li>
+  <li>Once those differences are accounted, there is a small but significant home bias amongst beer reviews.</li>
+  <li>The trend is reversed if we look at home bias on a per country basis (example of Simpson’s paradox).</li>
+  <li>Countries talk differently about beers.</li>
+  <li>Cultural differences are complicated and are not entirely determined by geographical proximity.</li>
 </ul>
 
 <h1 id="where-can-i-find-out-more">Where can I find out more?</h1>
-<p>Our code is publicly available <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">here</a>, and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each of figure to explain our approach.</p>
+<p>Our code is publicly available <a href="https://github.com/epfl-ada/ada-2022-project-enchiladas">here</a>, and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our approach.</p>
 
 <h1 id="references">References</h1>
 
@@ -339,179 +338,6 @@ Could it be that the non-Americans sound more American when talking about Americ
 <p>[11] “Why are there so many regional accents in the UK, in comparison to other English-speaking countries?”, The Guardian, <a href="https://www.theguardian.com/notesandqueries/query/0,5753,-18336,00.html#:~:text=SEMANTIC%20ENIGMAS-,Why%20are%20there%20so%20many%20regional%20accents%20in%20the%20UK,to%20other%20English%2Dspeaking%20countries%3F&amp;text=Until%20the%201930s%20communication%20between,means%20of%20retaining%20an%20identity">Various Contributors</a></p>
 
 <p>[12] “Accents in Britain”, AccentBiasBritain, <a href="https://accentbiasbritain.org/accents-in-britain/">Unknown</a></p>
-
-<p>Text can be <strong>bold</strong>, <em>italic</em>, or <del>strikethrough</del>.</p>
-
-<p><a href="./another-page.html">Link to another page</a>.</p>
-
-<pre><code class="language-{python}">print("Hello Python!")
-</code></pre>
-
-<iframe src="./pages/bignumber.html" title="Tutorials" width="100%" height="350" frameborder="0"></iframe>
-
-<p>There should be whitespace between paragraphs.</p>
-
-<p>There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.</p>
-
-<h1 id="header-1">Header 1</h1>
-
-<p>This is a normal paragraph following a header. GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.</p>
-
-<iframe src="./pages/new_rep.html" title="Tutorials" width="100%" height="800" frameborder="0"></iframe>
-
-<h2 id="header-2">Header 2</h2>
-
-<blockquote>
-  <p>This is a blockquote following a header.</p>
-
-  <p>When something is important enough, you do it even if the odds are not in your favor.</p>
-</blockquote>
-
-<h3 id="header-3">Header 3</h3>
-
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Javascript code with syntax highlighting.</span>
-<span class="kd">var</span> <span class="nx">fun</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">lang</span><span class="p">(</span><span class="nx">l</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">dateformat</span><span class="p">.</span><span class="nx">i18n</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./lang/</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">l</span><span class="p">)</span>
-  <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Ruby code with syntax highlighting</span>
-<span class="no">GitHubPages</span><span class="o">::</span><span class="no">Dependencies</span><span class="p">.</span><span class="nf">gems</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">gem</span><span class="p">,</span> <span class="n">version</span><span class="o">|</span>
-  <span class="n">s</span><span class="p">.</span><span class="nf">add_dependency</span><span class="p">(</span><span class="n">gem</span><span class="p">,</span> <span class="s2">"= </span><span class="si">#{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="k">end</span>
-</code></pre></div></div>
-
-<h4 id="header-4">Header 4</h4>
-
-<ul>
-  <li>This is an unordered list following a header.</li>
-  <li>This is an unordered list following a header.</li>
-  <li>This is an unordered list following a header.</li>
-</ul>
-
-<h5 id="header-5">Header 5</h5>
-
-<ol>
-  <li>This is an ordered list following a header.</li>
-  <li>This is an ordered list following a header.</li>
-  <li>This is an ordered list following a header.</li>
-</ol>
-
-<p><img src="./images/discount_regression.PNG" alt="Regression" /></p>
-
-<h6 id="header-6">Header 6</h6>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: left">head1</th>
-      <th style="text-align: left">head two</th>
-      <th style="text-align: left">three</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: left">ok</td>
-      <td style="text-align: left">good swedish fish</td>
-      <td style="text-align: left">nice</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">out of stock</td>
-      <td style="text-align: left">good and plenty</td>
-      <td style="text-align: left">nice</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">ok</td>
-      <td style="text-align: left">good <code class="language-plaintext highlighter-rouge">oreos</code></td>
-      <td style="text-align: left">hmm</td>
-    </tr>
-    <tr>
-      <td style="text-align: left">ok</td>
-      <td style="text-align: left">good <code class="language-plaintext highlighter-rouge">zoute</code> drop</td>
-      <td style="text-align: left">yumm</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="theres-a-horizontal-rule-below-this">There’s a horizontal rule below this.</h3>
-
-<hr />
-
-<h3 id="here-is-an-unordered-list">Here is an unordered list:</h3>
-
-<ul>
-  <li>Item foo</li>
-  <li>Item bar</li>
-  <li>Item baz</li>
-  <li>Item zip</li>
-</ul>
-
-<h3 id="and-an-ordered-list">And an ordered list:</h3>
-
-<ol>
-  <li>Item one</li>
-  <li>Item two</li>
-  <li>Item three</li>
-  <li>Item four</li>
-</ol>
-
-<h3 id="and-a-nested-list">And a nested list:</h3>
-
-<ul>
-  <li>level 1 item
-    <ul>
-      <li>level 2 item</li>
-      <li>level 2 item
-        <ul>
-          <li>level 3 item</li>
-          <li>level 3 item</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>level 1 item
-    <ul>
-      <li>level 2 item</li>
-      <li>level 2 item</li>
-      <li>level 2 item</li>
-    </ul>
-  </li>
-  <li>level 1 item
-    <ul>
-      <li>level 2 item</li>
-      <li>level 2 item</li>
-    </ul>
-  </li>
-  <li>level 1 item</li>
-</ul>
-
-<h3 id="small-image">Small image</h3>
-
-<p><img src="https://github.githubassets.com/images/icons/emoji/octocat.png" alt="Octocat" /></p>
-
-<h3 id="large-image">Large image</h3>
-
-<p><img src="https://guides.github.com/activities/hello-world/branching.png" alt="Branching" /></p>
-
-<h3 id="definition-lists-can-be-used-with-html-syntax">Definition lists can be used with HTML syntax.</h3>
-
-<dl>
-<dt>Name</dt>
-<dd>Godzilla</dd>
-<dt>Born</dt>
-<dd>1952</dd>
-<dt>Birthplace</dt>
-<dd>Japan</dd>
-<dt>Color</dt>
-<dd>Green</dd>
-</dl>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The final element.
-</code></pre></div></div>
 
 
             <footer style="text-align:center" class="site-footer">
