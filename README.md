@@ -104,6 +104,13 @@ The matching is initially done by computing the minimum weight matching bi-parti
 _Note_: RateBeer only have reviews from the US, so we conduct the analysis for RateBeer and BeerAdvocate separately. Furthermore, the rating systems on the websites are different also. When looking at the US, we compare results.
 
 ## Results
+- Users of different regions rate beers differently.
+- Those variations are however also influenced by the user criticism levels and the beer quality.
+- There is therefore a need to account for differences in user and beer biases when comparing ratings, using 1-to-1 review matching.
+- Once those differences are accounted, there is a small but significant home bias amongst beer reviews.
+- The trend is reversed if we look at home bias on a per country basis (example of Simpson's paradox).
+- Countries talk differently about beers.
+- Cultural differences are complicated and are not entirely determined by geographical proximity.
 
 ## Limitations
 - Lack of data for some regions
