@@ -13,7 +13,7 @@ title: Applied Beer Analysis
 Beer is the world's most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer the same way!
 
 Users from beer rating websites (such as [BeerAdvocate](https://www.beeradvocate.com/) or [RateBeer](https://www.ratebeer.com/ratebeerbest/)) are certainly beer enthusiasts, but do their preferences vary from state to state or country to country?
-To begin with our investigation, let's look at average ratings across the US states. You can use the menue to select which aspects of the beer is rated:
+To begin with our investigation, let's look at average ratings across the US states. You can use the menu to select which aspects of the beer to view:
 
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="600"></iframe>
@@ -32,9 +32,9 @@ _But can we trust this result?_
 The limits of this initial naive analysis quickly show up. For instance, the availability of a beer heavily depends on the geographical location. As a result, users from different regions end up rating different products. Therefore, it makes sense to assess if this might be problematic to the quality of our analysis.
 
 
-## Differences in beer quality between regions ?
+## Are there differences in beer quality between regions?
 
-The answer might seem obvious if you ask certain enthusiasts! Although user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
+The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.
 
 To illustrate this point, let's subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
 
