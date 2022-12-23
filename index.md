@@ -35,6 +35,7 @@ Indeed, the number of significantly different results across countries decreases
 For the states we observe a similar decrease - the number of significantly different results drops to 13% in the BeerAdvocate dataset and to only 10% in the RateBeer dataset.
 
 Even after this rescaling, we still have some significant results. However, it is interesting to note that the only significant pairs left are between the US and other countries, with the very interesting exception of Germany for the aspect 'appearance'. Germans seem to also rate beers significantly different in terms of appearance than other countries.
+If the user personnal biases can't explain differences of ratings between countries, what else could it be? 
 
 <!-- TOOD: include this as a table somehow? -->
 <!-- Rescaled:
@@ -64,7 +65,7 @@ most popular classes
 Proportion of significant results  0.33342168487948537
 Proportion of significant results rescaled 0.07058875196982614 -->
 
-## If it's not only the user behaviours, what else could it be? 
+## Differences in beer quality ?
 
 <!--
 Even after our rescaling to account for bias of the users, we still see an effect. Is it because the users rate different style of beer?
