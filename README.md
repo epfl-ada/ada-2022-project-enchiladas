@@ -1,4 +1,5 @@
-# “The Irish all love Guinness, right?”
+# Applied Beer Analysis
+## “The Irish all love Guinness, right?”
 
 Countries have (perhaps stereotypical) associations with different beer preferences. For example, one might think the Germans all love Helles but judge Guinness with the highest contempt. We aim to investigate if there truly is such a geographical and cultural influence on beer preferences by looking at differences in consumer ratings, and in preferences for beer styles and beer characteristics.
 
