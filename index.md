@@ -28,13 +28,8 @@ The figure below shows the distribution of ratings among all aspects for the mos
 
 We do observe quite some variation amongst countries. To assess if these variations are significant, we conduct country to country independent t-tests for each aspect rating. The results then vary even more than in for states! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
 
-<<<<<<< HEAD
 _Can we trust this result?_
 The limits of this initial naive analysis quickly show themselves. The availability of beers depends heavily on the geographical location. As a result, users from different regions end up rating different products, which are not necessarily of the same quality. This could greatly affect a user's ratings. The following section assesses if this might be problematic to the quality of our analysis.
-=======
-_But can we trust this result?_
-The limits of this initial naive analysis quickly show up. For instance, the availability of a beer heavily depends on the geographical location. As a result, users from different regions end up rating different products. Therefore, it makes sense to assess if this might be problematic to the quality of our analysis.
->>>>>>> 359b61a2a03a3e1332081189334459fccb601da9
 
 
 ## Are there differences in beer quality between regions?
