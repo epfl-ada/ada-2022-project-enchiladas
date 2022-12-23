@@ -34,24 +34,9 @@ mpl.rcParams['xtick.labelsize'] = 12
 mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['figure.dpi'] = 500
 
-# set the front color
-# mpl.rcParams['axes.edgecolor'] = 'black'
-# mpl.rcParams['patch.edgecolor'] = '#70290d'
-# #boxplot.boxprops.color:     black
-# mpl.rcParams['boxplot.boxprops.color'] = '#70290d'
-# # mpl.rcParams['axes.color_cycle'] = '#70290d'
-# mpl.rcParams['patch.facecolor'] = '#70290d'
 
-# mpl.rcParams['axes.prop_cycle'] = cycler(color=['#CD7E2A', '#6FA1BB','#6C3622'])
-mpl.rcParams['axes.prop_cycle'] = cycler(color=['#6c3c06', '#c8700b',"#f4a041","#f18913","#9a5608","#3d2203"])
-
-
-# mpl.rcParams['fig.edgecolor'] = '#70290d'
-# mpl.rcParams['axes.labelcolor'] = 'black'
-# mpl.rcParams['xtick.color'] = 'black'
-# mpl.rcParams['ytick.color'] = 'black'
-# mpl.rcParams['text.color'] = 'black'
-
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#6C3622', '#6FA1BB','#CD7E2A'])
+# mpl.rcParams['axes.prop_cycle'] = cycler(color=['#6c3c06', '#c8700b',"#f4a041","#f18913","#9a5608","#3d2203"])
 
 
 # mpl.rc('font',**{'family':'serif','serif':['Times']})
