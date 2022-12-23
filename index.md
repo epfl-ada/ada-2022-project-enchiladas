@@ -16,7 +16,7 @@ Beer reviewers certainly like beer, but do they like beer by the same amount or 
 To investigate, we look at average ratings across the states for different beer aspects.
 
 <!-- Map of states and their average rating -->
-<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="100%"></iframe>
+<iframe src="./Pages/States.html" title="States - Means" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
 At first sight, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.00004, we observe that about 50% of the country pairs actually have a significantly different rating distribution among all aspects.
 <!-- 49% in RateBeer data ^ (think we can just say approx 50) (thumbs up!) -->
@@ -25,7 +25,7 @@ At first sight, it is not possible to tell whether the ratings are significantly
 We also look if there are any significant differences between countries and not just states. The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="100%"></iframe>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="800"></iframe>
 
 Again, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.0014, we observe that even 80% of the country pairs actually have a different rating distribution among all aspects.
 
