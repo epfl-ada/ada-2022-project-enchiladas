@@ -137,13 +137,13 @@ The difference of distribution of rating between local and foreign reviews is al
 <!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
 ## Simpson's paradox?
 
-Since our dataset has a majority of reviews written by Americans, the observation might not be representative of users in other countries. In the following plot, let's have a look at the home bias when grouping users by country for the top 10 countries to investigate if there are more information hidden under the hood.
+Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. In the following plot, we have a look at the home bias when grouping users by country for the top 10 countries to investigate if there is more information hidden under the hood.
 
 <!-- Plot with confidence intervals  -->
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0"></iframe>
 
-Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradox: when users are combined, the majoritarian country (US) masks the effect of all others.  Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
+Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson's paradox: when users are combined, the majoritarian country (the US) masks the effect of all others.  Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
 
 <!-- Should we write references as [1] or nah? -->
 These results are interesting but it is hard to find a good foolproof explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis _et al._ [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore only yield the composition of all effects.
@@ -207,7 +207,7 @@ We can conduct the same analysis for US states to find the linguistic similarity
 
 We can also see again that geographic proximity does not entirely predict linguistic similarity. Nonetheless, we do see some clusters of states that occur. For example, Pennsylvania and New York are extremely close in both the RateBeer and BeerAdvocate datasets.
 
-We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that America is relatively homogeneous in general in its language usage.
+We also note that states with more reviews are quite similar, with most of the outliers being states with few reviews - for example, South Dakota is an outlier in both datasets due to having very few reviews. We do note that peripheral states such as Hawaii are less linguistically similar to others, but in general states are similar. This points to the fact that United States is relatively homogeneous in general in its language usage.
 
 <!-- Final parts and takeaways -->
 <!-- Key bullet points and takeaways (Table) -->
