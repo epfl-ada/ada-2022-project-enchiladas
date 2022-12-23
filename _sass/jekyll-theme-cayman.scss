@@ -191,7 +191,7 @@ a {
   
 
   @include large {
-    padding: 5rem 6rem; //12rem 13rem;//5rem 6rem;
+    padding: 5rem 6rem; 
   }
 
   @include medium {
@@ -206,9 +206,10 @@ a {
 .project-name {
   margin-top: 0;
   margin-bottom: 0.1rem;
+  color: $header-heading-color
 
   @include large {
-    font-size: 4.25rem;
+    font-size: 4rem;
   }
 
   @include medium {
