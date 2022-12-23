@@ -18,7 +18,7 @@ _How are beer preferences affected by geography or culture?_
 To understand this, we look at 4 key sub-questions:
 1. Are beer ratings different by country or state? If so, also by aspect?
 2. Why are beer ratings different by country and state? 
-3. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts? Vice-versa, is there a "home advantage" for local beers, i.e. is the average rating from local reviewers higher than from foreign reviewers?
+3. Is there a "home bias" for reviewers? I.e. do users rate local beers higher than their foreign counterparts?
 4. Do different cultures have stylistically different ways of writing reviews and discussing beer? Do users talk about foreign beers differently than they talk about their local ones?
 
 ## Code Structure
@@ -66,11 +66,11 @@ The files/folders contain the following information:
 _For further details, please see our notebooks_
 
 - [X] 1. Conduct preliminary analysis by investigating mean differences in ratings for palette, aroma, overall etc. per country and per state. Conduct independent t-tests in order to test if this difference is significant. Specifically, the test statistic is then constructed as follows
-    $$ t = \frac{\mu_1 - \mu_2}{\sqrt{\frac{s_1^2}{N_1}+\frac{s_2^2}{N_2}}} $$
+    $t = \frac{\mu_1 - \mu_2}{\sqrt{\frac{s_1^2}{N_1}+\frac{s_2^2}{N_2}}}$
     where $\mu_i$ is the sample mean for the sample $i$ and $s_i$ is the _corrected_ sample standard deviation.
     Since we are conducting multiple t-tests, use the Šidák correction. Specifically, if we want our final test to be equivalent to a signifance level of $\alpha$ and we have $m$ independent hypothesis tests, then we conduct each individual hypothesis test at a significance level of
-    $$ \alpha_1 = 1 - (1-\alpha)^{\frac{1}{m}} $$
-- [X] 2. A) We rescale the ratings for each user such that the mean corresponds to a value of 0, the max corresponds to a value of 1 and the min correponds to a value of -1. We then rerun the same analysis to see if there is now a difference compared to the previous results.
+    $\alpha_1 = 1 - (1-\alpha)^{\frac{1}{m}}$
+- [X] 2. A) (not included in the data story) We rescale the ratings for each user such that the mean corresponds to a value of 0, the max corresponds to a value of 1 and the min correponds to a value of -1. We then rerun the same analysis to see if there is now a difference compared to the previous results.
     - Specifically, for a rating $r$ we compute a rescaled rating as follows: $r_{rescaled} = \frac{r - u_{avg}}{scale(r,u_{avg})}$
     - Here, the scale function is given by:
       - if $r > u_{uvg}:$ $scale = 5 - u_{uvg}$
@@ -78,7 +78,7 @@ _For further details, please see our notebooks_
       - if $r == u_{uvg}:$ $scale = 1$
 - [X] 2. B) Check if the difference may be because users are reviewing different beers. Visualise the main beers per country and also conduct a statistical test to determine if the most ranked beers of two countries have globally significant average ratings as well.
 - [X] 3. A) Investigate whether consumers have a preference for local beers over foreign ones. To account for differences in users' critic level and for differences in beer quality, we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from which we recover the biases $b_{user}$ and $b_{beer}$. 
-- [X] 3. B) Following on from this, a propensity matching is then undertaken.
+- [X] 3. B) Following on from this, the two groups are matched.
 The matching is initially done by computing the minimum weight matching bi-partite graph between the local and foreign group (where the weight is the Euclidean distance of user and beer biases difference between subjects). However, as we scale up to the full dataset, the number of possible connection grows with $O(n^2)$. To speed up the process, we use a stochastic approximation where we randomly match each users within a discretized equal frequency binning of the user and beer biases.
 - [X] 3. C) Once the dataset is matched, we run a t-test to compare the mean rating of local and foreign reviews. 
 <!-- We find a small, but significant difference. -->
