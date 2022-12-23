@@ -35,7 +35,7 @@ As expected, beer quality does influence the ratings a lot! Indeed, we found in 
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user's biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.
 
 ## We need matching between reviews!
-To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to isolate the effect of the user's cultural beliefs. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user's level of criticism (more details can be found in the "method" tab of the next figure, or in our [github repo](https://github.com/epfl-ada/ada-2022-project-enchiladas)).
+To allow for beer to beer comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to isolate the effect of the user's cultural beliefs. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user's level of criticism (more details can be found in the "method" tab of the next figure, or in our [github repo](https://github.com/epfl-ada/ada-2022-project-enchiladas)).
 
 Now that we have established a better method, let's apply it to answer some interesting questions!
 
@@ -47,7 +47,7 @@ To isolate this effect, we match each local review to a similar foreign review. 
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameBorder="0" scrolling="no"></iframe>
 
-Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they **prefer local beers compared to foreign ones**. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
+Once matched, the difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to differ with the ratings on average 0.018 (between countries) or 0.014 (between states), in **favor of the local beers over the foreign ones**. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
 
 ## Simpson's paradox?
 
@@ -119,6 +119,8 @@ We also note that states with more reviews are quite similar, with most of the o
 
 # Where can I find out more?
 Our code is publicly available [here](https://github.com/epfl-ada/ada-2022-project-enchiladas), and detailed explanations of the methods employed can be found in the notebooks. We have also included a summarised methods tab for each figure to explain our approach.
+
+![Beer math](Beer_meme.png)
 
 # References
 
