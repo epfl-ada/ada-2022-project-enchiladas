@@ -110,21 +110,21 @@ To begin with our investigation, let’s look at average ratings across the US s
 <!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="500"></iframe>
 
-<p>Here, the results vary even more! We do observe that <strong>80% of the country pairs</strong> actually have a different rating distribution among all aspects.</p>
+<p>We do observe quite some variation amongst countries. To assess if these variations are significant, we conduct country to country independent t-tests for each aspect rating. The results then vary even more than in for states! We do observe that <strong>80% of the country pairs</strong> actually have a different rating distribution among all aspects.</p>
 
-<p><em>But can we trust this result?</em>
-The limits of this initial naive analysis quickly show up. For instance, the availability of a beer heavily depends on the geographical location. As a result, users from different regions end up rating different products. Therefore, it makes sense to assess if this might be problematic to the quality of our analysis.</p>
+<p><em>Can we trust this result?</em>
+The limits of this initial naive analysis quickly show themselves. The availability of beers depends heavily on the geographical location. As a result, users from different regions end up rating different products, which are not necessarily of the same quality. This could greatly affect a user’s ratings. The following section assesses if this might be problematic to the quality of our analysis.</p>
 
 <h2 id="are-there-differences-in-beer-quality-between-regions">Are there differences in beer quality between regions?</h2>
 
 <p>The answer might seem obvious if you ask certain enthusiasts! Although a user might have personal preferences or different levels of criticism, beers also have intrisinc qualities which would be recognised amongst a majority of enthusiasts.</p>
 
-<p>To illustrate this point, let’s subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
+<p>To illustrate this point, let’s subset our reviews to the most rated beers for each state and an assortment of countries. They do differ quite a bit between each region. Can you recognise popular names in your country of origin?</p>
 
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="1250" frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height="600" frameborder="0" scrolling="no"></iframe>
 
-<p>As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that <strong>84% of the pairs</strong> within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a <strong>vast majority</strong> of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
+<p>As expected, beer quality does influence the ratings a lot! Indeed, we found in our tests that <strong>84% of the country pairs</strong> within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a <strong>vast majority</strong> of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user’s biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.</p>
 
 <!-- Matthieus part  -->
@@ -152,7 +152,7 @@ These numbers have to be taken with a grain of salt. We are not able to estimate
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameborder="0" scrolling="no"></iframe>
 
-<p>Interestingly, there now seem to be a <strong>majority of countries showing a more pronounced negative home bias,</strong> meaning that user would actually <strong>rate foreign beers higher</strong> than local beers. This contradiction is a manifestation of <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">Simpson’s paradox</a>: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don’t see any global trend.</p>
+<p>Interestingly, there now seem to be a <strong>majority of countries showing a more pronounced negative home bias</strong>, meaning that user would actually <strong>rate foreign beers higher</strong> than local beers. This contradiction is a manifestation of <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">Simpson’s paradox</a>: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don’t see any global trend.</p>
 
 <p>These results are interesting but it is hard to find a good foolproof explanation behind each user’s behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis <em>et al.</em> [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore concludes that the composition of all these effects leads to reviewers of certain country having a more or less pronouced preference for local (the US or Belgium) or foreign beers (England, Australia, Spain, etc.).</p>
 
