@@ -1,5 +1,10 @@
-## Title
-“The Irish all love Guinness, right?”
+# “The Irish all love Guinness, right?”
+
+Countries have (perhaps stereotypical) associations with different beer preferences. For example, one might think the Germans all love Helles but judge Guinness with the highest contempt. We aim to investigate if there truly is such a geographical and cultural influence on beer preferences by looking at differences in consumer ratings, and in preferences in beer styles and beer characteristics.
+
+We then conduct an observational study to evaluate if consummers are biased towards rating beers from their own country higher (or lower) than foreign ones.
+
+Finaly, utilizing the written reviews data from two of the biggest beer-ranking websites, we will be able to investigate if there are regional variations in language usage for beer reviews.
 
 ## Our Work
 [Website](https://epfl-ada.github.io/ada-2022-project-enchiladas/) | [Code](https://github.com/epfl-ada/ada-2022-project-enchiladas) | [Milestone2](https://github.com/epfl-ada/ada-2022-project-enchiladas/tree/fe78b2989b4e2ac2de91e916df7d9e12c9a344b8)
@@ -41,12 +46,6 @@ The files/folders contain the following information:
 - `nlp.py` contains NLP-specific functions used in the NLP pipeline
 - [FINISH]
 
-
-## Abstract
-[KEEP OR REMOVE?]
-Countries have (perhaps stereotypical) associations with different beer preferences. For example, one might think the Germans all love Helles but judge Guinness with the highest contempt. We aim to investigate if there truly is such a geographical and cultural influence on beer preferences by looking at differences in consumer ratings, and in preferences in beer styles and beer characteristics. By utilizing the written reviews data from two of the biggest beer-ranking websites, we will be able to investigate if there are regional variations in language usage for beer reviews.
-
-Finally, it is also often said that beers from home taste better. Leveraging the geographical information for users and beers, will be able to investigate whether there exists a "home bias" (preference for local produce) when users rate beers.
 
 ## Research Question
 _How are beer preferences affected by geography or culture?_
