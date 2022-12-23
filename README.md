@@ -138,6 +138,7 @@ Matthieu:
 - Matrix factorization 
 - Propensity matching
 - Home bias study
+- Documentation of code
 
 Oisín:
 - Research NLP methods
