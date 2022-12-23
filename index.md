@@ -29,7 +29,7 @@ The figure below shows the distribution of ratings among all aspects for the mos
 Here, the results vary even more! We do observe that **80% of the country pairs** actually have a different rating distribution among all aspects.
 
 _Can we trust this result?_
-The limits of this initial naive analysis quickly show their limits though. Availability of beers heavily depends on the geographical location. The following section assesses if this might be problematic to the quality of our analysis.
+The limits of this initial naive analysis quickly show up. Availability of beers heavily depends on the geographical location. The following section assesses if this might be problematic to the quality of our analysis.
 
 
 ## Differences in beer quality between regions ?
