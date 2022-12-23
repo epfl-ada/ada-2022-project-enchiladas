@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8">
 
+    <script>
+      function resizeIframe(obj) {
+        obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+      }
+    </script>
+
 <!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Applied Beer Analysis | My neighbor’s beer is best anyway!</title>
 <meta name="generator" content="Jekyll v4.3.1" />
@@ -89,7 +95,8 @@
 <h2 id="doesnt-everyone-like-beer">Doesn’t everyone like beer?!</h2>
 <p>Beer is the world’s most widely consumed alcoholic drink [2] and is the third-most consumed drink overall, after only water and tea. It is enormously popular - but not everybody likes beer, nor does everyone like the same type of beer!</p>
 
-<p>First have a look at means per state… Some preliminary geographical difference visible?</p>
+<p>Beer reviewers certainly like beer, but do they like beer by the same amount or do some countries or states like beer more than others?
+The figure below shows the average ratings of</p>
 
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameborder="0"></iframe>
@@ -101,7 +108,9 @@ for rescaled ratings:</p>
 <p>How about per country?</p>
 
 <!-- Ratings per Country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" height="800" frameborder="0"></iframe>
+<p>TODO: Increase font size
+TODO: add formula in methods</p>
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" onload="resizeIframe(this)"></iframe>
 
 <p>Report some numbers and significance ratios.. (Kasimir will do)</p>
 
@@ -207,36 +216,33 @@ False    182</p>
 
 <!-- Matthieus part  -->
 
-<!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
-<h2 id="we-dont-like-no-foreign-beers">We don’t like no foreign beers!</h2>
+<h2 id="beer-from-home-always-taste-better">Beer from home always taste better!</h2>
 
 <p>If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?</p>
 
 <!-- TODO -->
 <p>Following paragraph motivate matching, remove if extra:</p>
 
-<p>To allow apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user’s level of criticism (details are shown in the “method” tab of the next figure).</p>
+<p>To allow for an apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user’s level of criticism (details are shown in the “method” tab of the next figure).</p>
 
+<!-- By pair? -->
 <p>Once we match reviews by pair, we the ratings are different. Let’s look at the results below:
 <!-- Plot with distributions (Rating distribution per group - foreign vs local) --></p>
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="1000" frameborder="0"></iframe>
 
-<p>The difference of distribution of rating between local and foreign reviews is almost indistinguishable. Indeed, the users only seem to give on average (MEAN DIFF) points more to local beers compared to reviews. However, despite being small, the difference is still significant as shown by the small p-value (P VALUE).</p>
+<p>The difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average XX (between countries) or YY (between states) points more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (P VALUES).</p>
 
 <!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
-<h2 id="does-this-hold-per-country-also">Does this hold per country also?</h2>
+<h2 id="simpsons-paradox">Simpson’s paradox?</h2>
 
-<p>Since our dataset has a majority of reviews written by americans, the observation might not be representative of user in other countries. In the following plot, let’s look at the home bias when grouping user by country for the top 10 countries on the website to investigate if there are more information hidden under the hood.</p>
+<p>Since our dataset has a majority of reviews written by Americans, the observation might not be representative of users in other countries. In the following plot, let’s have a look at the home bias when grouping users by country for the top 10 countries to investigate if there are more information hidden under the hood.</p>
 
 <!-- Plot with confidence intervals  -->
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="800" frameborder="0"></iframe>
 
-<p>Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson’s paradox: when users are combined, the majoritarian country (US) masks the effect of all others.</p>
-
-<!-- TODO: add citation -->
-<p>Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers.</p>
+<p>Interestingly, there now seem to be a majority of countries showing negative home bias, meaning that user would actually rate higher foreign beers compared to local beers. This contradiction is a manifestation of Simpson’s paradox: when users are combined, the majoritarian country (US) masks the effect of all others.  Let’s also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don’t see any global trend.</p>
 
 <!-- Should we write references as [1] or nah? -->
 <p>These results are interesting but it is hard to find a good foolproof explanation behind each user’s behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis <em>et al.</em> [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore only yield the composition of all effects.</p>
