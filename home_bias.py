@@ -27,7 +27,10 @@ img_path = "./Images/"
 # load the data
 df = pickle_load('./Data/' + 'df_ba_ratings_filtered_beers_merged_users')
 # define the treatment variable
+df_us = pickle_load('./Data/' + 'df_rb_reviews_filtered_beers_merged_users')
 df["treatment"] = df.apply(lambda row: 1 if row["user_country"] == row["beer_country"] else 0, axis=1)
+df_us.dropna(subset=["beer_state"], inplace=True)
+df_us["treatment"] = df_us.apply(lambda row: 1 if row["user_state"] == row["beer_state"] else 0, axis=1)
 # %% [markdown]
 # ## Preliminary data exploration for RQ4
 # %% [markdown]
@@ -456,6 +459,7 @@ print(res)
 # print difference of mean rating between control and treatment
 print(df_balanced[df_balanced["treatment"] == 1]["rating"].mean() - df_balanced[df_balanced["treatment"] == 0]["rating"].mean())
 
+# %%
 # plot histogram of rating for treatment and control groups
 plt.hist(df_balanced[df_balanced["treatment"] == 1]["rating"], label="local reviews", alpha = 0.5, bins = 25, density = True)
 plt.hist(df_balanced[df_balanced["treatment"] == 0]["rating"], label="foreign reviews", alpha = 0.5, bins = 25, density = True)
@@ -469,12 +473,12 @@ plt.savefig("Images/rating_distribution_homebias.jpg", dpi = 500)
 plt.title("Rating distribution")
 plt.show()
 # %%
+np.random.seed(42)
 def bootstrapping_function(treatment, control, level = 0.05, iterations = 1000):
     # boostrapping function to get the confidence interval
     # bootstrapping function
     # input: dataset, nb of iterations
     # output: overal mean, 95% confidence interval
-    np.random.seed(42)
     differences = []
     for i in range(iterations):
         treatment_sample = np.random.choice(treatment, size = len(treatment), replace = True)
@@ -510,11 +514,7 @@ plt.show()
 # since we are testing results for 10 countries, we need to correct for multiple testing. We will use the Sidak correction. The alpha value for the Sidak correction is $\alpha = 1 - (1-0.05)^\frac{1}{10} = 0.005 \%$, which will use to correct for multiple testing.
 
 # %%
-# get the top 10 countries
-groupby_country = df.groupby("user_country").count().sort_values(by="beer_id", ascending=False)
-topten_country = groupby_country.index[:10]
-print("The top 10 countries are: ", topten_country)
-df_topcountries = df[df["user_country"].isin(topten_country)]
+
 # %%
 # sidak correction
 alpha_1 = 1-(1-0.05)**(1/10)
@@ -522,28 +522,50 @@ print("The alpha value for the sidak correction is: ", alpha_1)
 # %%
 # get the results for each country
 list_results = []
-for country in topten_country:
-    df_country = df_topcountries[df_topcountries["user_country"] == country].copy()
-    print(f"country: {country}, number of reviews: {len(df_country)}")
-    df_country = get_biases(df_country)
-    # perform matching of the country
-    df_country = discretized_matching_updated(df_country, bin_method = "equal_frequency", match_method = "random_matching", bins = 10)
-    # run a t-test on rating with the balanced dataframe
-    res = ttest_ind(df_country[df_country["treatment"] == 1]["rating"], df_country[df_country["treatment"] == 0]["rating"])
-    print(f"{country}: {res}")
-    # print difference of mean rating between control and treatment
-    print("country: ", country)
-    print(df_country[df_country["treatment"] == 1]["rating"].mean() - df_country[df_country["treatment"] == 0]["rating"].mean())
 
-    # compute confidence interval
-    diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(df_country["rating"].loc[df_country["treatment"] == 1], df_country["rating"].loc[df_country["treatment"] == 0], level = alpha_1, iterations = 1000)
+def homebias_per_region(df, region = "country"):
+    # get the top 10 countries
+    if region == "country":
+        by_column = "user_country"
+    elif region == "state":
+        by_column = "user_state"
+    else:
+        raise ValueError("region must be 'country' or 'state'")
+    groupby_country = df.groupby(by=by_column).count().sort_values(by="beer_id", ascending=False)
+    topten_country = groupby_country.index[:10]
+    print(f"The top 10 {region} are: ", topten_country)
+    df_topcountries = df[df[by_column].isin(topten_country)]
 
-    #append results to list in key-value pairs
-    list_results.append({"country": country, "diff_user_mean": diff_user_mean, "diff_user_low": diff_user_low, "diff_user_high": diff_user_high})
+    for country in topten_country:
+        df_country = df_topcountries[df_topcountries[by_column] == country].copy()
+        print(f"country: {country}, number of reviews: {len(df_country)}")
+        df_country = get_biases(df_country)
+        # perform matching of the country
+        df_country = discretized_matching_updated(df_country, bin_method = "log_equal_frequency", match_method = "random_matching", bins = 8)
+        # run a t-test on rating with the balanced dataframe
+        res = ttest_ind(df_country[df_country["treatment"] == 1]["rating"], df_country[df_country["treatment"] == 0]["rating"])
+        print(f"{country}: {res}")
+        # print difference of mean rating between control and treatment
+        print("country: ", country)
+        print(df_country[df_country["treatment"] == 1]["rating"].mean() - df_country[df_country["treatment"] == 0]["rating"].mean())
+
+        # compute confidence interval
+        diff_user_mean, diff_user_low, diff_user_high = bootstrapping_function(df_country["rating"].loc[df_country["treatment"] == 1], df_country["rating"].loc[df_country["treatment"] == 0], level = alpha_1, iterations = 1000)
+
+        #append results to list in key-value pairs
+        list_results.append({"country": country, "diff_user_mean": diff_user_mean, "diff_user_low": diff_user_low, "diff_user_high": diff_user_high})
+
+    df_results = pd.DataFrame(list_results)
+    df_results["idx"] = [i for i in range(len(df_results))]
+    
+    return df_results, topten_country
+
+# %%
+df_results, topten_country = homebias_per_region(df, region = "country")
+# save df_results as csv
+df_results.to_csv("results_per_country.csv")
 # %%
 # plotting of the results
-df_results = pd.DataFrame(list_results)
-df_results["idx"] = [i for i in range(len(df_results))]
 # computing error bars
 df_results["err_low"] = df_results["diff_user_mean"] - df_results["diff_user_low"]
 df_results["err_high"] = df_results["diff_user_high"] - df_results["diff_user_mean"]
@@ -564,6 +586,62 @@ plt.show()
 # While the best beer country is subjective, Belgium and US are widely considered as major beer countries according to this [top 13 best beer countries in the world](https://www.thrillist.com/drink/nation/the-best-beer-countries-in-the-world). Therefor, it makes sense that user from those countries are biased toward rating their local beer higher. However, this argument is limited because other countries such as England or the Netherlands are also famous beer countries but have a bias towards foreign beers.
 # 
 # Bias towards foreign products might also be a result of consumer cosmopolitanism, an effect which described by  “the extent to which a consumer (1) exhibits an open-mindedness towards foreign countries and cultures, (2) appreciates the diversity brought about by the availability of products from different national and cultural origins, and (3) is positively disposed towards consuming products from foreign countries.” This effect also contributs to self identity, ie. “[the] frame of reference by which individuals evaluate their self-worth.” according to [Balabanis, G., Stathopoulou, A., & Qiao, J. (2019). Favoritism Toward Foreign and Domestic Brands: A Comparison of Different Theoretical Explanations. Journal of International Marketing](https://openaccess.city.ac.uk/id/eprint/23521/)
+# %% [markdown]
+# ## analysis for the us
+# %%
+# get the results for the US
+df_us = get_biases(df_us, plot = True)
+df_us_balanced = discretized_matching_updated(df_us, bin_method="log_equal_frequency", match_method = "random_matching", bins = 10, compute_distance = False)
+# %%
+# run a t-test on rating with the balanced dataframe
+res = ttest_ind(df_us_balanced[df_us_balanced["treatment"] == 0]["rating"], df_us_balanced[df_us_balanced["treatment"] == 1]["rating"])
+print(res)
+# print difference of mean rating between control and treatment
+print(df_us_balanced[df_us_balanced["treatment"] == 1]["rating"].mean() - df_us_balanced[df_us_balanced["treatment"] == 0]["rating"].mean())
+
+# %%
+# plot histogram of rating for treatment and control groups
+plt.hist(df_balanced[df_balanced["treatment"] == 1]["rating"], label="local reviews", alpha = 0.5, bins = 25, density = True)
+plt.hist(df_balanced[df_balanced["treatment"] == 0]["rating"], label="foreign reviews", alpha = 0.5, bins = 25, density = True)
+plt.xlabel("rating")
+plt.ylabel("density")
+# add a vertical line at the mean rating
+plt.axvline(df_balanced[df_balanced["treatment"] == 1]["rating"].mean(), color='b', linestyle='dashed', linewidth=1, label="mean rating local")
+plt.axvline(df_balanced[df_balanced["treatment"] == 0]["rating"].mean(), color='orangered', linestyle='dashed', linewidth=1, label="mean rating foreign")
+plt.legend()
+plt.savefig("Images/rating_distribution_homebias_us.jpg", dpi = 500)
+plt.title("Rating distribution for us")
+plt.show()
+
+# %%
+homebias_per_region(df_us, region = "state")
+# %% [markdown]
+# ## Creating datapane for the website
+# %%
+# %%
+import datapane as dp
+# create datapane:
+
+method_distribution_1 = dp.Text('The ratings of each dataset are split into two groups: local when the user rates a beer from its own counry and foreign. To accounts for difference in users critic level bias and beer quality , we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by:')
+
+matrix_formula = dp.Formula(r"\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}")
+
+method_distribution_2 = dp.Text('from wich we recover the biases $b_{user}$ and $b_{beer}$. The reviews are then put into bins of equal frequency in user and beer biases, then approximaely matched by resampling the majoritarian group within each bin. Once the dataset is balanced, we run a t-test to compare the mean rating of local and foreign reviews. We find a small, but significant difference.')
+
+
+app = dp.App(
+    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/rating_distribution_homebias.jpg", name="home_bias_distribution", caption="distribution of rating for local and foreign")]),
+    dp.Page(title="Method", blocks=["# Method", method_distribution_1, matrix_formula, method_distribution_2]))
+
+app.save(path="Images/home_bias.html")
+
+method_country = dp.Text('We group our review by user country and repeat the matching for each country in the top 10 number of reviews in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and sidak-corrected significance level.')
+
+app = dp.App(
+    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/homebias_confidence_intervall_countries.jpg", name="home_bias_confidence_countries", caption="Rating difference between local and foreign beers per country")]),
+    dp.Page(title="Method", blocks=["# Method", method_country]))
+
+app.save(path="Images/home_bias_countries.html")
 
 # %% [markdown]
 # ### (discarded) Matrix factorization: comparison of bias vectors between control and treatment groups
@@ -602,26 +680,3 @@ print(np.mean(user_bias_treatment) - np.mean(user_bias_control))
 res = ttest_ind(beer_bias_treatment, beer_bias_control)
 print(res)
 print(np.mean(beer_bias_treatment) - np.mean(beer_bias_control))
-
-# %% [markdown]
-# ## Creating datapane for the website
-# %%
-# %%
-import datapane as dp
-# create datapane:
-
-method_distribution = dp.Text('The ratings of each dataset are split into two groups: local when the user rates a beer from its own counry and foreign. To accounts for difference in users critic level bias and beer quality , we compute user and beer bias vectors by performing [matrix factorization with biases](https://surprise.readthedocs.io/en/stable/matrix_factorization.html?highlight=matrix%20factorization) on the user-beer review matrix. Each rating is approximated by $\hat r_{user,beer} = \mu + b_{user} + b_{beer} + q_{beer}^T p_{user}$, from wich we recover the biases $b_{user}$ and $b_{beer}$. The reviews are then put into bins of equal frequency in user and beer biases, then approximaely matched by resampling the majoritarian group within each bin. Once the dataset is balanced, we run a t-test to compare the mean rating of local and foreign reviews. We find a small, but significant difference.')
-
-app = dp.App(
-    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/rating_distribution_homebias.jpg", name="home_bias_distribution", caption="distribution of rating for local and foreign")]),
-    dp.Page(title="Method", blocks=["# Method", method_distribution]))
-
-app.save(path="Images/home_bias.html")
-
-method_country = dp.Text('We group our review by user country and repeat the matching for each country in the top 10 number of reviews in the dataset. We compute the mean difference between the two groups and confidence intervals using bootstraping and sidak-corrected significance level.')
-
-app = dp.App(
-    dp.Page(title= "Home bias", blocks=["# BeerAdvocate", dp.Media(file="Images/homebias_confidence_intervall_countries.jpg", name="home_bias_confidence_countries", caption="Rating difference between local and foreign beers per country")]),
-    dp.Page(title="Method", blocks=["# Method", method_country]))
-
-app.save(path="Images/home_bias_countries.html")
