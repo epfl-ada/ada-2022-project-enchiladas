@@ -1,4 +1,5 @@
 import matplotlib as mpl
+from cycler import cycler
 
 def mm2inch(*tupl):
     inch = 25.4 #1 inch = 25.4 mm
@@ -33,6 +34,24 @@ mpl.rcParams['xtick.labelsize'] = 12
 mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['figure.dpi'] = 500
 
+# set the front color
+# mpl.rcParams['axes.edgecolor'] = 'black'
+# mpl.rcParams['patch.edgecolor'] = '#70290d'
+# #boxplot.boxprops.color:     black
+# mpl.rcParams['boxplot.boxprops.color'] = '#70290d'
+# # mpl.rcParams['axes.color_cycle'] = '#70290d'
+# mpl.rcParams['patch.facecolor'] = '#70290d'
+
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#CD7E2A', '#6FA1BB','#6C3622'])
+
+# mpl.rcParams['fig.edgecolor'] = '#70290d'
+# mpl.rcParams['axes.labelcolor'] = 'black'
+# mpl.rcParams['xtick.color'] = 'black'
+# mpl.rcParams['ytick.color'] = 'black'
+# mpl.rcParams['text.color'] = 'black'
+
+
+
 # mpl.rc('font',**{'family':'serif','serif':['Times']})
-mpl.rc('font',**{'family':'sans-serif','sans-serif':['Open Sans']})
+mpl.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 # mpl.rc('text', usetex=True) # use this if you want to use latex
