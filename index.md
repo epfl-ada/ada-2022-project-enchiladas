@@ -115,17 +115,14 @@ The answer seems obvious! Although user might have personal preferences or diffe
 
 To illustrate this point, let's subset our reviews to the most rated beers in each country (and also states). They do differ quite a bit between each region. Can you recognise popular names in your country of origin?
 
-<!-- Top beers per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height=1300 frameborder="0" scrolling="no"></iframe>
-
 <!-- Top beers per state -->
-<iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height=800 frameborder="0" scrolling="no"></iframe>
+<iframe src="./Pages/states_beer_app.html" title="Top Beers per State and Country" width="100%" height=800 frameborder="0" scrolling="no"></iframe>
 
 As expected, beer quality does influence the ratings a lot! Indeed, we found that 84% of the pairs within the top beers have significant differences in their average rating. Similarly, when looking at most popular beers within each US states, a **vast majority** of the pairs do show significant differences in rating distribution (92% in the BeerAdvocate dataset and 75% in the RateBeer dataset).
 These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is now clear that both user's biases and differences in beer quality must be taken into account when comparing ratings behaviours for users of different regions.
 
 <!-- Matthieus part  -->
-## Matching between groups!
+## We need matching between reviews!
 To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the labels to have isolate the effect of the user's behaviour. To mimic this in an observational study, we instead match reviews with a similar beer quality and a similar user's level of criticism (more details can be found in the "method" tab of the next figure, or in our [github repo](https://github.com/epfl-ada/ada-2022-project-enchiladas)).
 
 Now that we have established a better method, let's apply it to answer some interesting questions!
@@ -143,13 +140,13 @@ Once matched, the difference of distribution of rating between local and foreign
 
 ## Simpson's paradox?
 
-Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. To investigate if there is more information hidden under the hood, we have a look at the home bias when grouping users by country for the top 10 countries.
+Since our dataset has a majority of reviews written by Americans, the observations might not be representative of users in other countries. To investigate if there is more information hidden under the hood, let's have a look at the home bias when grouping users by country for the top 10 countries.
 
 <!-- Plot with confidence intervals  -->
 
 <iframe src="./Pages/home_bias_countries.html" title="Distribution of local and foreign reviews" width="100%" height="650" frameBorder="0" scrolling="no"></iframe>
 
-Interestingly, there now seem to be a **majority of countries showing a more pronounced negative home bias,** meaning that user would actually **rate foreign beers higher** than local beers. This contradiction is a manifestation of Simpson's paradox: when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
+Interestingly, there now seem to be a **majority of countries showing a more pronounced negative home bias,** meaning that user would actually **rate foreign beers higher** than local beers. This contradiction is a manifestation of [Simpson's paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox): when users are combined, the majoritarian country of the dataset (US) masks the effect of all others. Let's also note that Belgium, which is quite renowned for its beer [3], seem to still prefer their local beers. For US states, we also have disparate results with some states showing positive and others negative biases towards their home beers. However, here we don't see any global trend.
 
 These results are interesting but it is hard to find a good foolproof explanation behind each user's behaviour. Indeed, favoritism towards local or foreign brands has been extensively studied in social sciences. For example, Balabanis _et al._ [4] summarise the possible explanations to five effects, which will either bias the consumer toward choosing local brands or, conversely, toward foreign ones. Given our lack of data on consumer profile, it is not possible to further quantify each effect. Our analysis can therefore concludes that the composition of all these effects leads to reviewers of certain country having a more or less pronouced preference for local (the US or Belgium) or foreign beers (England, Australia, Spain, etc.).
 
@@ -196,7 +193,7 @@ There is also more prominence in the American wordcloud for positive words - we 
 
 <!-- Some differences, can we cluster countries or states based on language? -->
 
-Since users of differnt countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
+Since users of different countries write reviews differently, we can try to use those variation in language to cluster them together. With this approach, do we find that geographically similar countries also talk similarly?
 
 <!-- dendrogram across countries -->
 <iframe src="./Pages/dendrogram.html" title="Dendrogram" width="100%" height="700" frameBorder="0" scrolling="no"></iframe>
