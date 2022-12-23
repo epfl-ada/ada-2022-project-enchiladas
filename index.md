@@ -22,17 +22,19 @@ At first sight, it is not possible to tell whether the ratings are significantly
 <!-- 49% in RateBeer data ^ (think we can just say approx 50) (thumbs up!) -->
 
 ## How about per country?
-We also look if there are any significant differences between countries. The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+We also look if there are any significant differences between countries and not just states. The figure below shows the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
 
 <!-- Ratings per Country -->
 <iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" frameborder="0" scrolling="no" height="700"></iframe>
 
-Again, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Sidak corrected significance level of 0.0014, we observe that even 80 % of the country pairs actually have a different rating distribution among all aspects.
-Why is this the case? One reason could be, that some users simply are more positive in rating beers than others. We can find out if this is the case by rescaling the ratings each user gives by their respective average. The figure above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
-Indeed, the number of significantly different results accross countries decreases to only 21 % at the same significance level!
-For the states we observe a similar decrease, the number of significantly different resutls drop to 13 % in the BeerAdvocate dataset and to only 10 % in the RateBeer dataset.
+Again, it is not possible to tell whether the ratings are significantly different. If we do pairwise t-tests and use a Šidák corrected significance level of 0.0014, we observe that even 80% of the country pairs actually have a different rating distribution among all aspects.
 
-It is interesting to note that looking at the remaining pairs of significant country differences after rescaling, the only pairs left are between the US and almost all other countries. Interestingly, Germany is an exception for the aspect 'appearance'. Germans seem to rate beers significantly different in terms of appearance than other countries.
+_Why is this the case?_
+One reason could be that some users simply are more positive in rating beers than others. We can find out if this is the case by rescaling the ratings each user gives by their respective average. The figure above shows how this rescaling affects the distribution of ratings among all aspects for all countries in the BeerAdvocate dataset.
+Indeed, the number of significantly different results across countries decreases to only 21% at the same significance level after this rescaling!
+For the states we observe a similar decrease - the number of significantly different results drops to 13% in the BeerAdvocate dataset and to only 10% in the RateBeer dataset.
+
+Even after this rescaling, we still have some significant results. However, it is interesting to note that the only significant pairs left are between the US and other countries, with the very interesting exception of Germany for the aspect 'appearance'. Germans seem to also rate beers significantly different in terms of appearance than other countries.
 
 <!-- TOOD: include this as a table somehow? -->
 <!-- Rescaled:
@@ -62,11 +64,13 @@ most popular classes
 Proportion of significant results  0.33342168487948537
 Proportion of significant results rescaled 0.07058875196982614 -->
 
-The question remains, why do some countries rate beer significantly different? Is it because they rate different style of beer?
+## The question remains, why do some countries rate beer significantly differently? 
+Even after our rescaling we still saw an effect. Is it because they rate different style of beer?
 We investigate this question by looking at the most rated beer styles on both dataset and repeating the pairwise t-tests for each of the most popular styles per dataset.
 Interestingly, the most rated beer styles are different for the two platforms. The most rated beer styles in the BeerAdvocate dataset are 'American IPA', 'American Double / Imperial IPA', 'American Pale Ale (APA)', 'Saison / Farmhouse Ale', 'American Wild Ale' while the most rated beer styles in the RateBeer dataset are 'India Pale Ale (IPA)', 'Imperial IPA', 'American Pale Ale', 'Belgian Strong Ale', 'Imperial Stout'.
-Subsetting to these styles and recomputing the t-tests, the number of significant results for the countries drops by only 1 % for the country differences in rescaled ratings.
-In the BeerAdvocate dataset the number of significant results for the state pairs remains 13 % whilst in the RateBeer dataset the number of significant results drops to 7 %.
+<!-- Should we make a table? -->
+Subsetting to these styles and recomputing the t-tests, the number of significant results for the countries drops by only 1% for the country differences in rescaled ratings.
+In the BeerAdvocate dataset the number of significant results for the state pairs remains 13% whilst in the RateBeer dataset the number of significant results drops to 7%.
 
 <!-- Data for styles:
 Style:
@@ -94,35 +98,41 @@ most popular styles rb
 Proportion of significant results  0.3334216848794854
 Proportion of significant results rescaled 0.07058875196982614 -->
 
-Just looking at the styles is not enough. We need to look at the actual beers. We can do this by looking at the most rated beers per country and state. The figure below shows the most rated beers per country in the BeerAdvocate dataset and the figure below that shows the most rated beers per state in the BeerAdvocate and the RateBeer dataset.
+However, clearly just looking at the styles is not enough. We need to look at the actual beers. We can do this by looking at the most rated beers per country and state. The figure below shows the most rated beers per country in the BeerAdvocate dataset and the the most rated beers per state in the BeerAdvocate and the RateBeer dataset.
 
 <!-- Top beers per country -->
 <iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height=1300 frameborder="0" scrolling="no"></iframe>
 
 Indeed, the most rated beers per country differ. Feel free to explore which beers are the most rated in your country!
 
+## What about per state?
+
 <!-- Top beers per state -->
 <iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height=1200 frameborder="0" scrolling="no"></iframe>
 
-Not unexpectedly, also the most rated beers per state differ. 
-We can test if the most rated beers for a country indeed has a significant global different average than the set of most rated beers of another country. Doing this, we see that for countries, only about 16 % of tests are not significant. Similarly, for states, only about 8 % of tests in the BeerAdvocate dataset and 25 % of tests in the RateBeer dataset are not significant.
-These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. Indeed, we did not check if our method of subsetting to all ratings of the most rated beers per country is actually giving insignificant results for previously insignificant country-pairs. Instead of digging down this path, we resort to a better method in the next section.
+Not unexpectedly, also the most rated beers per state differ. We thus need to investigate if the most rated beers per country have significantly different average ratings as compared to other countries. Doing this, we see that only about 16% of tests are not significant. Similarly, if we apply this same method for states, only about 8% of tests in the BeerAdvocate dataset and 25% of tests in the RateBeer dataset are not significant.
+These numbers have to be taken with a grain of salt. We are not able to estimate a good global average for beers as a huge amount of ratings are from the US. However, it is not worth digging down this path - instead we can move to a better method!
+<!-- Indeed, we did not check if our method of subsetting to all ratings of the most rated beers per country is actually giving insignificant results for previously insignificant country-pairs.  -->
 
 <!-- Matthieus part  -->
+## Let's do some propensity matching!
+To allow for apple to apple comparisons, the ideal controlled experiment would ask consumers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews based on the beer quality and user's level of criticism.
 
-## Beer from home always taste better!
+That is, in order to do good comparisons, we match ratings to each other that are similar: we can match ratings _from users_ with similar rating patterns and _about beers_ with similar ratings. More details can be found in the "method" tab of the next figure, or in our github repo.
+
+Now that we have established a better method, let's apply it to answer some interesting questions!
+
+## Does beer from home always taste better?
 
 If each country has its own way of enjoying beer, it is also interesting to see how they perceive foreign beverages. In particular, can we observe some consumer preferences towards local products as compared to foreign ones?
 
-To allow apple to apple comparison, the ideal controlled experiment would ask consummers to rate a set of beers, randomly changing the origin label to have a balance between local and foreign groups. To mimic this in an observational study, we instead match reviews between the two groups based on the beer quality and user's level of criticism (details are shown in the "method" tab of the next figure).
-
 <!-- By pair? -->
-Once we match reviews by pair, we the ratings are different. Let's look at the results below:
+Once we match reviews by pair, we observe that the ratings are different. Let's look at the results below:
 <!-- Plot with distributions (Rating distribution per group - foreign vs local) -->
 
 <iframe src="./Pages/home_bias.html" title="Distribution of local and foreign reviews" width="100%" height="1000" frameBorder="0"></iframe>
 
-The difference of distribution of rating between local and foreign reviews is almost indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states) points more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
+The difference of distribution of rating between local and foreign reviews is almost visually indistinguishable. Indeed, the users only seem to give on average 0.018 (between countries) or 0.014 (between states), meaning they move more to local beers compared foreign ones. However, despite being small, the difference is still significant as shown by the small p-value (1.9e-12 and 3.9e-9).
 
 <!-- Oisin suggestion to have some random catchy titles to split up the story a bit -->
 ## Simpson's paradox?
