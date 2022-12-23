@@ -17,28 +17,120 @@ First have a look at means per state... Some preliminary geographical difference
 <!-- Map of states and their average rating -->
 <iframe src="./Pages/States.html" title="States - Means" width="100%" height="800" frameBorder="0"></iframe>
 
+signficicance level: : 0.00004
+average unrescaled significant results:
+for rescaled ratings: 
+
 How about per country?
 
-<!-- Distribution of ratings per country -->
-<iframe src="./Pages/ratings_countries_app.html" title="Countries - Distribution" width="100%" height="1200" frameBorder="0"></iframe>
+<!-- Ratings per Country -->
+<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Ratings per Country" width="100%" height="800" frameBorder="0"></iframe>
 
 Report some numbers and significance ratios.. (Kasimir will do)
 
+| significant | total tests |              aspect |
+|------------:|------------:|--------------------:|
+|          27 |          36 |               aroma |
+|           6 |          36 |      aroma_rescaled |
+|          31 |          36 |          appearance |
+|          14 |          36 | appearance_rescaled |
+|          29 |          36 |               taste |
+|           7 |          36 |      taste_rescaled |
+|          29 |          36 |              palate |
+|           5 |          36 |     palate_rescaled |
+|          30 |          36 |             overall |
+|           7 |          36 |    overall_rescaled |
+|          30 |          36 |              rating |
+|           6 |          36 |     rating_rescaled |
+corrected level 0.0014
+
+Rescaled:
+Aroma: US vs (Australia, Belgium, Canada, England, Netherlands, Sweden)
+Palate: US vs (Australia, Canada, England, Netherlands, Sweden)
+Appearance: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+and Germany vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Taste: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Overall: US vs (Australia, Belgium, Canada, England, Netherlands, Romania, Sweden)
+Rating: US vs (Australia, Belgium, Canada, Netherlands, Sweden)
+
 Some differences occur! Why?
 Attempt to remove user bias by rescaling the ratings per user. (Kasimir will do) TODO: method for Countries-dist -> describe rescaling
+Users have bias...
 Somewhat fails (again report numbers using a table!)
+
+
 Maybe due to the beers rated by country/state? 
+Style classes:
+countries:
+Proportion of significant results  0.6435185185185186
+Proportion of significant results rescaled 0.20370370370370372
+most popular classes BA:
+India Pale Ales', 'Pale Ales', 'Stouts', 'Wild/Sour Beers', 'Strong Ales']
+
+BA: states:
+Proportion of significant results  0.43197278911564624
+Proportion of significant results rescaled 0.13208616780045357
+
+RB:
+most popular classes
+['Pale Ales', 'India Pale Ales', 'Stouts', 'Strong Ales', 'Wild/Sour Beers']
+Proportion of significant results  0.33342168487948537
+Proportion of significant results rescaled 0.07058875196982614
+
+Style:
+most popular styles ba
+['American IPA',
+ 'American Double / Imperial IPA',
+ 'American Pale Ale (APA)',
+ 'Saison / Farmhouse Ale',
+ 'American Wild Ale']
+
+ countries:
+ Proportion of significant results  0.6435185185185186
+Proportion of significant results rescaled 0.20370370370370372
+
+states:
+Proportion of significant results  0.43197278911564624
+Proportion of significant results rescaled 0.13208616780045357
+
+most popular styles rb
+'India Pale Ale (IPA)',
+ 'Imperial IPA',
+ 'American Pale Ale',
+ 'Belgian Strong Ale',
+ 'Imperial Stout']
+Proportion of significant results  0.3334216848794854
+Proportion of significant results rescaled 0.07058875196982614
+
+
 Next idea: look at most rated beers per state and country:
 
 <!-- Top beers per state -->
 <iframe src="./Pages/states_beer_app.html" title="Top beers per state" width="100%" height="1200" frameBorder="0"></iframe>
 
 <!-- Top beers per country -->
-<iframe src="./Pages/boxplots_of_aspects_for_all_countries.html" title="Top beers per country" width="100%" height="800" frameBorder="0"></iframe>
+<iframe src="./Pages/ratings_countries_app.html" title="Top beers per country" width="100%" height="1200" frameBorder="0"></iframe>
 
+Top beers are different...
 Our data is skewed. Global average is not representative for the actual quality of beers.
 Indeed, very different beers rated per country
 Significant in global ratings for top beers versus countries/states (Kasimir will do) (Add a table!)
+
+Accross all aspects...
+
+BA countries: (Significant)
+True     38
+False     7
+
+BA states: (Significant)
+True     870
+False     77
+
+RB states: (Significant)
+True     540
+False    182
+
+
 
 <!-- Matthieus part  -->
 
