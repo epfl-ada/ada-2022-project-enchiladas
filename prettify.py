@@ -33,5 +33,5 @@ mpl.rcParams['xtick.labelsize'] = 12
 mpl.rcParams['ytick.labelsize'] = 12
 mpl.rcParams['figure.dpi'] = 500
 
-mpl.rc('font',**{'family':'serif','serif':['Times']})
+# mpl.rc('font',**{'family':'serif','serif':['Times']})
 # mpl.rc('text', usetex=True) # use this if you want to use latex
